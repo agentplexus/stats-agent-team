@@ -118,7 +118,8 @@ func printResults(resp *models.OrchestrationResponse) {
 	}
 
 	// Print as JSON
-	fmt.Println("=== Verified Statistics (JSON) ===\n")
+	fmt.Println("=== Verified Statistics (JSON) ===")
+	fmt.Println()
 	jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
 	if err != nil {
 		log.Printf("Error marshaling JSON: %v", err)
@@ -127,7 +128,9 @@ func printResults(resp *models.OrchestrationResponse) {
 	fmt.Println(string(jsonData))
 
 	// Also print human-readable format
-	fmt.Println("\n=== Human-Readable Format ===\n")
+	fmt.Println()
+	fmt.Println("=== Human-Readable Format ===")
+	fmt.Println()
 	for i, stat := range resp.Statistics {
 		fmt.Printf("%d. %s\n", i+1, stat.Name)
 		fmt.Printf("   Value: %s\n", stat.Value)

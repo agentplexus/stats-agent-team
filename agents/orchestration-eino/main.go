@@ -12,8 +12,8 @@ import (
 	"github.com/cloudwego/eino/compose"
 	"github.com/grokify/stats-agent/pkg/config"
 	"github.com/grokify/stats-agent/pkg/models"
-	"github.com/trpc-group/trpc-a2a-go/agent"
-	"github.com/trpc-group/trpc-a2a-go/server"
+	"trpc.group/trpc-go/trpc-a2a-go/agent"
+	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
 // EinoOrchestrationAgent uses Eino framework for deterministic orchestration

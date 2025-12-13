@@ -12,9 +12,9 @@ import (
 
 	"github.com/grokify/stats-agent/pkg/config"
 	"github.com/grokify/stats-agent/pkg/models"
-	"github.com/trpc-group/trpc-a2a-go/agent"
-	"github.com/trpc-group/trpc-a2a-go/server"
-	agentgo "github.com/trpc-group/trpc-agent-go"
+	"trpc.group/trpc-go/trpc-a2a-go/agent"
+	"trpc.group/trpc-go/trpc-a2a-go/server"
+	agentgo "trpc.group/trpc-go/trpc-agent-go"
 )
 
 // VerificationAgent is responsible for validating statistics in their sources

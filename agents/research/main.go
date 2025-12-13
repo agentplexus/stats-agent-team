@@ -10,10 +10,14 @@ import (
 
 	"github.com/grokify/stats-agent/pkg/config"
 	"github.com/grokify/stats-agent/pkg/models"
-	"github.com/trpc-group/trpc-a2a-go/agent"
-	"github.com/trpc-group/trpc-a2a-go/server"
-	agentgo "github.com/trpc-group/trpc-agent-go"
+	// "trpc.group/trpc-go/trpc-a2a-go/protocol"
+	// "trpc.group/trpc-go/trpc-a2a-go/server"
+	// agentgo "trpc.group/trpc-go/trpc-agent-go/agent"
 )
+
+// Placeholder types until we properly integrate A2A
+type Agent struct{}
+func (*Agent) Run(ctx context.Context, prompt string) (string, error) { return "", nil }
 
 // ResearchAgent is responsible for finding statistics from web searches
 type ResearchAgent struct {

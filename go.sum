@@ -1,0 +1,6 @@
+github.com/cloudwego/eino v0.7.8 h1:3a2j1UKZZuQ3SzqDToOI5g6lrlJ7xZEtMlNQkTgIvaI=
+github.com/cloudwego/eino v0.7.8/go.mod h1:nA8Vacmuqv3pqKBQbTWENBLQ8MmGmPt/WqiyLeB8ohQ=
+trpc.group/trpc-go/trpc-a2a-go v0.2.5 h1:X3pAlWD128LaS9TtXsUDZoJWPVuPZDkZKUecKRxmWn4=
+trpc.group/trpc-go/trpc-a2a-go v0.2.5/go.mod h1:Gtytau9Uoc3oPo/dpHvKit+tQn9Qlk5XFG1RiZTGqfk=
+trpc.group/trpc-go/trpc-agent-go v0.7.0 h1:EJmEbty0jqm5330vGKBXsuD/Wvb9cWUOws8ctNHgxks=
+trpc.group/trpc-go/trpc-agent-go v0.7.0/go.mod h1:kxbE1KxsL7oOUb4GQb35DI7LaTDwJYXUC+GLXO/C+mU=
