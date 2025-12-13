@@ -30,7 +30,7 @@ The system consists of **3 specialized agents** with **2 orchestration options**
            ▼                          ▼
 ┌──────────────────────┐    ┌─────────────────────────────┐
 │  RESEARCH AGENT      │    │  VERIFICATION AGENT         │
-│  (Port 8001 / 9001)  │    │  (Port 8002 / 9002)        │
+│  (Port 8001 / 9001)  │    │  (Port 8002 / 9002)         │
 │                      │    │                             │
 │  • Web searches      │───▶│  • Fetches source URLs      │
 │  • Finds candidates  │    │  • Validates excerpts       │
