@@ -95,7 +95,8 @@ The system returns verified statistics in JSON format:
 [
   {
     "name": "Global temperature increase since pre-industrial times",
-    "value": "1.1°C",
+    "value": 1.1,
+    "unit": "°C",
     "source": "IPCC Sixth Assessment Report",
     "source_url": "https://www.ipcc.ch/...",
     "excerpt": "Global surface temperature has increased by approximately 1.1°C since pre-industrial times...",
@@ -108,7 +109,8 @@ The system returns verified statistics in JSON format:
 ### Field Descriptions
 
 - **name**: Description of the statistic
-- **value**: Numerical value (can be number or percentage)
+- **value**: Numerical value (float32)
+- **unit**: Unit of measurement (e.g., "°C", "%", "million", "billion")
 - **source**: Name of source organization/publication
 - **source_url**: URL to the original source
 - **excerpt**: Verbatim quote containing the statistic

@@ -5,7 +5,8 @@ import "time"
 // Statistic represents a verified statistic with its source
 type Statistic struct {
 	Name      string    `json:"name"`        // Name/description of the statistic
-	Value     string    `json:"value"`       // Numerical value (can be number or percentage)
+	Value     float32   `json:"value"`       // Numerical value
+	Unit      string    `json:"unit"`        // Unit of measurement (e.g., "°C", "%", "million")
 	Source    string    `json:"source"`      // Name of the source (e.g., "Pew Research Center")
 	SourceURL string    `json:"source_url"`  // URL to the source
 	Excerpt   string    `json:"excerpt"`     // Verbatim quote containing the statistic
@@ -15,11 +16,12 @@ type Statistic struct {
 
 // CandidateStatistic represents an unverified statistic from research
 type CandidateStatistic struct {
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	Source    string `json:"source"`
-	SourceURL string `json:"source_url"`
-	Excerpt   string `json:"excerpt"`
+	Name      string  `json:"name"`
+	Value     float32 `json:"value"`
+	Unit      string  `json:"unit"`
+	Source    string  `json:"source"`
+	SourceURL string  `json:"source_url"`
+	Excerpt   string  `json:"excerpt"`
 }
 
 // VerificationResult represents the result of verifying a statistic

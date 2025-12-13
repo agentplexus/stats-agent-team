@@ -133,7 +133,7 @@ func printResults(resp *models.OrchestrationResponse) {
 	fmt.Println()
 	for i, stat := range resp.Statistics {
 		fmt.Printf("%d. %s\n", i+1, stat.Name)
-		fmt.Printf("   Value: %s\n", stat.Value)
+		fmt.Printf("   Value: %v %s\n", stat.Value, stat.Unit)
 		fmt.Printf("   Source: %s\n", stat.Source)
 		fmt.Printf("   URL: %s\n", stat.SourceURL)
 		fmt.Printf("   Excerpt: \"%s\"\n", stat.Excerpt)

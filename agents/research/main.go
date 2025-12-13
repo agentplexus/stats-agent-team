@@ -118,7 +118,8 @@ func (ra *ResearchAgent) generateMockCandidates(topic string, count int) []model
 	for i := 0; i < count; i++ {
 		candidates[i] = models.CandidateStatistic{
 			Name:      fmt.Sprintf("Statistic #%d about %s", i+1, topic),
-			Value:     fmt.Sprintf("%d%%", (i+1)*10),
+			Value:     float32((i + 1) * 10),
+			Unit:      "%",
 			Source:    "Pew Research Center",
 			SourceURL: fmt.Sprintf("https://www.pewresearch.org/example-%d", i+1),
 			Excerpt:   fmt.Sprintf("According to our latest survey, %d%% of respondents reported...", (i+1)*10),

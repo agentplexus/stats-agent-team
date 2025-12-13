@@ -121,6 +121,7 @@ func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate mode
 			Statistic: &models.Statistic{
 				Name:      candidate.Name,
 				Value:     candidate.Value,
+				Unit:      candidate.Unit,
 				Source:    candidate.Source,
 				SourceURL: candidate.SourceURL,
 				Excerpt:   candidate.Excerpt,
@@ -142,6 +143,7 @@ func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate mode
 	stat := &models.Statistic{
 		Name:      candidate.Name,
 		Value:     candidate.Value,
+		Unit:      candidate.Unit,
 		Source:    candidate.Source,
 		SourceURL: candidate.SourceURL,
 		Excerpt:   candidate.Excerpt,
