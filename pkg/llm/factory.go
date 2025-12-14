@@ -31,10 +31,12 @@ func (mf *ModelFactory) CreateModel(ctx context.Context) (model.LLM, error) {
 		return mf.createClaudeModel()
 	case "openai":
 		return mf.createOpenAIModel()
+	case "xai":
+		return mf.createXAIModel()
 	case "ollama":
 		return mf.createOllamaModel()
 	default:
-		return nil, fmt.Errorf("unsupported LLM provider: %s (supported: gemini, claude, openai, ollama)", mf.cfg.LLMProvider)
+		return nil, fmt.Errorf("unsupported LLM provider: %s (supported: gemini, claude, openai, xai, ollama)", mf.cfg.LLMProvider)
 	}
 }
 
@@ -72,7 +74,7 @@ func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 
 	modelName := mf.cfg.LLMModel
 	if modelName == "" {
-		modelName = "claude-3-5-sonnet-20241022"
+		modelName = "claude-3-5-sonnet-latest"
 	}
 
 	return adapters.NewGollmAdapter("anthropic", apiKey, modelName)
@@ -95,6 +97,25 @@ func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
 	}
 
 	return adapters.NewGollmAdapter("openai", apiKey, modelName)
+}
+
+// createXAIModel creates an xAI Grok model using gollm
+func (mf *ModelFactory) createXAIModel() (model.LLM, error) {
+	apiKey := mf.cfg.XAIAPIKey
+	if apiKey == "" {
+		apiKey = mf.cfg.LLMAPIKey
+	}
+
+	if apiKey == "" {
+		return nil, fmt.Errorf("xAI API key not set - please set XAI_API_KEY")
+	}
+
+	modelName := mf.cfg.LLMModel
+	if modelName == "" {
+		modelName = "grok-3"
+	}
+
+	return adapters.NewGollmAdapter("xai", apiKey, modelName)
 }
 
 // createOllamaModel creates an Ollama model using gollm

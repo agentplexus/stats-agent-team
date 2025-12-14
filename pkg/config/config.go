@@ -7,7 +7,7 @@ import (
 // Config holds the application configuration
 type Config struct {
 	// LLM Configuration
-	LLMProvider string // "gemini", "claude", "openai", "ollama"
+	LLMProvider string // "gemini", "claude", "openai", "ollama", "xai"
 	LLMAPIKey   string
 	LLMModel    string
 	LLMBaseURL  string // For Ollama or custom endpoints
@@ -16,6 +16,7 @@ type Config struct {
 	GeminiAPIKey string
 	ClaudeAPIKey string
 	OpenAIAPIKey string
+	XAIAPIKey    string
 	OllamaURL    string
 
 	// Search Configuration
@@ -51,6 +52,7 @@ func LoadConfig() *Config {
 		GeminiAPIKey: getEnv("GEMINI_API_KEY", getEnv("GOOGLE_API_KEY", "")),
 		ClaudeAPIKey: getEnv("CLAUDE_API_KEY", getEnv("ANTHROPIC_API_KEY", "")),
 		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
+		XAIAPIKey:    getEnv("XAI_API_KEY", ""),
 		OllamaURL:    getEnv("OLLAMA_URL", "http://localhost:11434"),
 
 		// Search settings
@@ -80,6 +82,8 @@ func LoadConfig() *Config {
 			cfg.LLMAPIKey = cfg.ClaudeAPIKey
 		case "openai":
 			cfg.LLMAPIKey = cfg.OpenAIAPIKey
+		case "xai":
+			cfg.LLMAPIKey = cfg.XAIAPIKey
 		}
 	}
 
@@ -97,11 +101,13 @@ func getDefaultModel(provider string) string {
 	case "gemini":
 		return "gemini-2.0-flash-exp"
 	case "claude":
-		return "claude-3-5-sonnet-20241022"
+		return "claude-3-5-sonnet-latest"
 	case "openai":
 		return "gpt-4"
+	case "xai":
+		return "grok-3" // Latest stable Grok model
 	case "ollama":
-		return "llama3.2"
+		return "llama3:latest"
 	default:
 		return "gemini-2.0-flash-exp"
 	}
