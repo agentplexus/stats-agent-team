@@ -86,12 +86,14 @@ The system consists of **3 specialized agents** with **2 orchestration options**
 - ✅ **Google ADK integration** for LLM-based agents
 - ✅ **Eino framework** for deterministic graph orchestration
 - ✅ **Gemini 2.0 Flash model** for fast, accurate LLM operations
+- ✅ **MCP Server** for integration with Claude Code and other MCP clients ⭐
 - ✅ **Source verification** to prevent hallucinations
 - ✅ **Reputable source prioritization** (government, academic, research orgs)
 - ✅ **Structured JSON output** with complete metadata
 - ✅ **HTTP APIs** for all agents
 - ✅ **Retry logic** for ensuring quality results
 - ✅ **Function tools** for structured agent capabilities
+- ✅ **Configurable LLM providers** (Gemini, Claude, OpenAI, Ollama)
 
 ## Output Format
 
@@ -218,6 +220,19 @@ Once the agents are running, use the CLI to search for statistics:
 ./bin/stats-agent search "cybersecurity threats 2024"
 ./bin/stats-agent search "renewable energy statistics"
 ```
+
+### Using with Claude Code (MCP Server)
+
+The system can be used as an MCP server with Claude Code and other MCP clients:
+
+```bash
+# Build the MCP server
+make build-mcp
+
+# Configure in Claude Code's MCP settings (see MCP_SERVER.md)
+```
+
+See [MCP_SERVER.md](MCP_SERVER.md) for detailed setup instructions.
 
 ### API Usage
 
