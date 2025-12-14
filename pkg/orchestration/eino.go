@@ -1,7 +1,6 @@
 package orchestration
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 	"github.com/cloudwego/eino/compose"
 
 	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/grokify/stats-agent-team/pkg/httpclient"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
@@ -66,7 +66,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 
 		return req, nil
 	})
-	g.AddLambdaNode(nodeValidateInput, validateInputLambda)
+	if err := g.AddLambdaNode(nodeValidateInput, validateInputLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add validate input node: %v", err)
+	}
 
 	// 2. Research Node - calls research agent
 	researchLambda := compose.InvokableLambda(func(ctx context.Context, req *models.OrchestrationRequest) (*ResearchState, error) {
@@ -89,7 +91,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			Candidates: resp.Candidates,
 		}, nil
 	})
-	g.AddLambdaNode(nodeResearch, researchLambda)
+	if err := g.AddLambdaNode(nodeResearch, researchLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add research node: %v", err)
+	}
 
 	// 3. Verification Node - calls verification agent
 	verificationLambda := compose.InvokableLambda(func(ctx context.Context, state *ResearchState) (*VerificationState, error) {
@@ -119,7 +123,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			Failed:        resp.Failed,
 		}, nil
 	})
-	g.AddLambdaNode(nodeVerification, verificationLambda)
+	if err := g.AddLambdaNode(nodeVerification, verificationLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add verification node: %v", err)
+	}
 
 	// 4. Quality Check Node - deterministic decision
 	qualityCheckLambda := compose.InvokableLambda(func(ctx context.Context, state *VerificationState) (*QualityDecision, error) {
@@ -142,7 +148,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 
 		return decision, nil
 	})
-	g.AddLambdaNode(nodeCheckQuality, qualityCheckLambda)
+	if err := g.AddLambdaNode(nodeCheckQuality, qualityCheckLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add quality check node: %v", err)
+	}
 
 	// 5. Retry Research Node (if needed)
 	retryResearchLambda := compose.InvokableLambda(func(ctx context.Context, decision *QualityDecision) (*ResearchState, error) {
@@ -182,7 +190,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			Candidates: allCandidates,
 		}, nil
 	})
-	g.AddLambdaNode(nodeRetryResearch, retryResearchLambda)
+	if err := g.AddLambdaNode(nodeRetryResearch, retryResearchLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add retry research node: %v", err)
+	}
 
 	// 6. Format Response Node
 	formatResponseLambda := compose.InvokableLambda(func(ctx context.Context, state *VerificationState) (*models.OrchestrationResponse, error) {
@@ -197,18 +207,20 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			Timestamp:       time.Now(),
 		}, nil
 	})
-	g.AddLambdaNode(nodeFormatResponse, formatResponseLambda)
+	if err := g.AddLambdaNode(nodeFormatResponse, formatResponseLambda); err != nil {
+		log.Printf("[Eino] Warning: failed to add format response node: %v", err)
+	}
 
 	// Add edges to define the workflow
-	g.AddEdge(compose.START, nodeValidateInput)
-	g.AddEdge(nodeValidateInput, nodeResearch)
-	g.AddEdge(nodeResearch, nodeVerification)
-	g.AddEdge(nodeVerification, nodeCheckQuality)
+	_ = g.AddEdge(compose.START, nodeValidateInput)
+	_ = g.AddEdge(nodeValidateInput, nodeResearch)
+	_ = g.AddEdge(nodeResearch, nodeVerification)
+	_ = g.AddEdge(nodeVerification, nodeCheckQuality)
 
 	// Conditional branching based on quality check
-	g.AddEdge(nodeCheckQuality, nodeRetryResearch)
-	g.AddEdge(nodeRetryResearch, nodeFormatResponse)
-	g.AddEdge(nodeFormatResponse, compose.END)
+	_ = g.AddEdge(nodeCheckQuality, nodeRetryResearch)
+	_ = g.AddEdge(nodeRetryResearch, nodeFormatResponse)
+	_ = g.AddEdge(nodeFormatResponse, compose.END)
 
 	return g
 }
@@ -236,67 +248,21 @@ func (oa *EinoOrchestrationAgent) Orchestrate(ctx context.Context, req *models.O
 // Helper methods to call research and verification agents
 
 func (oa *EinoOrchestrationAgent) callResearchAgent(ctx context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
-	reqData, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	var resp models.ResearchResponse
+	url := fmt.Sprintf("%s/research", oa.cfg.ResearchAgentURL)
+	if err := httpclient.PostJSON(ctx, oa.client, url, req, &resp); err != nil {
+		return nil, err
 	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "POST",
-		fmt.Sprintf("%s/research", oa.cfg.ResearchAgentURL),
-		bytes.NewReader(reqData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	resp, err := oa.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	var researchResp models.ResearchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&researchResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &researchResp, nil
+	return &resp, nil
 }
 
 func (oa *EinoOrchestrationAgent) callVerificationAgent(ctx context.Context, req *models.VerificationRequest) (*models.VerificationResponse, error) {
-	reqData, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	var resp models.VerificationResponse
+	url := fmt.Sprintf("%s/verify", oa.cfg.VerificationAgentURL)
+	if err := httpclient.PostJSON(ctx, oa.client, url, req, &resp); err != nil {
+		return nil, err
 	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "POST",
-		fmt.Sprintf("%s/verify", oa.cfg.VerificationAgentURL),
-		bytes.NewReader(reqData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	resp, err := oa.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	var verifyResp models.VerificationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&verifyResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &verifyResp, nil
+	return &resp, nil
 }
 
 // HTTP Handler
@@ -319,7 +285,9 @@ func (oa *EinoOrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWrit
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // State types for the workflow

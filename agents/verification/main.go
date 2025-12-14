@@ -236,7 +236,9 @@ func (va *VerificationAgent) HandleVerificationRequest(w http.ResponseWriter, r 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }
 
 func main() {
@@ -247,16 +249,25 @@ func main() {
 		log.Fatalf("Failed to create verification agent: %v", err)
 	}
 
-	// Start HTTP server
+	// Start HTTP server with timeout
+	server := &http.Server{
+		Addr:         ":8002",
+		ReadTimeout:  45 * time.Second,
+		WriteTimeout: 45 * time.Second,
+		IdleTimeout:  90 * time.Second,
+	}
+
 	http.HandleFunc("/verify", verificationAgent.HandleVerificationRequest)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Printf("Failed to write health response: %v", err)
+		}
 	})
 
 	log.Println("Verification Agent HTTP server starting on :8002")
 	log.Println("(ADK agent initialized for future A2A integration)")
-	if err := http.ListenAndServe(":8002", nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
 }

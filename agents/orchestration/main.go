@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 	"google.golang.org/adk/tool/functiontool"
 
 	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/grokify/stats-agent-team/pkg/httpclient"
 	"github.com/grokify/stats-agent-team/pkg/llm"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
@@ -227,68 +227,22 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 
 // callResearchAgent calls the research agent via HTTP
 func (oa *OrchestrationAgent) callResearchAgent(ctx context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
-	reqData, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	var resp models.ResearchResponse
+	url := fmt.Sprintf("%s/research", oa.cfg.ResearchAgentURL)
+	if err := httpclient.PostJSON(ctx, oa.client, url, req, &resp); err != nil {
+		return nil, err
 	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "POST",
-		fmt.Sprintf("%s/research", oa.cfg.ResearchAgentURL),
-		bytes.NewReader(reqData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	resp, err := oa.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	var researchResp models.ResearchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&researchResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &researchResp, nil
+	return &resp, nil
 }
 
 // callVerificationAgent calls the verification agent via HTTP
 func (oa *OrchestrationAgent) callVerificationAgent(ctx context.Context, req *models.VerificationRequest) (*models.VerificationResponse, error) {
-	reqData, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	var resp models.VerificationResponse
+	url := fmt.Sprintf("%s/verify", oa.cfg.VerificationAgentURL)
+	if err := httpclient.PostJSON(ctx, oa.client, url, req, &resp); err != nil {
+		return nil, err
 	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "POST",
-		fmt.Sprintf("%s/verify", oa.cfg.VerificationAgentURL),
-		bytes.NewReader(reqData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	resp, err := oa.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	var verifyResp models.VerificationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&verifyResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &verifyResp, nil
+	return &resp, nil
 }
 
 // Orchestrate is the public method for orchestrating the workflow
@@ -324,7 +278,9 @@ func (oa *OrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWriter, 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }
 
 func main() {
@@ -335,16 +291,25 @@ func main() {
 		log.Fatalf("Failed to create orchestration agent: %v", err)
 	}
 
-	// Start HTTP server
+	// Start HTTP server with timeout
+	server := &http.Server{
+		Addr:         ":8000",
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
 	http.HandleFunc("/orchestrate", orchestrationAgent.HandleOrchestrationRequest)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Printf("Failed to write health response: %v", err)
+		}
 	})
 
 	log.Println("Orchestration Agent HTTP server starting on :8000")
 	log.Println("(ADK agent initialized for future A2A integration)")
-	if err := http.ListenAndServe(":8000", nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
 }

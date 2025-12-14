@@ -128,7 +128,7 @@ func (ra *ResearchAgent) generateMockCandidates(topic string, count int) []model
 }
 
 // Research performs research directly
-func (ra *ResearchAgent) Research(ctx context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
+func (ra *ResearchAgent) Research(_ context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
 	log.Printf("Research Agent: Searching for statistics on topic: %s", req.Topic)
 
 	// Generate mock candidates directly
@@ -172,7 +172,9 @@ func (ra *ResearchAgent) HandleResearchRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }
 
 func main() {
@@ -183,16 +185,25 @@ func main() {
 		log.Fatalf("Failed to create research agent: %v", err)
 	}
 
-	// Start HTTP server
+	// Start HTTP server with timeout
+	server := &http.Server{
+		Addr:         ":8001",
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	http.HandleFunc("/research", researchAgent.HandleResearchRequest)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Printf("Failed to write health response: %v", err)
+		}
 	})
 
 	log.Println("Research Agent HTTP server starting on :8001")
 	log.Println("(ADK agent initialized for future A2A integration)")
-	if err := http.ListenAndServe(":8001", nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
 }
