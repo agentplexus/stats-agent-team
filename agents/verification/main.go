@@ -27,7 +27,7 @@ type VerificationAgent struct {
 
 // VerificationInput defines input for verification tool
 type VerificationInput struct {
-	Candidates []models.CandidateStatistic `json:"candidates" jsonschema:"description=Statistics candidates to verify"`
+	Candidates []models.CandidateStatistic `json:"candidates"`
 }
 
 // VerificationToolOutput defines output from verification tool

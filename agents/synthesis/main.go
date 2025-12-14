@@ -29,10 +29,10 @@ type SynthesisAgent struct {
 
 // SynthesisInput defines input for synthesis tool
 type SynthesisInput struct {
-	Topic         string               `json:"topic" jsonschema:"description=The topic being researched"`
-	SearchResults []models.SearchResult `json:"search_results" jsonschema:"description=URLs to analyze for statistics"`
-	MinStatistics int                  `json:"min_statistics" jsonschema:"description=Minimum statistics to extract"`
-	MaxStatistics int                  `json:"max_statistics" jsonschema:"description=Maximum statistics to extract"`
+	Topic         string               `json:"topic"`
+	SearchResults []models.SearchResult `json:"search_results"`
+	MinStatistics int                  `json:"min_statistics"`
+	MaxStatistics int                  `json:"max_statistics"`
 }
 
 // SynthesisToolOutput defines output from synthesis tool

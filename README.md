@@ -108,7 +108,7 @@ The system implements a **4-agent architecture** with clear separation of concer
 - ✅ **HTTP APIs** for all agents
 - ✅ **Retry logic** for ensuring quality results
 - ✅ **Function tools** for structured agent capabilities
-- ✅ **Configurable LLM providers** (Gemini, Claude, OpenAI, Ollama)
+- ✅ **Multi-LLM providers** (Gemini, Claude, OpenAI, Ollama) via unified interface ⭐
 
 ## Output Format
 

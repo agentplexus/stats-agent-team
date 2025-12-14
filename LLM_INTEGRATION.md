@@ -6,16 +6,27 @@ The Statistics Agent Team now features **full LLM-based extraction** with suppor
 
 ## Supported LLM Providers
 
-All agents support the following LLM providers via Google ADK:
+All agents support the following LLM providers:
 
-| Provider | Model | Configuration |
-|----------|-------|---------------|
-| **Gemini** (Default) | `gemini-2.0-flash-exp` | `GEMINI_API_KEY` or `GOOGLE_API_KEY` |
-| Claude | `claude-3-5-sonnet-20241022` | `CLAUDE_API_KEY` or `ANTHROPIC_API_KEY` |
-| OpenAI | `gpt-4` | `OPENAI_API_KEY` |
-| Ollama | `llama3.2` | `OLLAMA_URL` (local) |
+| Provider | Model | Configuration | Integration |
+|----------|-------|---------------|-------------|
+| **Gemini** (Default) | `gemini-2.0-flash-exp` | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | Google ADK (native) ✅ |
+| **Claude** | `claude-3-5-sonnet-20241022` | `CLAUDE_API_KEY` or `ANTHROPIC_API_KEY` | gollm adapter ✅ |
+| **OpenAI** | `gpt-4o-mini` | `OPENAI_API_KEY` | gollm adapter ✅ |
+| **Ollama** | `llama3.2` | `OLLAMA_URL` (local) | gollm adapter ✅ |
 
 ## Architecture
+
+### Multi-Provider Support via gollm
+
+The system uses **two integration paths**:
+
+1. **Gemini**: Direct via Google ADK (native)
+2. **Claude, OpenAI, Ollama**: Via `gollm` adapter (`pkg/llm/adapters/gollm_adapter.go`)
+
+The `gollm` adapter implements the ADK `model.LLM` interface, allowing seamless multi-provider support.
+
+**Design Note:** The `pkg/llm/adapters/` directory is self-contained and can be moved to the `gollm` repository as `pkg/adk/` for broader reuse.
 
 ### Shared Base Agent (`pkg/agent/base.go`)
 

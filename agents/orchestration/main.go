@@ -28,10 +28,10 @@ type OrchestrationAgent struct {
 
 // OrchestrationInput defines input for orchestration tool
 type OrchestrationInput struct {
-	Topic            string `json:"topic" jsonschema:"description=The topic to research statistics for"`
-	MinVerifiedStats int    `json:"min_verified_stats" jsonschema:"description=Minimum number of verified statistics required"`
-	MaxCandidates    int    `json:"max_candidates" jsonschema:"description=Maximum number of candidate statistics to gather"`
-	ReputableOnly    bool   `json:"reputable_only" jsonschema:"description=Only use reputable sources"`
+	Topic            string `json:"topic"`
+	MinVerifiedStats int    `json:"min_verified_stats"`
+	MaxCandidates    int    `json:"max_candidates"`
+	ReputableOnly    bool   `json:"reputable_only"`
 }
 
 // OrchestrationToolOutput defines output from orchestration tool

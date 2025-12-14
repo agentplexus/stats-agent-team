@@ -9,6 +9,7 @@ import (
 	"google.golang.org/genai"
 
 	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/grokify/stats-agent-team/pkg/llm/adapters"
 )
 
 // ModelFactory creates LLM models based on configuration
@@ -24,16 +25,16 @@ func NewModelFactory(cfg *config.Config) *ModelFactory {
 // CreateModel creates an LLM model based on the configured provider
 func (mf *ModelFactory) CreateModel(ctx context.Context) (model.LLM, error) {
 	switch mf.cfg.LLMProvider {
-	case "gemini":
+	case "gemini", "":
 		return mf.createGeminiModel(ctx)
 	case "claude":
-		return nil, fmt.Errorf("claude support via ADK is not yet implemented - use gemini for now")
+		return mf.createClaudeModel()
 	case "openai":
-		return nil, fmt.Errorf("openai support via ADK is not yet implemented - use gemini for now")
+		return mf.createOpenAIModel()
 	case "ollama":
-		return nil, fmt.Errorf("ollama support via ADK is not yet implemented - use gemini for now")
+		return mf.createOllamaModel()
 	default:
-		return nil, fmt.Errorf("unsupported LLM provider: %s (supported: gemini)", mf.cfg.LLMProvider)
+		return nil, fmt.Errorf("unsupported LLM provider: %s (supported: gemini, claude, openai, ollama)", mf.cfg.LLMProvider)
 	}
 }
 
@@ -56,6 +57,56 @@ func (mf *ModelFactory) createGeminiModel(ctx context.Context) (model.LLM, error
 	return gemini.NewModel(ctx, modelName, &genai.ClientConfig{
 		APIKey: apiKey,
 	})
+}
+
+// createClaudeModel creates a Claude model using gollm
+func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
+	apiKey := mf.cfg.ClaudeAPIKey
+	if apiKey == "" {
+		apiKey = mf.cfg.LLMAPIKey
+	}
+
+	if apiKey == "" {
+		return nil, fmt.Errorf("claude API key not set - please set CLAUDE_API_KEY or ANTHROPIC_API_KEY")
+	}
+
+	modelName := mf.cfg.LLMModel
+	if modelName == "" {
+		modelName = "claude-3-5-sonnet-20241022"
+	}
+
+	return adapters.NewGollmAdapter("anthropic", apiKey, modelName)
+}
+
+// createOpenAIModel creates an OpenAI model using gollm
+func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
+	apiKey := mf.cfg.OpenAIAPIKey
+	if apiKey == "" {
+		apiKey = mf.cfg.LLMAPIKey
+	}
+
+	if apiKey == "" {
+		return nil, fmt.Errorf("openai API key not set - please set OPENAI_API_KEY")
+	}
+
+	modelName := mf.cfg.LLMModel
+	if modelName == "" {
+		modelName = "gpt-4o-mini" // Use mini for cost efficiency
+	}
+
+	return adapters.NewGollmAdapter("openai", apiKey, modelName)
+}
+
+// createOllamaModel creates an Ollama model using gollm
+func (mf *ModelFactory) createOllamaModel() (model.LLM, error) {
+	modelName := mf.cfg.LLMModel
+	if modelName == "" {
+		modelName = "llama3.2"
+	}
+
+	// Ollama doesn't need an API key for local instances
+	// gollm will use the base URL from environment or default to localhost
+	return adapters.NewGollmAdapter("ollama", "", modelName)
 }
 
 // GetProviderInfo returns information about the current provider
