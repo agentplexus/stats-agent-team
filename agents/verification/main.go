@@ -7,18 +7,16 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
-	"google.golang.org/adk/model/gemini"
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
-	"google.golang.org/genai"
 
 	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/grokify/stats-agent-team/pkg/llm"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
@@ -43,13 +41,14 @@ type VerificationToolOutput struct {
 func NewVerificationAgent(cfg *config.Config) (*VerificationAgent, error) {
 	ctx := context.Background()
 
-	// Create Gemini model
-	model, err := gemini.NewModel(ctx, "gemini-2.0-flash-exp", &genai.ClientConfig{
-		APIKey: os.Getenv("GOOGLE_API_KEY"),
-	})
+	// Create model using factory
+	modelFactory := llm.NewModelFactory(cfg)
+	model, err := modelFactory.CreateModel(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model: %w", err)
 	}
+
+	log.Printf("Verification Agent: Using %s", modelFactory.GetProviderInfo())
 
 	va := &VerificationAgent{
 		cfg:    cfg,

@@ -128,7 +128,11 @@ The system returns verified statistics in JSON format:
 ### Prerequisites
 
 - Go 1.21 or higher
-- Google API key for Gemini (set as `GOOGLE_API_KEY` environment variable)
+- LLM API key for your chosen provider:
+  - **Gemini** (default): Google API key (set as `GOOGLE_API_KEY` or `GEMINI_API_KEY`)
+  - **Claude**: Anthropic API key (set as `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY`)
+  - **OpenAI**: OpenAI API key (set as `OPENAI_API_KEY`)
+  - **Ollama**: Local Ollama installation (default: `http://localhost:11434`)
 - Optional: API keys for search provider (Google Search, etc.)
 
 ### Setup
@@ -148,7 +152,21 @@ go mod download
 
 3. Configure environment variables:
 ```bash
+# For Gemini (default)
 export GOOGLE_API_KEY="your-google-api-key"
+
+# For Claude
+export LLM_PROVIDER="claude"
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+
+# For OpenAI
+export LLM_PROVIDER="openai"
+export OPENAI_API_KEY="your-openai-api-key"
+
+# For Ollama (local)
+export LLM_PROVIDER="ollama"
+export OLLAMA_URL="http://localhost:11434"
+export LLM_MODEL="llama3.2"
 
 # Optional: Create .env file
 cp .env.example .env
@@ -231,9 +249,33 @@ curl -X POST http://localhost:8000/orchestrate \
 
 ### Environment Variables
 
+#### LLM Configuration
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GOOGLE_API_KEY` | Google API key for Gemini | **Required** |
+| `LLM_PROVIDER` | LLM provider: `gemini`, `claude`, `openai`, `ollama` | `gemini` |
+| `LLM_MODEL` | Model name (provider-specific) | See defaults below |
+| `LLM_API_KEY` | Generic API key (overrides provider-specific) | - |
+| `LLM_BASE_URL` | Base URL for custom endpoints (Ollama, etc.) | - |
+
+**Provider-Specific API Keys:**
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | Google API key for Gemini | **Required for Gemini** |
+| `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` | Anthropic API key for Claude | **Required for Claude** |
+| `OPENAI_API_KEY` | OpenAI API key | **Required for OpenAI** |
+| `OLLAMA_URL` | Ollama server URL | `http://localhost:11434` |
+
+**Default Models by Provider:**
+- Gemini: `gemini-2.0-flash-exp`
+- Claude: `claude-3-5-sonnet-20241022`
+- OpenAI: `gpt-4`
+- Ollama: `llama3.2`
+
+#### Other Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `SEARCH_PROVIDER` | Search provider | `google` |
 | `SEARCH_API_KEY` | Search API key | Optional |
 | `RESEARCH_AGENT_URL` | Research agent URL | `http://localhost:8001` |
@@ -301,7 +343,11 @@ make clean
 - **Agent Frameworks**:
   - [Google ADK (Agent Development Kit)](https://github.com/google/adk-go) - LLM-based agents ⭐
   - [Eino](https://github.com/cloudwego/eino) - Deterministic graph orchestration ⭐
-- **LLM Model**: Google Gemini 2.0 Flash (via `google.golang.org/genai`)
+- **LLM Providers** (configurable):
+  - Google Gemini (default) - Gemini 2.0 Flash ⭐
+  - Anthropic Claude - Claude 3.5 Sonnet
+  - OpenAI - GPT-4
+  - Ollama - Local models (llama3.2, etc.)
 - **Search**: Configurable (Google Search, etc.)
 
 ## How It Works
