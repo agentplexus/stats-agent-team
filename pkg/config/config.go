@@ -63,7 +63,7 @@ func LoadConfig() *Config {
 		SynthesisAgentURL:    getEnv("SYNTHESIS_AGENT_URL", "http://localhost:8004"),
 		VerificationAgentURL: getEnv("VERIFICATION_AGENT_URL", "http://localhost:8002"),
 		OrchestratorURL:      getEnv("ORCHESTRATOR_URL", "http://localhost:8000"),
-		OrchestratorEinoURL:  getEnv("ORCHESTRATOR_EINO_URL", "http://localhost:8003"),
+		OrchestratorEinoURL:  getEnv("ORCHESTRATOR_EINO_URL", "http://localhost:8000"), // Same port as ADK
 
 		// A2A Protocol
 		A2AEnabled:   getEnv("A2A_ENABLED", "true") == "true",

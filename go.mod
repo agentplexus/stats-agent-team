@@ -4,7 +4,9 @@ go 1.25.3
 
 require (
 	github.com/cloudwego/eino v0.7.8
+	github.com/grokify/gollm v0.5.1
 	github.com/grokify/metasearch v0.4.0
+	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.1.0
 	google.golang.org/adk v0.2.0
 	google.golang.org/genai v1.39.0
@@ -51,9 +53,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/grokify/gollm v0.5.1 // indirect
 	github.com/grokify/sogo v0.13.0 // indirect
-	github.com/jessevdk/go-flags v1.6.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/mailru/easyjson v0.9.1 // indirect

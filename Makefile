@@ -84,7 +84,7 @@ run-orchestration:
 	go run agents/orchestration/main.go
 
 run-orchestration-eino:
-	@echo "Starting Orchestration Agent (Eino) on :8003 (HTTP) and :9003 (A2A)..."
+	@echo "Starting Orchestration Agent (Eino) on :8000 (HTTP)..."
 	go run agents/orchestration-eino/main.go
 
 run-all:
@@ -104,7 +104,7 @@ run-all-eino:
 	@echo "Research Agent: http://localhost:8001 (A2A: 9001)"
 	@echo "Synthesis Agent: http://localhost:8004"
 	@echo "Verification Agent: http://localhost:8002 (A2A: 9002)"
-	@echo "Orchestration Agent (Eino): http://localhost:8003 (A2A: 9003)"
+	@echo "Orchestration Agent (Eino): http://localhost:8000"
 	@go run agents/research/main.go & \
 	go run agents/synthesis/main.go & \
 	go run agents/verification/main.go & \

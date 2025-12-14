@@ -9,67 +9,134 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jessevdk/go-flags"
+
 	"github.com/grokify/stats-agent-team/pkg/config"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
-func main() {
-	if len(os.Args) < 2 {
-		printUsage()
-		os.Exit(1)
-	}
+// Options defines the CLI options structure
+type Options struct {
+	// Global options
+	Verbose bool `short:"v" long:"verbose" description:"Show verbose debug information"`
+	Version bool `long:"version" description:"Show version information"`
 
-	command := os.Args[1]
-
-	switch command {
-	case "search":
-		handleSearch()
-	case "help", "--help", "-h":
-		printUsage()
-	default:
-		fmt.Printf("Unknown command: %s\n\n", command)
-		printUsage()
-		os.Exit(1)
-	}
+	// Commands
+	Search SearchCommand `command:"search" description:"Search for verified statistics on a topic"`
 }
 
-func handleSearch() {
-	if len(os.Args) < 3 {
-		fmt.Println("Error: topic required")
-		fmt.Println("Usage: stats-agent search <topic> [options]")
-		os.Exit(1)
-	}
+// SearchCommand defines options for the search command
+type SearchCommand struct {
+	// Positional arguments
+	Args struct {
+		Topic string `positional-arg-name:"topic" description:"Topic to search for statistics"`
+	} `positional-args:"yes" required:"yes"`
 
-	topic := os.Args[2]
+	// Search options
+	MinStats      int    `short:"m" long:"min-stats" default:"10" description:"Minimum number of verified statistics required"`
+	MaxCandidates int    `short:"c" long:"max-candidates" default:"30" description:"Maximum number of candidate statistics to gather"`
+	ReputableOnly bool   `short:"r" long:"reputable-only" description:"Only use reputable sources"`
+	Output        string `short:"o" long:"output" default:"both" choice:"json" choice:"text" choice:"both" description:"Output format"`
 
-	// Parse optional flags
-	minStats := 10
-	maxCandidates := 30
-	reputableOnly := true
+	// Orchestrator options
+	OrchestratorURL string `long:"orchestrator-url" description:"Orchestrator URL (overrides env var)" env:"ORCHESTRATOR_URL"`
+}
 
-	// TODO: Add flag parsing for customization
+// Execute runs the search command
+func (cmd *SearchCommand) Execute(args []string) error {
+	topic := cmd.Args.Topic
 
 	cfg := config.LoadConfig()
+
+	// Override orchestrator URL if provided
+	if cmd.OrchestratorURL != "" {
+		cfg.OrchestratorURL = cmd.OrchestratorURL
+	}
 
 	// Create orchestration request
 	req := &models.OrchestrationRequest{
 		Topic:            topic,
-		MinVerifiedStats: minStats,
-		MaxCandidates:    maxCandidates,
-		ReputableOnly:    reputableOnly,
+		MinVerifiedStats: cmd.MinStats,
+		MaxCandidates:    cmd.MaxCandidates,
+		ReputableOnly:    cmd.ReputableOnly,
 	}
 
 	fmt.Printf("Searching for statistics about: %s\n", topic)
-	fmt.Printf("Target: %d verified statistics from reputable sources\n\n", minStats)
+	fmt.Printf("Target: %d verified statistics from reputable sources\n\n", cmd.MinStats)
 
 	// Call orchestration agent
 	resp, err := callOrchestrator(cfg, req)
 	if err != nil {
-		log.Fatalf("Error: %v\n", err)
+		return fmt.Errorf("orchestration failed: %w", err)
 	}
 
-	// Print results
-	printResults(resp)
+	// Print results based on output format
+	printResults(resp, cmd.Output)
+
+	return nil
+}
+
+func main() {
+	var opts Options
+
+	parser := flags.NewParser(&opts, flags.Default)
+	parser.LongDescription = `Statistics Agent - Multi-Agent System for Finding Verified Statistics
+
+ARCHITECTURE:
+This system uses a 4-agent architecture:
+
+1. Research Agent (port 8001)
+   - Searches for statistics from web sources via Serper/SerpAPI
+   - Returns URLs with metadata
+
+2. Synthesis Agent (port 8004)
+   - Fetches webpage content from URLs
+   - Uses LLM to extract statistics intelligently
+
+3. Verification Agent (port 8002)
+   - Re-fetches source URLs
+   - Validates statistics in their sources
+   - Checks for exact excerpts and values
+
+4. Orchestration Agent (port 8000 ADK / 8003 Eino)
+   - Coordinates the 4-agent workflow
+   - Manages retry logic
+   - Ensures quality standards
+
+ENVIRONMENT VARIABLES:
+LLM_PROVIDER          LLM provider (gemini, claude, openai, ollama)
+GEMINI_API_KEY        API key for Gemini
+CLAUDE_API_KEY        API key for Claude
+OPENAI_API_KEY        API key for OpenAI
+SEARCH_PROVIDER       Search provider (serper, serpapi)
+SERPER_API_KEY        API key for Serper
+SERPAPI_API_KEY       API key for SerpAPI
+ORCHESTRATOR_URL      Orchestrator URL (default: http://localhost:8000)
+
+EXAMPLES:
+stats-agent search "climate change"
+stats-agent search "AI adoption rates" --min-stats 15
+stats-agent search "cybersecurity 2024" --output json
+stats-agent search "renewable energy" --reputable-only
+`
+
+	// Parse arguments
+	_, err := parser.Parse()
+	if err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok {
+			if flagsErr.Type == flags.ErrHelp {
+				os.Exit(0)
+			}
+		}
+		os.Exit(1)
+	}
+
+	// Handle version flag
+	if opts.Version {
+		fmt.Println("stats-agent version 1.0.0")
+		fmt.Println("Multi-LLM support: Gemini, Claude, OpenAI, Ollama")
+		os.Exit(0)
+	}
 }
 
 func callOrchestrator(cfg *config.Config, req *models.OrchestrationRequest) (*models.OrchestrationResponse, error) {
@@ -105,7 +172,19 @@ func callOrchestrator(cfg *config.Config, req *models.OrchestrationRequest) (*mo
 	return &resp, nil
 }
 
-func printResults(resp *models.OrchestrationResponse) {
+func printResults(resp *models.OrchestrationResponse, outputFormat string) {
+	if outputFormat == "json" {
+		// JSON only
+		jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
+		if err != nil {
+			log.Printf("Error marshaling JSON: %v", err)
+			return
+		}
+		fmt.Println(string(jsonData))
+		return
+	}
+
+	// Text format (header + stats)
 	fmt.Printf("=== Statistics Search Results ===\n\n")
 	fmt.Printf("Topic: %s\n", resp.Topic)
 	fmt.Printf("Found: %d verified statistics (from %d candidates)\n", resp.VerifiedCount, resp.TotalCandidates)
@@ -117,18 +196,20 @@ func printResults(resp *models.OrchestrationResponse) {
 		return
 	}
 
-	// Print as JSON
-	fmt.Println("=== Verified Statistics (JSON) ===")
-	fmt.Println()
-	jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
-	if err != nil {
-		log.Printf("Error marshaling JSON: %v", err)
-		return
+	if outputFormat == "both" {
+		// Print JSON
+		fmt.Println("=== Verified Statistics (JSON) ===")
+		fmt.Println()
+		jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
+		if err != nil {
+			log.Printf("Error marshaling JSON: %v", err)
+			return
+		}
+		fmt.Println(string(jsonData))
+		fmt.Println()
 	}
-	fmt.Println(string(jsonData))
 
-	// Also print human-readable format
-	fmt.Println()
+	// Human-readable format
 	fmt.Println("=== Human-Readable Format ===")
 	fmt.Println()
 	for i, stat := range resp.Statistics {
@@ -140,59 +221,4 @@ func printResults(resp *models.OrchestrationResponse) {
 		fmt.Printf("   Verified: ✓\n")
 		fmt.Printf("   Date Found: %s\n\n", stat.DateFound.Format("2006-01-02"))
 	}
-}
-
-func printUsage() {
-	usage := `Statistics Agent - Multi-Agent System for Finding Verified Statistics
-
-USAGE:
-    stats-agent <command> [arguments]
-
-COMMANDS:
-    search <topic>     Search for verified statistics on a topic
-    help               Show this help message
-
-EXAMPLES:
-    stats-agent search "climate change"
-    stats-agent search "artificial intelligence adoption rates"
-    stats-agent search "cybersecurity threats 2024"
-
-ENVIRONMENT VARIABLES:
-    LLM_PROVIDER           LLM provider (default: openai)
-    LLM_API_KEY           API key for LLM provider
-    LLM_MODEL             LLM model to use (default: gpt-4)
-    SEARCH_PROVIDER       Search provider (default: google)
-    SEARCH_API_KEY        API key for search provider
-    ORCHESTRATOR_URL      Orchestrator agent URL (default: http://localhost:8000)
-    A2A_ENABLED           Enable A2A protocol (default: true)
-
-ARCHITECTURE:
-    This system uses a 3-agent architecture:
-
-    1. Research Agent (port 8001/9001)
-       - Searches for statistics from web sources
-       - Prioritizes reputable publishers
-       - Extracts candidate statistics
-
-    2. Verification Agent (port 8002/9002)
-       - Validates statistics in their sources
-       - Checks for exact excerpts and values
-       - Flags hallucinations and mismatches
-
-    3. Orchestration Agent (port 8000/9000)
-       - Coordinates the workflow
-       - Manages retry logic
-       - Ensures quality standards
-
-OUTPUT FORMAT:
-    JSON array with fields:
-    - name: Description of the statistic
-    - value: Numerical value (number or percentage)
-    - source: Name of source organization
-    - source_url: URL to the source
-    - excerpt: Verbatim quote containing the statistic
-    - verified: Verification status (always true in results)
-    - date_found: When the statistic was found
-`
-	fmt.Println(usage)
 }

@@ -15,7 +15,7 @@ func main() {
 
 	// Start HTTP server with timeout
 	server := &http.Server{
-		Addr:         ":8003",
+		Addr:         ":8000",
 		ReadTimeout:  60 * time.Second,
 		WriteTimeout: 60 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -29,7 +29,7 @@ func main() {
 		}
 	})
 
-	log.Println("[Eino Orchestrator] HTTP server starting on :8003")
+	log.Println("[Eino Orchestrator] HTTP server starting on :8000")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
