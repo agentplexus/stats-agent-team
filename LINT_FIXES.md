@@ -109,15 +109,16 @@ if err := server.ListenAndServe(); err != nil {
 - `agents/research/main.go`
 - `agents/verification/main.go`
 
-### 4. Unused Parameters (unparam) - 2 issues
+### 4. Unused Parameters (unparam) - 4 issues
 
 **Problem:**
 - `agents/research/main.go:131` - `ctx` parameter unused in `Research()` method
+- `agents/research/main.go:131` - `error` return value always nil in `Research()` method
 - `agents/verification/main.go:190` - `error` return value always nil in `Verify()` method
 
 **Solution:**
 
-**Research Agent:**
+**Research Agent - Unused ctx parameter:**
 ```go
 // Before
 func (ra *ResearchAgent) Research(ctx context.Context, req *models.ResearchRequest) ...
@@ -126,10 +127,32 @@ func (ra *ResearchAgent) Research(ctx context.Context, req *models.ResearchReque
 func (ra *ResearchAgent) Research(_ context.Context, req *models.ResearchRequest) ...
 ```
 
-**Note:** The Verify method's error return is kept for API consistency even though current implementation doesn't return errors.
+**Research and Verification Agents - Error returns always nil:**
+Added nolint directives to suppress warnings while keeping error returns for API consistency:
+
+```go
+// Research performs research directly
+//
+//nolint:unparam // error return kept for API consistency, will be used when real implementation replaces mock
+func (ra *ResearchAgent) Research(_ context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
+```
+
+```go
+// Verify processes a verification request
+//
+//nolint:unparam // error return kept for API consistency
+func (va *VerificationAgent) Verify(ctx context.Context, req *models.VerificationRequest) (*models.VerificationResponse, error) {
+```
+
+**Rationale:** Error returns are kept because:
+- Current implementations use mock data and don't encounter errors
+- Real implementations (when integrated with actual search APIs) will need error handling
+- Maintaining consistent API signatures across all agent methods
+- Methods are public interfaces that may be called by external code
 
 **Files Updated:**
 - `agents/research/main.go`
+- `agents/verification/main.go`
 
 ## Files Created
 
@@ -169,4 +192,4 @@ The project uses `.golangci.yaml` with the following active linters:
 - unused
 - whitespace
 
-All 31 issues have been resolved.
+All 33 issues have been resolved (31 fixed + 2 suppressed with nolint).

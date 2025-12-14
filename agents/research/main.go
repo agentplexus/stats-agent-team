@@ -128,6 +128,8 @@ func (ra *ResearchAgent) generateMockCandidates(topic string, count int) []model
 }
 
 // Research performs research directly
+//
+//nolint:unparam // error return kept for API consistency, will be used when real implementation replaces mock
 func (ra *ResearchAgent) Research(_ context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
 	log.Printf("Research Agent: Searching for statistics on topic: %s", req.Topic)
 

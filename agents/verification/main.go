@@ -187,6 +187,8 @@ func (va *VerificationAgent) fetchSourceContent(ctx context.Context, url string)
 }
 
 // Verify processes a verification request
+//
+//nolint:unparam // error return kept for API consistency
 func (va *VerificationAgent) Verify(ctx context.Context, req *models.VerificationRequest) (*models.VerificationResponse, error) {
 	log.Printf("Verification Agent: Verifying %d candidates", len(req.Candidates))
 
