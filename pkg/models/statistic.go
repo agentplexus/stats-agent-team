@@ -4,14 +4,14 @@ import "time"
 
 // Statistic represents a verified statistic with its source
 type Statistic struct {
-	Name      string    `json:"name"`        // Name/description of the statistic
-	Value     float32   `json:"value"`       // Numerical value
-	Unit      string    `json:"unit"`        // Unit of measurement (e.g., "°C", "%", "million")
-	Source    string    `json:"source"`      // Name of the source (e.g., "Pew Research Center")
-	SourceURL string    `json:"source_url"`  // URL to the source
-	Excerpt   string    `json:"excerpt"`     // Verbatim quote containing the statistic
-	Verified  bool      `json:"verified"`    // Whether this has been verified by verification agent
-	DateFound time.Time `json:"date_found"`  // When this statistic was found
+	Name      string    `json:"name"`       // Name/description of the statistic
+	Value     float32   `json:"value"`      // Numerical value
+	Unit      string    `json:"unit"`       // Unit of measurement (e.g., "°C", "%", "million")
+	Source    string    `json:"source"`     // Name of the source (e.g., "Pew Research Center")
+	SourceURL string    `json:"source_url"` // URL to the source
+	Excerpt   string    `json:"excerpt"`    // Verbatim quote containing the statistic
+	Verified  bool      `json:"verified"`   // Whether this has been verified by verification agent
+	DateFound time.Time `json:"date_found"` // When this statistic was found
 }
 
 // CandidateStatistic represents an unverified statistic from research
@@ -33,10 +33,10 @@ type VerificationResult struct {
 
 // ResearchRequest represents a request to find statistics
 type ResearchRequest struct {
-	Topic          string `json:"topic"`
-	MinStatistics  int    `json:"min_statistics"`  // Minimum number of statistics to find
-	MaxStatistics  int    `json:"max_statistics"`  // Maximum number of statistics to find
-	ReputableOnly  bool   `json:"reputable_only"`  // Only search reputable sources
+	Topic         string `json:"topic"`
+	MinStatistics int    `json:"min_statistics"` // Minimum number of statistics to find
+	MaxStatistics int    `json:"max_statistics"` // Maximum number of statistics to find
+	ReputableOnly bool   `json:"reputable_only"` // Only search reputable sources
 }
 
 // ResearchResponse represents the response from research agent
@@ -61,18 +61,18 @@ type VerificationResponse struct {
 
 // OrchestrationRequest represents the main request to the orchestrator
 type OrchestrationRequest struct {
-	Topic             string `json:"topic"`
-	MinVerifiedStats  int    `json:"min_verified_stats"`  // Minimum verified statistics required
-	MaxCandidates     int    `json:"max_candidates"`      // Maximum candidates to research
-	ReputableOnly     bool   `json:"reputable_only"`
+	Topic            string `json:"topic"`
+	MinVerifiedStats int    `json:"min_verified_stats"` // Minimum verified statistics required
+	MaxCandidates    int    `json:"max_candidates"`     // Maximum candidates to research
+	ReputableOnly    bool   `json:"reputable_only"`
 }
 
 // OrchestrationResponse represents the final response
 type OrchestrationResponse struct {
-	Topic              string       `json:"topic"`
-	Statistics         []Statistic  `json:"statistics"`
-	TotalCandidates    int          `json:"total_candidates"`
-	VerifiedCount      int          `json:"verified_count"`
-	FailedCount        int          `json:"failed_count"`
-	Timestamp          time.Time    `json:"timestamp"`
+	Topic           string      `json:"topic"`
+	Statistics      []Statistic `json:"statistics"`
+	TotalCandidates int         `json:"total_candidates"`
+	VerifiedCount   int         `json:"verified_count"`
+	FailedCount     int         `json:"failed_count"`
+	Timestamp       time.Time   `json:"timestamp"`
 }

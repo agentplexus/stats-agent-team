@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/eino/compose"
+
 	"github.com/grokify/stats-agent-team/pkg/config"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
@@ -128,9 +129,9 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		log.Printf("[Eino] Quality check: %d verified (target: %d)", verified, target)
 
 		decision := &QualityDecision{
-			State:      state,
-			NeedMore:   verified < target,
-			Shortfall:  target - verified,
+			State:     state,
+			NeedMore:  verified < target,
+			Shortfall: target - verified,
 		}
 
 		if decision.NeedMore {

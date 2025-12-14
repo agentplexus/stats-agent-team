@@ -16,14 +16,14 @@ type Config struct {
 	SearchAPIKey   string
 
 	// Agent Configuration
-	ResearchAgentURL       string
-	VerificationAgentURL   string
-	OrchestratorURL        string
-	OrchestratorEinoURL    string
+	ResearchAgentURL     string
+	VerificationAgentURL string
+	OrchestratorURL      string
+	OrchestratorEinoURL  string
 
 	// A2A Protocol Configuration
-	A2AEnabled bool
-	A2AAuthType string // "jwt", "apikey", "oauth2"
+	A2AEnabled   bool
+	A2AAuthType  string // "jwt", "apikey", "oauth2"
 	A2AAuthToken string
 }
 
