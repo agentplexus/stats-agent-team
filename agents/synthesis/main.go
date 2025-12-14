@@ -4,11 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,19 +14,17 @@ import (
 	"google.golang.org/adk/model"
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
+	"google.golang.org/genai"
 
+	agentbase "github.com/grokify/stats-agent-team/pkg/agent"
 	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/llm"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
 // SynthesisAgent extracts statistics from webpage content using LLM
 type SynthesisAgent struct {
-	cfg         *config.Config
-	client      *http.Client
-	adkAgent    agent.Agent
-	model       model.LLM
-	modelFactor *llm.ModelFactory
+	*agentbase.BaseAgent
+	adkAgent agent.Agent
 }
 
 // SynthesisInput defines input for synthesis tool
@@ -47,22 +42,16 @@ type SynthesisToolOutput struct {
 
 // NewSynthesisAgent creates a new ADK-based synthesis agent
 func NewSynthesisAgent(cfg *config.Config) (*SynthesisAgent, error) {
-	ctx := context.Background()
-
-	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
-	model, err := modelFactory.CreateModel(ctx)
+	// Create base agent with LLM
+	base, err := agentbase.NewBaseAgent(cfg, 45)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create model: %w", err)
+		return nil, fmt.Errorf("failed to create base agent: %w", err)
 	}
 
-	log.Printf("Synthesis Agent: Using %s", modelFactory.GetProviderInfo())
+	log.Printf("Synthesis Agent: Using %s", base.GetProviderInfo())
 
 	sa := &SynthesisAgent{
-		cfg:         cfg,
-		client:      &http.Client{Timeout: 45 * time.Second},
-		model:       model,
-		modelFactor: modelFactory,
+		BaseAgent: base,
 	}
 
 	// Create synthesis tool
@@ -77,7 +66,7 @@ func NewSynthesisAgent(cfg *config.Config) (*SynthesisAgent, error) {
 	// Create ADK agent
 	adkAgent, err := llmagent.New(llmagent.Config{
 		Name:        "statistics_synthesis_agent",
-		Model:       model,
+		Model:       base.Model,
 		Description: "Extracts statistics from web content",
 		Instruction: `You are a statistics synthesis agent. Your job is to:
 1. Fetch content from provided URLs
@@ -124,15 +113,19 @@ func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input Synthesis
 
 		log.Printf("Synthesis Agent: Fetching content from %s", result.URL)
 
-		// Fetch webpage content
-		content, err := sa.fetchWebpage(context.Background(), result.URL)
+		// Fetch webpage content using base agent method
+		content, err := sa.FetchURL(context.Background(), result.URL, 1)
 		if err != nil {
 			log.Printf("Failed to fetch %s: %v", result.URL, err)
 			continue
 		}
 
 		// Extract statistics from content using LLM
-		stats := sa.extractStatisticsWithLLM(input.Topic, result, content)
+		stats, err := sa.extractStatisticsWithLLM(context.Background(), input.Topic, result, content)
+		if err != nil {
+			log.Printf("Failed to extract statistics from %s: %v", result.URL, err)
+			continue
+		}
 		candidates = append(candidates, stats...)
 
 		log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d/%d)",
@@ -151,100 +144,113 @@ func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input Synthesis
 	}, nil
 }
 
-// fetchWebpage fetches and returns webpage content
-func (sa *SynthesisAgent) fetchWebpage(ctx context.Context, url string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+// extractStatisticsWithLLM uses LLM to intelligently extract statistics from content
+func (sa *SynthesisAgent) extractStatisticsWithLLM(ctx context.Context, topic string, result models.SearchResult, content string) ([]models.CandidateStatistic, error) {
+	// Truncate content if too long (LLMs have token limits)
+	maxContentLen := 8000 // ~2000 tokens
+	if len(content) > maxContentLen {
+		content = content[:maxContentLen]
 	}
 
-	req.Header.Set("User-Agent", "StatisticsSynthesisAgent/1.0")
+	// Create prompt for LLM to extract statistics
+	prompt := fmt.Sprintf(`Analyze the following webpage content and extract numerical statistics related to "%s".
 
-	resp, err := sa.client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch URL: %w", err)
-	}
-	defer resp.Body.Close()
+For each statistic found, provide:
+1. name: A brief descriptive name
+2. value: The numerical value (as a number, not string)
+3. unit: The unit of measurement (percent, million, billion, degrees, people, etc.)
+4. excerpt: The verbatim excerpt from the text containing this statistic (exact quote, 50-200 characters)
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
+Return valid JSON array with this structure:
+[
+  {
+    "name": "description",
+    "value": 123.45,
+    "unit": "percent",
+    "excerpt": "exact quote from source text"
+  }
+]
 
-	// Limit response size to 1MB
-	limitedReader := io.LimitReader(resp.Body, 1*1024*1024)
-	body, err := io.ReadAll(limitedReader)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
+Only extract statistics that are clearly stated with numerical values. Return empty array [] if no statistics found.
 
-	return string(body), nil
-}
+Webpage URL: %s
+Domain: %s
 
-// extractStatisticsWithLLM uses LLM to extract statistics from content
-func (sa *SynthesisAgent) extractStatisticsWithLLM(topic string, result models.SearchResult, content string) []models.CandidateStatistic {
-	// For now, use a simple regex-based approach
-	// TODO: Use LLM to intelligently analyze content
-	candidates := make([]models.CandidateStatistic, 0)
+Content:
+%s
 
-	// Simple pattern matching for statistics
-	// Look for patterns like: "50%", "1.5 million", "23 degrees", etc.
-	patterns := []string{
-		`(\d+\.?\d*)\s*%`,                    // Percentages
-		`(\d+\.?\d*)\s*(million|billion|thousand)`, // Large numbers
-		`(\d+\.?\d*)\s*(degrees?|°[CF])`,    // Temperatures
-		`(\d+\.?\d*)\s*(people|users|cases)`, // Counts
+JSON output:`, topic, result.URL, result.Domain, content)
+
+	// Call LLM to extract statistics using ADK
+	llmReq := &model.LLMRequest{
+		Contents: genai.Text(prompt),
 	}
 
-	re := regexp.MustCompile(strings.Join(patterns, "|"))
-	matches := re.FindAllStringSubmatch(content, -1)
-
-	// Extract context around each match
-	for _, match := range matches {
-		if len(candidates) >= 5 { // Limit per URL
-			break
-		}
-
-		// Find the full match
-		fullMatch := match[0]
-
-		// Parse the value
-		valueStr := regexp.MustCompile(`\d+\.?\d*`).FindString(fullMatch)
-		value, err := strconv.ParseFloat(valueStr, 32)
+	var response string
+	for llmResp, err := range sa.Model.GenerateContent(ctx, llmReq, false) {
 		if err != nil {
-			continue
+			return nil, fmt.Errorf("LLM generation failed: %w", err)
 		}
-
-		// Extract excerpt (surrounding context)
-		index := strings.Index(content, fullMatch)
-		if index == -1 {
-			continue
+		// Extract text from response
+		if llmResp.Content != nil && llmResp.Content.Parts != nil {
+			for _, part := range llmResp.Content.Parts {
+				if part.Text != "" {
+					response += part.Text
+				}
+			}
 		}
+	}
 
-		start := max(0, index-100)
-		end := min(len(content), index+len(fullMatch)+100)
-		excerpt := strings.TrimSpace(content[start:end])
+	// Parse JSON response
+	type StatExtraction struct {
+		Name    string  `json:"name"`
+		Value   float32 `json:"value"`
+		Unit    string  `json:"unit"`
+		Excerpt string  `json:"excerpt"`
+	}
 
-		// Clean up excerpt
-		excerpt = strings.ReplaceAll(excerpt, "\n", " ")
-		excerpt = regexp.MustCompile(`\s+`).ReplaceAllString(excerpt, " ")
+	var extractions []StatExtraction
+	if err := json.Unmarshal([]byte(response), &extractions); err != nil {
+		// LLM might wrap JSON in markdown code blocks
+		response = extractJSONFromMarkdown(response)
+		if err := json.Unmarshal([]byte(response), &extractions); err != nil {
+			return nil, fmt.Errorf("failed to parse LLM response as JSON: %w (response: %s)", err, response)
+		}
+	}
 
-		// Determine unit
-		unit := strings.TrimSpace(strings.TrimPrefix(fullMatch, valueStr))
-		if unit == "" {
-			unit = "count"
+	// Convert to CandidateStatistic
+	candidates := make([]models.CandidateStatistic, 0, len(extractions))
+	for _, ext := range extractions {
+		if ext.Value == 0 || ext.Excerpt == "" {
+			continue // Skip invalid entries
 		}
 
 		candidates = append(candidates, models.CandidateStatistic{
-			Name:      fmt.Sprintf("%s statistic from %s", topic, result.Domain),
-			Value:     float32(value),
-			Unit:      unit,
+			Name:      ext.Name,
+			Value:     ext.Value,
+			Unit:      ext.Unit,
 			Source:    result.Domain,
 			SourceURL: result.URL,
-			Excerpt:   excerpt,
+			Excerpt:   ext.Excerpt,
 		})
 	}
 
-	return candidates
+	return candidates, nil
+}
+
+// extractJSONFromMarkdown removes markdown code fences from LLM response
+func extractJSONFromMarkdown(response string) string {
+	// Remove ```json and ``` markers
+	response = strings.TrimSpace(response)
+	if strings.HasPrefix(response, "```json") {
+		response = strings.TrimPrefix(response, "```json")
+	} else if strings.HasPrefix(response, "```") {
+		response = strings.TrimPrefix(response, "```")
+	}
+	if strings.HasSuffix(response, "```") {
+		response = strings.TrimSuffix(response, "```")
+	}
+	return strings.TrimSpace(response)
 }
 
 // Synthesize processes a synthesis request directly
@@ -259,15 +265,19 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 			break
 		}
 
-		// Fetch webpage content
-		content, err := sa.fetchWebpage(ctx, result.URL)
+		// Fetch webpage content using base agent
+		content, err := sa.FetchURL(ctx, result.URL, 1)
 		if err != nil {
 			log.Printf("Failed to fetch %s: %v", result.URL, err)
 			continue
 		}
 
-		// Extract statistics
-		stats := sa.extractStatisticsWithLLM(req.Topic, result, content)
+		// Extract statistics using LLM
+		stats, err := sa.extractStatisticsWithLLM(ctx, req.Topic, result, content)
+		if err != nil {
+			log.Printf("Failed to extract statistics from %s: %v", result.URL, err)
+			continue
+		}
 		candidates = append(candidates, stats...)
 
 		log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d)",

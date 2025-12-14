@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -15,15 +14,14 @@ import (
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
 
+	agentbase "github.com/grokify/stats-agent-team/pkg/agent"
 	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/llm"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
 // VerificationAgent uses ADK for validating statistics
 type VerificationAgent struct {
-	cfg      *config.Config
-	client   *http.Client
+	*agentbase.BaseAgent
 	adkAgent agent.Agent
 }
 
@@ -39,20 +37,16 @@ type VerificationToolOutput struct {
 
 // NewVerificationAgent creates a new ADK-based verification agent
 func NewVerificationAgent(cfg *config.Config) (*VerificationAgent, error) {
-	ctx := context.Background()
-
-	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
-	model, err := modelFactory.CreateModel(ctx)
+	// Create base agent with LLM
+	base, err := agentbase.NewBaseAgent(cfg, 30)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create model: %w", err)
+		return nil, fmt.Errorf("failed to create base agent: %w", err)
 	}
 
-	log.Printf("Verification Agent: Using %s", modelFactory.GetProviderInfo())
+	log.Printf("Verification Agent: Using %s", base.GetProviderInfo())
 
 	va := &VerificationAgent{
-		cfg:    cfg,
-		client: &http.Client{Timeout: 30 * time.Second},
+		BaseAgent: base,
 	}
 
 	// Create verification tool
@@ -67,7 +61,7 @@ func NewVerificationAgent(cfg *config.Config) (*VerificationAgent, error) {
 	// Create ADK agent
 	adkAgent, err := llmagent.New(llmagent.Config{
 		Name:        "statistics_verification_agent",
-		Model:       model,
+		Model:       base.Model,
 		Description: "Verifies that statistics actually exist in their claimed sources",
 		Instruction: `You are a statistics verification agent. Your job is to:
 1. Fetch the content from the provided source URL
@@ -112,8 +106,8 @@ func (va *VerificationAgent) verifyToolHandler(ctx tool.Context, input Verificat
 func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate models.CandidateStatistic) models.VerificationResult {
 	log.Printf("Verification Agent: Verifying statistic from %s", candidate.SourceURL)
 
-	// Fetch source content
-	sourceContent, err := va.fetchSourceContent(ctx, candidate.SourceURL)
+	// Fetch source content using base agent
+	sourceContent, err := va.FetchURL(ctx, candidate.SourceURL, 1)
 	if err != nil {
 		log.Printf("Failed to fetch source: %v", err)
 		return models.VerificationResult{
@@ -157,34 +151,6 @@ func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate mode
 	}
 }
 
-// fetchSourceContent fetches content from a URL
-func (va *VerificationAgent) fetchSourceContent(ctx context.Context, url string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("User-Agent", "StatisticsVerificationAgent/1.0")
-
-	resp, err := va.client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch URL: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	// Limit response size
-	limitedReader := io.LimitReader(resp.Body, 10*1024*1024) // 10MB
-	body, err := io.ReadAll(limitedReader)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
-
-	return string(body), nil
-}
 
 // Verify processes a verification request
 //

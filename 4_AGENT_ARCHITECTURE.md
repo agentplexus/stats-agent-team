@@ -67,16 +67,17 @@ Response:
 
 **Tasks**:
 - Fetch webpage content from URLs
-- Use LLM to analyze text
-- Extract numerical values, units, and context
+- Use LLM to intelligently analyze text and extract statistics
+- Extract numerical values, units, and context using structured prompts
 - Find verbatim excerpts containing statistics
 - Create candidate statistics with proper metadata
 - **Output**: List of CandidateStatistic objects
 
 **Files**:
-- `agents/synthesis/main.go` - NEW agent with LLM analysis
-- Uses ADK for intelligent content analysis
-- Current implementation: Regex-based (TODO: Full LLM integration)
+- `agents/synthesis/main.go` - LLM-based extraction agent ✅
+- Uses `pkg/agent/base.go` for shared LLM initialization
+- Full LLM integration with JSON output parsing
+- Supports all LLM providers via ADK
 
 **API**:
 ```json
@@ -259,17 +260,19 @@ type SynthesisResponse struct {
    - Updated `run-all-eino` to include synthesis agent
    - Updated `build` target to build synthesis binary
 
+### ✅ Recently Completed
+
+4. **LLM Integration & Code Refactoring** ✅
+   - Created `pkg/agent/base.go` - Shared agent base with common LLM initialization
+   - Refactored Synthesis Agent to use proper LLM-based extraction (not regex)
+   - Refactored Verification Agent to use shared base agent
+   - Eliminated code duplication across agents
+   - Full multi-LLM support (Gemini/Claude/OpenAI/Ollama) via unified interface
+
 ### ⏳ TODO
 
 1. **Documentation Updates**
-   - README.md - Update architecture diagram
-   - DOCKER.md - Add synthesis agent info
-   - Update API examples to show 4-agent workflow
-
-2. **LLM Integration in Synthesis** (Future Enhancement)
-   - Replace regex with full LLM analysis
-   - Use ADK to intelligently parse content
-   - Extract context and validate statistics
+   - Update API examples to show 4-agent workflow with LLM extraction
 
 ## Benefits of 4-Agent Architecture
 
