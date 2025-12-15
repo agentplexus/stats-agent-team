@@ -74,7 +74,7 @@ func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 
 	modelName := mf.cfg.LLMModel
 	if modelName == "" {
-		modelName = "claude-3-5-sonnet-latest"
+		modelName = "claude-3-5-sonnet-20241022"
 	}
 
 	return adapters.NewGollmAdapter("anthropic", apiKey, modelName)

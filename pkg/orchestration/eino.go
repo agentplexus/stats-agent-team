@@ -215,15 +215,25 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 
 	// 7. Format Response Node
 	formatResponseLambda := compose.InvokableLambda(func(ctx context.Context, state *VerificationState) (*models.OrchestrationResponse, error) {
-		log.Printf("[Eino] Formatting response with %d verified statistics", len(state.Verified))
+		verifiedCount := len(state.Verified)
+		targetCount := state.Request.MinVerifiedStats
+		isPartial := verifiedCount < targetCount
+
+		if isPartial {
+			log.Printf("[Eino] Formatting PARTIAL response with %d/%d verified statistics", verifiedCount, targetCount)
+		} else {
+			log.Printf("[Eino] Formatting COMPLETE response with %d verified statistics", verifiedCount)
+		}
 
 		return &models.OrchestrationResponse{
 			Topic:           state.Request.Topic,
 			Statistics:      state.Verified,
 			TotalCandidates: len(state.AllCandidates),
-			VerifiedCount:   len(state.Verified),
+			VerifiedCount:   verifiedCount,
 			FailedCount:     state.Failed,
 			Timestamp:       time.Now(),
+			Partial:         isPartial,
+			TargetCount:     targetCount,
 		}, nil
 	})
 	if err := g.AddLambdaNode(nodeFormatResponse, formatResponseLambda); err != nil {

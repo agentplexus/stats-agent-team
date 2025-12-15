@@ -12,6 +12,7 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/grokify/stats-agent-team/pkg/direct"
 	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
@@ -34,9 +35,10 @@ type SearchCommand struct {
 
 	// Search options
 	MinStats      int    `short:"m" long:"min-stats" default:"10" description:"Minimum number of verified statistics required"`
-	MaxCandidates int    `short:"c" long:"max-candidates" default:"30" description:"Maximum number of candidate statistics to gather"`
+	MaxCandidates int    `short:"c" long:"max-candidates" default:"50" description:"Maximum number of candidate statistics to gather"`
 	ReputableOnly bool   `short:"r" long:"reputable-only" description:"Only use reputable sources"`
 	Output        string `short:"o" long:"output" default:"both" choice:"json" choice:"text" choice:"both" description:"Output format"`
+	Direct        bool   `short:"d" long:"direct" description:"Use direct LLM search (faster, like ChatGPT)"`
 
 	// Orchestrator options
 	OrchestratorURL string `long:"orchestrator-url" description:"Orchestrator URL (overrides env var)" env:"ORCHESTRATOR_URL"`
@@ -47,6 +49,29 @@ func (cmd *SearchCommand) Execute(args []string) error {
 	topic := cmd.Args.Topic
 
 	cfg := config.LoadConfig()
+
+	fmt.Printf("Searching for statistics about: %s\n", topic)
+	fmt.Printf("Target: %d verified statistics\n", cmd.MinStats)
+
+	var resp *models.OrchestrationResponse
+	var err error
+
+	// Use direct LLM mode if requested
+	if cmd.Direct {
+		fmt.Println("mode: Direct LLM search (fast, like ChatGPT)")
+		fmt.Println()
+		resp, err = callDirectLLMSearch(cfg, topic, cmd.MinStats)
+		if err != nil {
+			return fmt.Errorf("direct LLM search failed: %w", err)
+		}
+
+		// Direct mode - just print results, no retry loop
+		printResults(resp, cmd.Output)
+		return nil
+	}
+
+	fmt.Println("mode: Multi-agent verification pipeline")
+	fmt.Println()
 
 	// Override orchestrator URL if provided
 	if cmd.OrchestratorURL != "" {
@@ -61,17 +86,80 @@ func (cmd *SearchCommand) Execute(args []string) error {
 		ReputableOnly:    cmd.ReputableOnly,
 	}
 
-	fmt.Printf("Searching for statistics about: %s\n", topic)
-	fmt.Printf("Target: %d verified statistics from reputable sources\n\n", cmd.MinStats)
-
 	// Call orchestration agent
-	resp, err := callOrchestrator(cfg, req)
+	resp, err = callOrchestrator(cfg, req)
 	if err != nil {
 		return fmt.Errorf("orchestration failed: %w", err)
 	}
 
-	// Print results based on output format
-	printResults(resp, cmd.Output)
+	// Handle partial results with retry logic
+	allStatistics := resp.Statistics
+	totalVerified := resp.VerifiedCount
+	retryCount := 0
+	maxRetries := 3
+
+	for resp.Partial && retryCount < maxRetries {
+		fmt.Printf("\n⚠️  PARTIAL RESULTS: Found %d/%d statistics\n\n", resp.VerifiedCount, resp.TargetCount)
+
+		// Print what we have so far
+		printResults(resp, cmd.Output)
+
+		// Ask user if they want to continue
+		fmt.Printf("\n\nWould you like to search for more statistics? (y/n): ")
+		var answer string
+		fmt.Scanln(&answer)
+
+		if answer != "y" && answer != "Y" && answer != "yes" {
+			fmt.Printf("\nStopping with %d verified statistics.\n", totalVerified)
+			break
+		}
+
+		// Continue searching
+		fmt.Println("\nContinuing search for more statistics...")
+		retryCount++
+
+		// Calculate how many more we need
+		stillNeeded := req.MinVerifiedStats - totalVerified
+		fmt.Printf("Attempting to find %d more statistics (attempt %d/%d)...\n\n", stillNeeded, retryCount, maxRetries)
+
+		// Make another request with increased candidates limit
+		continueReq := &models.OrchestrationRequest{
+			Topic:            topic,
+			MinVerifiedStats: stillNeeded,
+			MaxCandidates:    cmd.MaxCandidates + (retryCount * 20), // Increase search space
+			ReputableOnly:    cmd.ReputableOnly,
+		}
+
+		continueResp, err := callOrchestrator(cfg, continueReq)
+		if err != nil {
+			fmt.Printf("⚠️  Continuation failed: %v\n", err)
+			fmt.Printf("Stopping with %d verified statistics.\n", totalVerified)
+			break
+		}
+
+		// Merge new statistics with existing ones
+		allStatistics = append(allStatistics, continueResp.Statistics...)
+		totalVerified += continueResp.VerifiedCount
+
+		// Update response for next iteration
+		resp = continueResp
+		resp.VerifiedCount = totalVerified
+		resp.Statistics = allStatistics
+		resp.Partial = totalVerified < req.MinVerifiedStats
+
+		if !resp.Partial {
+			fmt.Printf("\n✓ Target reached! Found %d verified statistics total.\n\n", totalVerified)
+		}
+	}
+
+	if retryCount >= maxRetries && resp.Partial {
+		fmt.Printf("\n⚠️  Maximum retries (%d) reached. Found %d/%d statistics.\n\n", maxRetries, totalVerified, req.MinVerifiedStats)
+	}
+
+	// Print final results if not already printed
+	if !resp.Partial {
+		printResults(resp, cmd.Output)
+	}
 
 	return nil
 }
@@ -137,6 +225,15 @@ stats-agent search "renewable energy" --reputable-only
 		fmt.Println("Multi-LLM support: Gemini, Claude, OpenAI, Ollama")
 		os.Exit(0)
 	}
+}
+
+func callDirectLLMSearch(cfg *config.Config, topic string, minStats int) (*models.OrchestrationResponse, error) {
+	directSvc, err := direct.NewLLMSearchService(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create direct search service: %w", err)
+	}
+
+	return directSvc.SearchStatistics(context.Background(), topic, minStats)
 }
 
 func callOrchestrator(cfg *config.Config, req *models.OrchestrationRequest) (*models.OrchestrationResponse, error) {

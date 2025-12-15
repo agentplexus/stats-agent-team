@@ -147,31 +147,47 @@ func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input Synthesis
 // extractStatisticsWithLLM uses LLM to intelligently extract statistics from content
 func (sa *SynthesisAgent) extractStatisticsWithLLM(ctx context.Context, topic string, result models.SearchResult, content string) ([]models.CandidateStatistic, error) {
 	// Truncate content if too long (LLMs have token limits)
-	maxContentLen := 8000 // ~2000 tokens
+	maxContentLen := 15000 // ~4000 tokens - increased to capture more content
 	if len(content) > maxContentLen {
 		content = content[:maxContentLen]
 	}
 
 	// Create prompt for LLM to extract statistics
-	prompt := fmt.Sprintf(`Analyze the following webpage content and extract numerical statistics related to "%s".
+	prompt := fmt.Sprintf(`Analyze the following webpage content and extract ALL numerical statistics related to "%s".
+
+IMPORTANT RULES:
+1. Extract EVERY statistic you find, not just one or two. Be thorough and comprehensive.
+2. The "value" field MUST be the exact number that appears in the excerpt - do not approximate or round
+3. The "excerpt" MUST be a verbatim quote containing the exact number you put in "value"
+4. If the excerpt says "1.5°C", the value must be 1.5, not 1
+5. If you cannot find an exact number in the text, skip that statistic
 
 For each statistic found, provide:
 1. name: A brief descriptive name
-2. value: The numerical value (as a number, not string)
-3. unit: The unit of measurement (percent, million, billion, degrees, people, etc.)
-4. excerpt: The verbatim excerpt from the text containing this statistic (exact quote, 50-200 characters)
+2. value: The EXACT numerical value from the text (as a number, not string)
+3. unit: The unit of measurement (percent, million, billion, degrees Celsius, people, countries, etc.)
+4. excerpt: The verbatim excerpt from the text containing this EXACT statistic (50-200 characters)
 
 Return valid JSON array with this structure:
 [
   {
-    "name": "description",
-    "value": 123.45,
-    "unit": "percent",
-    "excerpt": "exact quote from source text"
+    "name": "Global temperature rise",
+    "value": 1.5,
+    "unit": "degrees Celsius",
+    "excerpt": "limiting global warming to 1.5°C above pre-industrial levels"
+  },
+  {
+    "name": "Survey respondents",
+    "value": 75000,
+    "unit": "people",
+    "excerpt": "Over 75,000 people across 77 countries participated"
   }
 ]
 
-Only extract statistics that are clearly stated with numerical values. Return empty array [] if no statistics found.
+CRITICAL: The value field must match the number in the excerpt exactly. Do not invent numbers.
+
+Extract ALL statistics with clear numerical values. If the page contains 10 statistics, return 10 items in the array.
+Return empty array [] ONLY if absolutely no statistics are found.
 
 Webpage URL: %s
 Domain: %s
@@ -179,7 +195,7 @@ Domain: %s
 Content:
 %s
 
-JSON output:`, topic, result.URL, result.Domain, content)
+JSON output with ALL statistics:`, topic, result.URL, result.Domain, content)
 
 	// Call LLM to extract statistics using ADK
 	llmReq := &model.LLMRequest{
@@ -264,10 +280,14 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 	log.Printf("Synthesis Agent: Processing %d search results for topic: %s", len(req.SearchResults), req.Topic)
 
 	var candidates []models.CandidateStatistic
+	pagesProcessed := 0
+	minPagesToProcess := 5 // Always process at least 5 pages to get diverse statistics
 
 	// Analyze each search result
-	for i, result := range req.SearchResults {
-		if len(candidates) >= req.MaxStatistics && req.MaxStatistics > 0 {
+	for _, result := range req.SearchResults {
+		// Stop only if we have enough candidates AND processed minimum pages
+		if len(candidates) >= req.MaxStatistics && req.MaxStatistics > 0 && pagesProcessed >= minPagesToProcess {
+			log.Printf("Synthesis Agent: Reached max statistics (%d) after processing %d pages", req.MaxStatistics, pagesProcessed)
 			break
 		}
 
@@ -284,13 +304,21 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 			log.Printf("Failed to extract statistics from %s: %v", result.URL, err)
 			continue
 		}
-		candidates = append(candidates, stats...)
 
-		log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d)",
-			len(stats), result.Domain, len(candidates))
+		pagesProcessed++
 
-		// Stop early if we have enough
-		if len(candidates) >= req.MinStatistics && i >= 2 {
+		if len(stats) > 0 {
+			candidates = append(candidates, stats...)
+			log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d from %d pages)",
+				len(stats), result.Domain, len(candidates), pagesProcessed)
+		} else {
+			log.Printf("Synthesis Agent: No statistics extracted from %s (total: %d from %d pages)",
+				result.Domain, len(candidates), pagesProcessed)
+		}
+
+		// Only stop early if we have well exceeded the minimum requirement
+		if len(candidates) >= req.MinStatistics*2 && pagesProcessed >= minPagesToProcess {
+			log.Printf("Synthesis Agent: Have %d candidates (2x minimum), stopping after %d pages", len(candidates), pagesProcessed)
 			break
 		}
 	}

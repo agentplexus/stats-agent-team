@@ -75,6 +75,9 @@ type OrchestrationResponse struct {
 	VerifiedCount   int         `json:"verified_count"`
 	FailedCount     int         `json:"failed_count"`
 	Timestamp       time.Time   `json:"timestamp"`
+	Partial         bool        `json:"partial"`          // True if target not met
+	TargetCount     int         `json:"target_count"`     // The minimum requested
+	ContinuationID  string      `json:"continuation_id,omitempty"` // ID for continuing the search
 }
 
 // SearchResult represents a source URL from research agent

@@ -223,22 +223,23 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 			}
 		}
 
-		log.Printf("Orchestration: Current progress - %d/%d verified statistics",
+		log.Printf("Orchestration: Current progress - %d/%d verified statistics (keeping all verified)",
 			totalVerified, req.MinVerifiedStats)
 
-		// Check if we have enough verified statistics
+		// Check if we have enough verified statistics to stop gathering more
 		if totalVerified >= req.MinVerifiedStats {
-			log.Printf("Orchestration: Target reached with %d verified statistics", totalVerified)
+			log.Printf("Orchestration: Minimum target reached with %d verified statistics (will return all %d)",
+				totalVerified, totalVerified)
 			break
 		}
 
 		retry++
 	}
 
-	// Build final response
+	// Build final response with ALL verified statistics (not limited to MinVerifiedStats)
 	response := &models.OrchestrationResponse{
 		Topic:           req.Topic,
-		Statistics:      verifiedStatistics,
+		Statistics:      verifiedStatistics, // Returns ALL verified statistics found
 		TotalCandidates: len(allCandidates),
 		VerifiedCount:   totalVerified,
 		FailedCount:     totalFailed,
@@ -248,8 +249,11 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 	if totalVerified < req.MinVerifiedStats {
 		log.Printf("Warning: Only found %d verified statistics (target: %d)",
 			totalVerified, req.MinVerifiedStats)
+	} else if totalVerified > req.MinVerifiedStats {
+		log.Printf("Orchestration: Successfully completed with %d verified statistics (exceeded target of %d)",
+			totalVerified, req.MinVerifiedStats)
 	} else {
-		log.Printf("Orchestration: Successfully completed with %d verified statistics", totalVerified)
+		log.Printf("Orchestration: Successfully completed with exactly %d verified statistics", totalVerified)
 	}
 
 	return response, nil

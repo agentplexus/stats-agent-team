@@ -101,7 +101,7 @@ func getDefaultModel(provider string) string {
 	case "gemini":
 		return "gemini-2.0-flash-exp"
 	case "claude":
-		return "claude-3-5-sonnet-latest"
+		return "claude-3-5-sonnet-20241022" // Latest Claude 3.5 Sonnet (Oct 2024)
 	case "openai":
 		return "gpt-4"
 	case "xai":

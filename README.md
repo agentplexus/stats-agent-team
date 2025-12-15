@@ -95,20 +95,21 @@ The system implements a **4-agent architecture** with clear separation of concer
 
 ## Features
 
+- ✅ **Two search modes**: Direct LLM (fast, like ChatGPT) and Multi-agent verification pipeline ⭐ NEW
+- ✅ **Direct LLM search** - Single LLM call with URLs, no agents needed 🚀 NEW
 - ✅ **Multi-agent orchestration** with chains and workflow coordination
 - ✅ **Google ADK integration** for LLM-based agents
 - ✅ **Eino framework** for deterministic graph orchestration
-- ✅ **Gemini 2.0 Flash model** for fast, accurate LLM operations
-- ✅ **MCP Server** for integration with Claude Code and other MCP clients ⭐
+- ✅ **Human-in-the-loop retry** - Prompts user when partial results found ⭐ NEW
+- ✅ **Multi-LLM providers** (Gemini, Claude, OpenAI, Ollama, xAI Grok) via unified interface ⭐
+- ✅ **MCP Server** for integration with Claude Code and other MCP clients
 - ✅ **Docker deployment** for easy containerized setup 🐳
 - ✅ **Real web search** via Serper/SerpAPI for finding actual statistics 🔍
 - ✅ **Source verification** to prevent hallucinations
 - ✅ **Reputable source prioritization** (government, academic, research orgs)
 - ✅ **Structured JSON output** with complete metadata
 - ✅ **HTTP APIs** for all agents
-- ✅ **Retry logic** for ensuring quality results
 - ✅ **Function tools** for structured agent capabilities
-- ✅ **Multi-LLM providers** (Gemini, Claude, OpenAI, Ollama) via unified interface ⭐
 
 ## Output Format
 
@@ -255,18 +256,83 @@ make run-orchestration       # ADK version (LLM-based)
 make run-orchestration-eino  # Eino version (deterministic, recommended)
 ```
 
-#### Using the CLI (Local Only)
+#### Using the CLI
 
-Once the agents are running locally, use the CLI to search for statistics:
+The CLI supports two modes: **Direct LLM search** (fast, like ChatGPT) and **Multi-agent verification pipeline** (thorough, verified).
+
+##### Direct Mode (Fast, Recommended for Quick Results)
+
+Direct mode uses a single LLM call to find statistics with sources - similar to ChatGPT:
 
 ```bash
-# Basic search
+# Fast search using direct LLM (no agents needed)
+./bin/stats-agent search "climate change" --direct
+
+# Request specific number of statistics
+./bin/stats-agent search "AI adoption" --direct --min-stats 15
+
+# JSON output only
+./bin/stats-agent search "renewable energy" --direct --output json
+
+# With specific LLM provider
+LLM_PROVIDER=openai OPENAI_API_KEY=your_key \
+  ./bin/stats-agent search "cybersecurity 2024" --direct --min-stats 20
+```
+
+**Advantages of Direct Mode:**
+- ⚡ **Fast** - Single LLM call, no multi-agent pipeline
+- 🔗 **URLs included** - Returns source URLs like ChatGPT
+- 🚀 **No agent servers needed** - Works standalone
+- 💰 **Lower cost** - Single LLM call instead of multiple
+
+##### Multi-Agent Pipeline Mode (Thorough Verification)
+
+For verified, web-scraped statistics (requires agents running):
+
+```bash
+# Start agents first
+make run-all-eino
+
+# Then in another terminal:
+# Basic search with verification pipeline
 ./bin/stats-agent search "climate change"
 
-# More examples
-./bin/stats-agent search "artificial intelligence adoption rates"
-./bin/stats-agent search "cybersecurity threats 2024"
-./bin/stats-agent search "renewable energy statistics"
+# Request specific number of verified statistics
+./bin/stats-agent search "global warming" --min-stats 15
+
+# Increase candidate search space
+./bin/stats-agent search "AI trends" --min-stats 10 --max-candidates 100
+
+# Only reputable sources
+./bin/stats-agent search "COVID-19 statistics" --reputable-only
+
+# JSON output only
+./bin/stats-agent search "renewable energy" --output json
+
+# Text output only
+./bin/stats-agent search "climate data" --output text
+```
+
+**Advantages of Multi-Agent Mode:**
+- ✅ **Verified sources** - Actually fetches and checks web pages
+- 🔍 **Web search** - Finds current statistics from the web
+- 🎯 **Accuracy** - Validates excerpts and values match
+- 🔄 **Human-in-the-loop** - Prompts to continue if target not met
+
+##### CLI Options
+
+```bash
+stats-agent search <topic> [options]
+
+Options:
+  -d, --direct              Use direct LLM search (fast, like ChatGPT)
+  -m, --min-stats <n>       Minimum statistics to find (default: 10)
+  -c, --max-candidates <n>  Max candidates for pipeline mode (default: 50)
+  -r, --reputable-only      Only use reputable sources
+  -o, --output <format>     Output format: json, text, both (default: both)
+      --orchestrator-url    Override orchestrator URL
+  -v, --verbose             Show verbose debug information
+      --version             Show version information
 ```
 
 ---
