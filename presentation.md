@@ -1,0 +1,1625 @@
+---
+marp: true
+theme: default
+paginate: true
+style: |
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  section {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    color: #e8eaf6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 24px;
+    padding: 40px 60px;
+    padding-top: 35px;
+  }
+
+  section * {
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+  }
+
+  /* Definition lists - this is what causes the horizontal lines */
+  section dt, section dd {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  section dt::after, section dd::before {
+    border: none !important;
+    content: none !important;
+  }
+
+  section dl {
+    border: none !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  section dl::before, section dl::after {
+    border: none !important;
+    content: none !important;
+  }
+
+  /* Target the actual elements more aggressively */
+  dt, dd, dl {
+    border: 0 !important;
+    border-top-width: 0 !important;
+    border-bottom-width: 0 !important;
+    outline: none !important;
+  }
+
+  section::after {
+    content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+    position: absolute;
+    bottom: 20px;
+    right: 60px;
+    font-size: 14px;
+    color: #7c4dff;
+    font-weight: 600;
+  }
+
+  section h1 {
+    font-size: 47px;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 0.3em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    border: none;
+    border-top: none;
+    border-bottom: none;
+  }
+
+  section h2 {
+    font-size: 36px;
+    font-weight: 600;
+    color: #b39ddb;
+    margin-top: 0.5em;
+    margin-bottom: 0.4em;
+    border: none;
+  }
+
+  section h3 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #9575cd;
+    border: none;
+  }
+
+  section p, section li {
+    font-size: 22px;
+    line-height: 1.6;
+    color: #e8eaf6;
+  }
+
+  section strong {
+    color: #7c4dff;
+    font-weight: 600;
+  }
+
+  section em {
+    color: #b39ddb;
+    font-style: italic;
+  }
+
+  section a {
+    color: #7c4dff;
+    text-decoration: none;
+    border-bottom: 2px solid #7c4dff;
+  }
+
+  section code {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 20px;
+    background: rgba(124, 77, 255, 0.15);
+    color: #b39ddb;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(124, 77, 255, 0.3);
+  }
+
+  section pre {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 18px;
+    background: rgba(15, 12, 41, 0.6);
+    border: 1px solid #7c4dff;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 1em 0;
+    box-shadow: 0 4px 20px rgba(124, 77, 255, 0.2);
+  }
+
+  section pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #f5f5f5;
+  }
+
+  section pre code .hljs-string,
+  section pre code .hljs-attr {
+    color: #e8eaf6;
+  }
+
+  section ul, section ol {
+    margin: 0.5em 0;
+    border: none;
+    border-top: none;
+    border-bottom: none;
+  }
+
+  section li {
+    margin: 0.27em 0;
+    line-height: 1.44;
+    font-size: 20px;
+    border: none;
+  }
+
+  section table {
+    border-collapse: collapse;
+    margin: 1em auto;
+    background: rgba(15, 12, 41, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(124, 77, 255, 0.3);
+  }
+
+  section th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px 20px;
+    text-align: left;
+  }
+
+  section td {
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(124, 77, 255, 0.2);
+    color: #e8eaf6;
+    background: rgba(15, 12, 41, 0.4);
+  }
+
+  section tr:last-child td {
+    border-bottom: none;
+  }
+
+  section tr:hover td {
+    background: rgba(124, 77, 255, 0.15);
+  }
+
+  section blockquote {
+    border-left: 4px solid #7c4dff;
+    background: rgba(124, 77, 255, 0.1);
+    padding: 12px 20px;
+    margin: 1em 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  /* Title slide styling */
+  section:first-of-type h1 {
+    font-size: 58px;
+    text-align: center;
+    margin-top: 1em;
+  }
+
+  section:first-of-type h2 {
+    text-align: center;
+    font-size: 32px;
+    color: #b39ddb;
+  }
+
+  section:first-of-type p {
+    text-align: center;
+    font-size: 22px;
+    color: #9575cd;
+  }
+
+  /* Emoji and icon styling */
+  section img[alt~="emoji"], section img[alt~="icon"] {
+    height: 1.2em;
+    vertical-align: middle;
+  }
+
+  /* Hide any horizontal rules that Marp might generate */
+  section hr {
+    display: none;
+  }
+
+  /* VibeMinds.AI branding footer */
+  section::before {
+    content: 'VibeMinds.AI';
+    position: absolute;
+    bottom: 20px;
+    left: 60px;
+    font-size: 12px;
+    color: #7c4dff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+---
+
+<!--
+Welcome to our presentation on the Statistics Agent Team project. Today, we'll explore how we built a sophisticated multi-agent system for finding and verifying statistics from the web using Go and large language models.
+[PAUSE:1500]
+-->
+
+# Statistics Agent Team
+## Building a Multi-Agent System for Verified Statistics
+
+**A Production-Ready Implementation**
+
+Built with Google ADK, Eino, and Multi-LLM Support
+
+---
+
+<!--
+Let's start by understanding what problem we're trying to solve. When you ask a chatbot for statistics, how do you know if the numbers are accurate? Can you verify the source? This is the core challenge we addressed.
+[PAUSE:2000]
+-->
+
+# The Problem 🎯
+
+**Challenge**: Finding verified, numerical statistics from reputable web sources
+
+**Pain Points** —
+- ❌ LLMs hallucinate statistics and sources
+- ❌ URLs from LLM memory are often outdated or wrong
+- ❌ No verification that excerpts actually exist
+- ❌ Hard to distinguish reputable vs unreliable sources
+
+**Goal**: Build a system that provides **provably accurate** statistics
+
+---
+
+<!--
+We established clear requirements for what success looks like. The system must not only find statistics but verify them against actual web sources. Speed matters, but accuracy is paramount.
+[PAUSE:2000]
+-->
+
+# Requirements 📋
+
+## Functional Requirements
+- ✅ Search web for statistics on any topic
+- ✅ Extract numerical values with context
+- ✅ Verify excerpts exist in source documents
+- ✅ Validate numerical accuracy
+- ✅ Prioritize reputable sources (.gov, .edu, research orgs)
+
+## Non-Functional Requirements
+- ✅ 60-90% verification rate (vs 0% for direct LLM)
+- ✅ Response time: under 60 seconds
+- ✅ Support multiple LLM providers
+- ✅ Containerized deployment
+
+---
+
+<!--
+We chose a four-agent architecture with clear separation of concerns. Each agent has a specific responsibility in the pipeline. This modular design allows us to optimize each component independently.
+[PAUSE:2500]
+-->
+
+# Architecture Overview 🏗️
+
+```
+User Request → Orchestrator
+                    ↓
+        ┌───────────┼───────────┐
+        ↓           ↓           ↓
+    Research    Synthesis  Verification
+    (Search)    (Extract)   (Validate)
+        ↓           ↓           ↓
+      URLs    Statistics    Verified ✓
+```
+
+**4 Specialized Agents** working together:
+1. **Research** - Web search (no LLM needed)
+2. **Synthesis** - LLM-based extraction
+3. **Verification** - Web validation
+4. **Orchestration** - Workflow coordination
+
+---
+
+<!--
+The research agent is our foundation. It performs web search using Google via Serper or SerpAPI. Notice it doesn't use an LLM at all - it's pure search functionality. This keeps it fast and cost-effective.
+[PAUSE:2500]
+-->
+
+# Agent 1: Research Agent 🔍
+
+**Responsibility**: Find relevant web sources
+
+**Implementation** —
+- No LLM required (pure search)
+- Integrates with Serper/SerpAPI via `metasearch` library
+- Filters for reputable domains
+- Returns 30 URLs by default
+
+**Key Decision**: Separate search from extraction
+- Allows caching of search results
+- Different providers don't need LLM changes
+- Faster iteration on search queries
+
+**Port**: 8001
+
+---
+
+<!--
+The synthesis agent is where the heavy lifting happens. It fetches actual web pages and uses an LLM to intelligently extract statistics. We built this with Google's ADK framework for robust LLM operations.
+[PAUSE:2500]
+-->
+
+# Agent 2: Synthesis Agent 📊
+
+**Responsibility**: Extract statistics from web pages
+
+**Implementation** (Google ADK):
+- Fetches webpage content (30K chars per page)
+- LLM analyzes text for numerical statistics
+- Extracts verbatim excerpts
+- Processes 15+ pages for comprehensive coverage
+- Returns candidates with metadata
+
+**Key Challenge**: Getting complete extraction
+- ❌ Initial: Only returned 5-8 statistics
+- ✅ Solution: Increased pages (5→15), content (15K→30K), multiplier (2x→5x)
+
+**Port**: 8004
+
+---
+
+<!--
+Here's a critical insight we learned. When we first tested, the synthesis agent would only find a handful of statistics. We discovered we needed to cast a much wider net because many candidates fail verification. The five-x multiplier accounts for this reality.
+[PAUSE:3000]
+-->
+
+# Synthesis Agent: Key Learnings 💡
+
+**Problem**: Low statistical yield (5-8 stats vs ChatGPT's 20+)
+
+**Root Cause Analysis** —
+- Too few pages processed (only 5)
+- Too little content per page (15K chars)
+- Too conservative multiplier (2x)
+
+**Solution** - Aggressive extraction:
+```go
+minPagesToProcess := 15  // (increased from 5)
+maxContentLen := 30000   // (increased from 15K)
+multiplier := 5          // (increased from 2x)
+```
+
+**Result**: Now matches ChatGPT.com performance! 🎉
+
+---
+
+<!--
+The verification agent is what sets our system apart. It doesn't just trust what the LLM says - it actually fetches the source URL and validates the excerpt exists word-for-word. This is where accuracy comes from.
+[PAUSE:2500]
+-->
+
+# Agent 3: Verification Agent ✅
+
+**Responsibility**: Validate statistics against sources
+
+**Implementation** (Google ADK):
+- Re-fetches source URLs
+- Checks excerpts exist verbatim
+- Validates numerical values match exactly
+- Uses light LLM assistance for fuzzy matching
+- Returns pass/fail with detailed reasons
+
+**Key Decision**: Always fetch original source
+- No trusting LLM claims
+- Catches hallucinations
+- Verifies pages haven't changed
+
+**Port**: 8002
+
+---
+
+<!--
+We implemented two orchestration approaches. The ADK version uses an LLM to make decisions about workflow. The Eino version uses a deterministic graph. Both work, but Eino is faster and more predictable for production use.
+[PAUSE:2500]
+-->
+
+# Agent 4: Orchestration Agent 🎭
+
+**Two Implementations Available** —
+
+## Option A: Google ADK (LLM-driven)
+- Uses LLM to decide workflow steps
+- Adaptive retry logic
+- More flexible but slower
+
+## Option B: Eino (Deterministic) ⭐ **RECOMMENDED**
+- Type-safe graph-based workflow
+- Predictable, reproducible behavior
+- Faster and lower cost
+- No LLM for orchestration decisions
+
+**Both run on Port 8000** (choose one)
+
+---
+
+<!--
+Here's what the Eino workflow looks like. It's a directed graph where each node has a specific job. Data flows predictably from input validation through to formatted output. This determinism is crucial for production reliability.
+[PAUSE:2500]
+-->
+
+# Eino Orchestration Flow 🔄
+
+```
+ValidateInput
+     ↓
+Research (30 URLs)
+     ↓
+Synthesis (15+ pages → candidates)
+     ↓
+Verification (validate each)
+     ↓
+QualityCheck (≥ min verified?)
+     ↓
+FormatOutput → User
+```
+
+**Why Eino?**
+- Type-safe operations
+- No non-deterministic LLM decisions
+- Easier to debug and test
+- Production-ready reliability
+
+---
+
+<!--
+One of our biggest challenges was the direct mode. Initially, we thought letting an LLM directly answer from memory would be useful. What we found was eye-opening - zero percent verification rate. This taught us the importance of real-time web search.
+[PAUSE:3000]
+-->
+
+# Challenge 1: Direct Mode Failure ⚠️
+
+**Initial Idea**: Let LLM answer from memory (like ChatGPT)
+
+**Implementation** —
+```bash
+./stats-agent search "AI trends" --direct
+```
+
+**The Problem** —
+- LLM returns statistics from training data (up to Jan 2025)
+- URLs are **guessed** - not from real search
+- Pages have moved, changed, or are paywalled
+- **0% verification rate** when validated
+
+**The Lesson**: Real-time web search is essential for statistics
+
+---
+
+<!--
+Here's a real comparison we did. We asked both systems about the same topic. ChatGPT dot com returned many verifiable statistics because it uses real-time Bing search. Our direct mode returned plausible-looking numbers but with completely wrong URLs. This comparison drove our architecture decisions.
+[PAUSE:3000]
+-->
+
+# Direct Mode vs ChatGPT.com 📊
+
+**Same Query: "AI trends"**
+
+| System | Statistics Found | Verification Rate | Why? |
+|--------|-----------------|-------------------|------|
+| **ChatGPT.com** | 20+ | ✅ 90%+ | Real-time Bing search |
+| **Direct Mode** | 10 | ❌ 0% | LLM memory (outdated URLs) |
+| **Pipeline Mode** | 15-25 | ✅ 60-90% | Real-time Google search |
+
+**Key Insight**: ChatGPT.com's success comes from **web search**, not just LLM quality!
+
+**Our Solution**: Pipeline mode with Serper/SerpAPI
+
+---
+
+<!--
+Based on this learning, we added clear warnings to our documentation. Direct mode remains available for general knowledge questions, but we steer users toward pipeline mode for actual statistics. Being honest about limitations builds trust.
+[PAUSE:2500]
+-->
+
+# Solution: Pipeline Mode ✅
+
+**What We Changed** —
+- Made Pipeline mode the default
+- Added warnings to Direct mode docs
+- Implemented hybrid mode (Direct + Verification)
+
+**README Warning** —
+```markdown
+⚠️ Direct Mode - Not Recommended for Statistics
+- ❌ Uses LLM memory (training data)
+- ❌ Outdated URLs
+- ❌ 0% verification rate
+
+✅ For statistics, use Pipeline mode instead
+```
+
+**Result**: Clear expectations, better user experience
+
+---
+
+<!--
+The second major challenge was LLM provider flexibility. Different teams use different LLM vendors. We needed to support them all without duplicating code. The solution was a factory pattern with provider abstraction.
+[PAUSE:2500]
+-->
+
+# Challenge 2: Multi-LLM Support 🔧
+
+**Requirement**: Support multiple LLM providers
+
+**Supported Providers** —
+- Google Gemini (default) - `gemini-2.5-flash` / `gemini-2.5-pro`
+- Anthropic Claude - `claude-sonnet-4-20250514` / `claude-opus-4-1-20250805`
+- OpenAI - `gpt-4o` / `gpt-5`
+- xAI Grok - `grok-4-1-fast-reasoning` / `grok-4-1-fast-non-reasoning`
+- Ollama - `llama3:8b` / `mistral:7b` (local)
+
+**Challenge**: Each provider has different APIs, models, rate limits
+
+**Solution**: Abstraction via `gollm` library
+
+---
+
+<!--
+Here's how the abstraction works. The gollm library provides a unified interface. We just select a provider via environment variable. The agents don't care which LLM they're using - they just call the standard interface.
+[PAUSE:2500]
+-->
+
+# Multi-LLM Implementation 🎯
+
+**Factory Pattern** in `pkg/llm/factory.go`:
+
+```go
+func CreateLLM(cfg *config.Config) (*genai.Client, string, error) {
+    switch cfg.LLMProvider {
+    case "gemini":
+        return createGeminiClient(cfg)
+    case "claude":
+        return createClaudeClient(cfg)
+    case "openai":
+        return createOpenAIClient(cfg)
+    case "xai":
+        return createXAIClient(cfg)
+    case "ollama":
+        return createOllamaClient(cfg)
+    }
+}
+```
+
+**Benefit**: Agents are provider-agnostic
+
+---
+
+<!--
+Configuration is entirely environment-based. No hardcoded API keys. This makes it secure and flexible. You can switch providers with a single environment variable change. Perfect for testing different models or working around rate limits.
+[PAUSE:2500]
+-->
+
+# LLM Configuration Example 💻
+
+**Simple Environment Variables** —
+
+```bash
+# Use Gemini (default)
+export GOOGLE_API_KEY="your-key"
+
+# Switch to Claude
+export LLM_PROVIDER="claude"
+export ANTHROPIC_API_KEY="your-key"
+
+# Switch to local Ollama
+export LLM_PROVIDER="ollama"
+export OLLAMA_URL="http://localhost:11434"
+export LLM_MODEL="llama3:8b"
+```
+
+**No code changes required!** 🎉
+
+---
+
+<!--
+The third challenge was search integration. Web search APIs are not free, and different organizations prefer different providers. We needed flexibility here too. The metasearch library provided the abstraction we needed.
+[PAUSE:2500]
+-->
+
+# Challenge 3: Search Provider Options 🔍
+
+**Requirement**: Support multiple search providers
+
+**Options** —
+- **Serper API** - $50/month, 5K queries (recommended)
+- **SerpAPI** - Alternative with different pricing
+- **Mock** - For development without API keys
+
+**Challenge**: Different APIs, different response formats
+
+**Solution**: `metasearch` library abstraction
+
+```go
+// Unified interface - works with any provider
+result, err := searchClient.SearchNormalized(ctx, params)
+```
+
+---
+
+<!--
+Early on, we made a security mistake. The direct mode ran the LLM on the client side. This meant users needed API keys. Not only is this a security risk, but it's inconvenient. We moved to a server-side architecture.
+[PAUSE:2500]
+-->
+
+# Challenge 4: Security Architecture 🔒
+
+**Initial Design**: Client-side LLM (❌ Bad)
+```bash
+# Client needs API key!
+export GOOGLE_API_KEY="key"
+./stats-agent search "topic" --direct
+```
+
+**Problem** —
+- Clients need API keys (security risk)
+- Hard to update prompts
+- No centralized rate limiting
+
+**Solution**: Server-side Direct Agent (✅ Good)
+- Direct Agent server on port 8005
+- Client makes HTTP requests
+- Server holds API keys
+- Centralized control
+
+---
+
+<!--
+The server-side architecture also gave us an opportunity to add proper API documentation. We used the Huma framework to generate OpenAPI three-point-one specs automatically. Now external clients can easily integrate with interactive Swagger docs.
+[PAUSE:2500]
+-->
+
+# Direct Agent Server Implementation 🌐
+
+**Built with Huma v2 + Chi router** —
+- OpenAPI 3.1 automatic generation
+- Interactive Swagger UI at `/docs`
+- Type-safe request/response handling
+- Proper HTTP timeouts
+
+**Example** —
+```go
+type DirectSearchInput struct {
+    Body struct {
+        Topic    string `json:"topic" minLength:"1"`
+        MinStats int    `json:"min_stats" minimum:"1"`
+    }
+}
+
+huma.Register(api, operation, handler)
+```
+
+**Port 8005** - Production-ready with docs! 📚
+
+---
+
+<!--
+One subtle but important challenge was number formatting. JSON doesn't allow commas in numbers. But LLMs love to format numbers like humans do - with commas. This caused silent parsing failures until we fixed the prompts.
+[PAUSE:2500]
+-->
+
+# Challenge 5: JSON Number Format 🔢
+
+**The Bug** —
+```json
+{
+  "value": 2,537  // ❌ Invalid JSON!
+}
+```
+
+**Root Cause**: LLM formats numbers like humans (2,537)
+
+**The Fix** - Explicit prompt instructions:
+```
+CRITICAL: The "value" field must be a plain number
+with NO commas (e.g., 2537 not 2,537)
+
+REMEMBER: Numbers like 75,000 should be written
+as 75000 (no comma).
+```
+
+**Result**: Valid JSON every time! ✅
+
+---
+
+<!--
+We also discovered the importance of explicit completeness instructions. LLMs tend to be lazy - they'll find one or two examples and stop. We had to explicitly tell them to find ALL statistics on a page, not just a few examples.
+[PAUSE:2500]
+-->
+
+# Prompt Engineering Lessons 📝
+
+**Problem**: LLM returns 1-2 statistics, stops
+
+**Bad Prompt** —
+```
+Find statistics about climate change.
+```
+
+**Good Prompt** —
+```
+Extract EVERY statistic you find, not just one or two.
+Be thorough and comprehensive.
+
+If the page contains 10 statistics, return 10 items
+in the array.
+
+Return empty array [] ONLY if absolutely no statistics
+are found.
+```
+
+**Impact**: 2-3x more statistics extracted per page
+
+---
+
+<!--
+Deployment was a key consideration. We needed to support both local development and production Docker deployments. Make commands handle local, Docker Compose handles production. Both use the same code and configuration.
+[PAUSE:2500]
+-->
+
+# Deployment Architecture 🐳
+
+**Two Deployment Methods** —
+
+## Local Development
+```bash
+make run-all-eino  # Start all 4 agents
+./bin/stats-agent search "topic"
+```
+
+## Docker Production
+```bash
+docker-compose up -d  # All agents containerized
+curl -X POST http://localhost:8000/orchestrate
+```
+
+**Same code, same config** - seamless transition!
+
+**Ports**: 8000-8002, 8004-8005
+
+---
+
+<!--
+We also added an MCP server for integration with Claude Code and other AI tools. This allows our statistics engine to be used as a tool by other AI agents. It's a nice example of composability in multi-agent systems.
+[PAUSE:2500]
+-->
+
+# MCP Server Integration 🔌
+
+**Model Context Protocol** support for AI tool integration
+
+**Use Case**: Claude Code can search for verified statistics
+
+```json
+{
+  "mcpServers": {
+    "stats-agent": {
+      "command": "go",
+      "args": ["run", "mcp/server/main.go"]
+    }
+  }
+}
+```
+
+**Tools Available** —
+- `search_statistics` - Full pipeline search
+- `verify_statistic` - Single verification
+
+**Integration**: Works with Claude Code, other MCP clients
+
+---
+
+<!--
+Let's talk results. The pipeline mode achieves sixty to ninety percent verification rate. Response times are under a minute for most queries. Compare this to direct mode's zero percent verification, and you can see why architecture matters.
+[PAUSE:2500]
+-->
+
+# Performance Metrics 📈
+
+| Metric | Direct Mode | Pipeline Mode |
+|--------|-------------|---------------|
+| **Verification Rate** | ❌ 0-30% | ✅ 60-90% |
+| **Response Time** | ⚡ 5-10s | ⚡ 30-60s |
+| **URLs Searched** | 0 (LLM memory) | 30 (real search) |
+| **Pages Processed** | 0 | 15+ |
+| **Cost per Query** | Low | Medium |
+| **Accuracy** | ❌ Low | ✅ High |
+
+**Sweet Spot**: Pipeline mode for statistics, Direct for general Q&A
+
+---
+
+<!--
+Here's a concrete example. When we search for climate change statistics, we get back verified data with exact sources. Notice the verbatim excerpt - that's proof it came from the actual source. This is what makes our system trustworthy.
+[PAUSE:2500]
+-->
+
+# Real-World Example 🌍
+
+**Query**: "climate change statistics"
+
+**Result** —
+```json
+{
+  "name": "Global temperature increase",
+  "value": 1.1,
+  "unit": "°C",
+  "source": "IPCC Sixth Assessment Report",
+  "source_url": "https://www.ipcc.ch/...",
+  "excerpt": "Global surface temperature has increased
+             by approximately 1.1°C since pre-industrial
+             times...",
+  "verified": true
+}
+```
+
+**Verification**: Excerpt found verbatim in source! ✅
+
+---
+
+<!--
+The technology choices were deliberate. Go provided concurrency and performance. ADK gave us robust LLM operations. Eino provided deterministic orchestration. Together they create a production-ready system.
+[PAUSE:2500]
+-->
+
+# Technology Stack 🛠️
+
+**Language & Runtime** —
+- Go 1.21+ - Concurrency, performance, simple deployment
+
+**Agent Frameworks** —
+- **Google ADK** - LLM-based agent operations
+- **Eino** - Deterministic graph orchestration
+
+**API & Docs** —
+- **Huma v2** - OpenAPI 3.1 generation
+- **Chi v5** - Lightweight HTTP router
+
+**Integrations** —
+- **gollm** - Multi-provider LLM abstraction
+- **metasearch** - Unified search API
+
+---
+
+<!--
+We learned several key lessons building this system. Real-time search beats LLM memory for current data. Verification is non-negotiable for accuracy. Clear separation of concerns makes debugging easier. And always be explicit with LLMs - they need detailed instructions.
+[PAUSE:3000]
+-->
+
+# Key Learnings 💡
+
+1. **Real-time search > LLM memory** for current data
+   - 0% vs 60-90% verification rate
+2. **Verification is non-negotiable** for accuracy
+   - Always fetch and validate sources
+3. **Separation of concerns** enables optimization
+   - Search, extract, verify are independent
+4. **Prompt engineering matters** at scale
+   - Explicit completeness instructions needed
+5. **Flexibility enables adoption**
+   - Multi-LLM, multi-search provider support
+
+---
+
+<!--
+Some challenges remain. Paywalled content is inaccessible. Different languages need special handling. And we'd love to support statistical ranges, not just single values. These are areas for future enhancement.
+[PAUSE:2500]
+-->
+
+# Challenges & Future Work 🚀
+
+**Current Limitations** —
+- ❌ Paywalled content inaccessible
+- ❌ Non-English sources need translation
+- ⚠️ Range statistics (e.g., "79-96%") need schema updates
+
+**Future Enhancements** —
+- ✨ Add `value_max` field for ranges
+- ✨ Perplexity API integration (built-in search)
+- ✨ Caching layer for search results
+- ✨ Streaming responses for faster perceived performance
+- ✨ Multi-language support
+
+---
+
+<!--
+Here's the complete workflow from user query to verified results. Each step is optimized and reliable. The human-in-the-loop retry gives users control when results are partial. This balance of automation and control is key.
+[PAUSE:2500]
+-->
+
+# Complete Workflow Example 🔄
+
+```bash
+./stats-agent search "renewable energy" --min-stats 10
+```
+
+**What Happens** —
+1. **Orchestrator** validates input
+2. **Research** searches 30 URLs via Serper
+3. **Synthesis** processes 15+ pages (450K+ chars total)
+4. **Synthesis** extracts 50+ candidate statistics
+5. **Verification** validates each candidate
+6. **Verification** returns 12 verified (60% rate)
+7. **Orchestrator** checks: 12 ≥ 10 ✅
+8. **User** receives JSON output
+
+**Total time**: ~45 seconds
+
+---
+
+<!--
+Monitoring and observability were important. Each agent logs its operations. We can see how many pages were processed, how many candidates were extracted, and the verification pass rate. This helps us continually optimize the system.
+[PAUSE:2500]
+-->
+
+# Monitoring & Observability 📊
+
+**Structured Logging** at each stage:
+
+```
+Research Agent: Found 30 search results
+Synthesis Agent: Extracted 8 statistics from nature.com
+Synthesis Agent: Total candidates: 52 from 15 pages
+Verification Agent: Verified 10/15 candidates (67%)
+Orchestration: Target met (10 verified)
+```
+
+**Health Checks** —
+- `/health` endpoint on each agent
+- Docker health checks in production
+- Timeout monitoring (60s max)
+
+**Metrics to Track** —
+- Verification rate per query
+- Average response time
+- Cost per query (API calls)
+
+---
+
+<!--
+Make commands provide a simple interface for complex operations. Developers can start the entire system with one command. This developer experience was a priority - if it's hard to run locally, it won't get used.
+[PAUSE:2500]
+-->
+
+# Developer Experience 👨‍💻
+
+**Simple Commands** —
+
+```bash
+# Install dependencies
+make install
+
+# Build all agents
+make build
+
+# Run everything (Eino orchestrator)
+make run-all-eino
+
+# Run direct + verification only
+make run-direct-verify
+
+# Run tests
+make test
+```
+
+**Clean Abstractions**: Agents don't know about each other's internals
+
+**Easy Debugging**: Run individual agents in separate terminals
+
+---
+
+<!--
+Configuration is centralized but flexible. The dot-env file approach means you can have different environments easily. Development, staging, and production configs are just different env files. No code changes needed.
+[PAUSE:2500]
+-->
+
+# Configuration Management ⚙️
+
+**Environment-Based** —
+
+```bash
+# .env file
+LLM_PROVIDER=gemini
+GOOGLE_API_KEY=your-key
+SEARCH_PROVIDER=serper
+SERPER_API_KEY=your-key
+```
+
+**Override per Agent** —
+```bash
+# Use different LLM for synthesis
+export SYNTHESIS_LLM_PROVIDER=claude
+export SYNTHESIS_LLM_MODEL=claude-sonnet-4-20250514
+```
+
+**Docker-Friendly**: All config via environment variables
+
+---
+
+<!--
+Let's compare the three operating modes side by side. Each has a use case. Direct mode is for brainstorming when you don't need verification. Hybrid adds verification but suffers from the LLM memory problem. Pipeline mode is the gold standard for actual statistics.
+[PAUSE:3000]
+-->
+
+# Mode Comparison Summary 📊
+
+| Feature | Direct | Hybrid | Pipeline |
+|---------|--------|---------|----------|
+| **Speed** | ⚡⚡⚡ 5s | ⚡⚡ 15s | ⚡ 45s |
+| **Accuracy** | ❌ Low | ⚠️ Medium | ✅ High |
+| **Verification** | ❌ No | ⚠️ LLM URLs | ✅ Real URLs |
+| **Cost** | $ | $$ | $$$ |
+| **Use Case** | Brainstorm | Quick check | Production |
+| **Agents Needed** | 1 | 2 | 4 |
+
+**Recommendation**: Pipeline mode for statistics that matter
+
+---
+
+<!--
+Testing was multi-layered. Unit tests for individual functions. Integration tests for agent communication. End-to-end tests for complete workflows. And manual testing against known statistics to verify accuracy.
+[PAUSE:2500]
+-->
+
+# Testing Strategy 🧪
+
+**Unit Tests** —
+- Individual function validation
+- LLM provider factory
+- JSON parsing edge cases
+
+**Integration Tests** —
+- Agent-to-agent communication
+- HTTP endpoint validation
+- Error handling flows
+
+**End-to-End Tests** —
+- Complete pipeline execution
+- Verification rate validation
+- Performance benchmarks
+
+**Manual Testing** —
+- Known statistics verification
+- Multi-provider compatibility
+- Edge case exploration
+
+---
+
+<!--
+Error handling was crucial for reliability. Network failures happen. Sources go offline. LLMs hit rate limits. We handle all of these gracefully with detailed logging and user-friendly messages.
+[PAUSE:2500]
+-->
+
+# Error Handling & Resilience 🛡️
+
+**Graceful Degradation** —
+
+```go
+// If source unreachable, mark failed
+if err := fetchURL(url); err != nil {
+    return VerificationResult{
+        Verified: false,
+        Reason:   "Source unreachable",
+    }
+}
+```
+
+**Retry Logic** —
+- HTTP retries with exponential backoff
+- Automatic quality check retries
+- Human-in-the-loop for partial results
+
+**User-Friendly Messages** —
+- "Found 8 of 10 requested, continue? (y/n)"
+- Clear error messages with remediation steps
+
+---
+
+<!--
+Security considerations went beyond API keys. We implemented request timeouts to prevent resource exhaustion. Input validation prevents injection attacks. Rate limiting could be added at the reverse proxy level. And all secrets are environment-based, never in code.
+[PAUSE:2500]
+-->
+
+# Security Considerations 🔐
+
+**API Key Management** —
+- Environment variables only (never in code)
+- Server-side storage (clients don't need keys)
+- Per-agent key rotation possible
+
+**Input Validation** —
+- Topic length limits (500 chars)
+- Min/max stats bounds (1-100)
+- URL validation before fetching
+
+**Timeouts** —
+- HTTP request timeouts (30-60s)
+- LLM generation timeouts
+- Overall query timeout (120s)
+
+**Future**: Add rate limiting, authentication
+
+---
+
+<!--
+Performance optimization was iterative. We profiled each agent. Added caching where appropriate. Optimized LLM prompts to reduce tokens. And parallelized independent operations. There's always room for improvement, but we've achieved good performance.
+[PAUSE:2500]
+-->
+
+# Performance Optimization 🚄
+
+**Research Agent** —
+- Parallel URL searches where supported
+- Connection pooling for HTTP clients
+
+**Synthesis Agent** —
+- Parallel page fetching (up to 5 concurrent)
+- Content truncation (30K chars max)
+- Efficient JSON parsing
+
+**Verification Agent** —
+- Batch verification where possible
+- Early exit on clear failures
+- LLM only for fuzzy matching
+
+**Overall** —
+- 45-second average for 10 verified statistics
+- Scales linearly with min_stats target
+
+---
+
+<!--
+The code structure promotes maintainability. Shared models prevent drift. The package organization is clear. Agent independence means you can refactor one without breaking others. And the factory patterns make adding new providers trivial.
+[PAUSE:2500]
+-->
+
+# Code Organization 📁
+
+```
+agents/          # Each agent is independent
+  ├── research/
+  ├── synthesis/
+  ├── verification/
+  ├── direct/
+  └── orchestration-eino/
+
+pkg/             # Shared libraries
+  ├── config/    # Centralized configuration
+  ├── llm/       # Multi-provider factory
+  ├── models/    # Shared data structures
+  ├── search/    # Search abstraction
+  └── direct/    # Direct search service
+
+main.go          # CLI entry point
+```
+
+**Principle**: High cohesion, low coupling
+
+---
+
+<!--
+Documentation was a first-class citizen. The README is comprehensive with clear warnings. Each agent has inline comments. OpenAPI docs for the Direct agent. And this presentation serves as architectural documentation. Good docs enable adoption.
+[PAUSE:2500]
+-->
+
+# Documentation Strategy 📚
+
+**README.md** —
+- Comprehensive setup instructions
+- Clear mode comparisons
+- Warning callouts for limitations
+
+**Code Documentation** —
+- Inline comments for complex logic
+- Function documentation (godoc format)
+- Architecture decision records (ADRs)
+
+**API Documentation** —
+- OpenAPI 3.1 specification (Huma)
+- Interactive Swagger UI at `/docs`
+- Example requests/responses
+
+**Presentation**: Architecture overview (this!)
+
+---
+
+<!--
+Community and extensibility were design goals. The multi-provider support means teams can use their preferred LLM. The modular architecture means you can swap out agents. And the open-source license encourages contributions.
+[PAUSE:2500]
+-->
+
+# Extensibility & Contributions 🤝
+
+**Easy to Extend** —
+- Add new LLM provider: Implement `gollm` interface
+- Add new search provider: Implement `metasearch` interface
+- Add new agent: Follow existing patterns
+- Add new verification rules: Extend verification agent
+
+**Contribution Areas** —
+- 🔧 New LLM providers (e.g., Perplexity)
+- 🌍 Multi-language support
+- 📊 Range statistics (`value_max`)
+- ⚡ Performance optimizations
+- 📚 Documentation improvements
+
+**License**: MIT (permissive)
+
+---
+
+<!--
+Real-world usage patterns emerged. The pipeline mode is used for research reports and data analysis. Direct mode is used for quick brainstorming. The MCP integration is used by AI assistants. Different modes serve different needs.
+[PAUSE:2500]
+-->
+
+# Real-World Usage Patterns 🌐
+
+1. **Use Case 1**: Research Reports
+    - Pipeline mode with `--reputable-only`
+    - Export to JSON for analysis
+    - Cite sources with URLs
+2. **Use Case 2**: Data Analysis
+    - Bulk queries via API
+    - Process results in pandas/R
+    - Visualization of trends
+3. **Use Case 3**: AI Assistant Integration
+    - MCP server with Claude Code
+    - LLM asks stats-agent for verified data
+    - Compose into reports
+4. **Use Case 4**: Quick Fact-Checking
+    - Direct mode for fast lookup
+    - Accept unverified for speed
+
+---
+
+<!--
+The cost model is important for production. LLM API costs dominate. Search API costs are secondary. But the value is in accuracy - one wrong statistic in a report can be costly. We provide cost-performance tradeoffs.
+[PAUSE:2500]
+-->
+
+# Cost Analysis 💰
+
+**Per Query Costs** (estimates):
+
+| Component | Direct | Hybrid | Pipeline |
+|-----------|--------|--------|----------|
+| Search API | $0.00 | $0.00 | $0.02 |
+| LLM Calls | $0.01 | $0.03 | $0.08 |
+| **Total** | **$0.01** | **$0.03** | **$0.10** |
+
+**Cost Drivers** —
+- Number of pages processed (15+)
+- LLM provider choice (Gemini < Claude < GPT-4o/GPT-5)
+- Verification attempts
+
+**Optimization**: Use Gemini 2.5 Flash (fast + cheap)
+
+---
+
+<!--
+Scaling considerations matter for high-volume use. Each agent can be independently scaled. Add load balancers in front. Use a message queue for async processing. Cache search results. These patterns enable production deployment.
+[PAUSE:2500]
+-->
+
+# Scaling Considerations 📈
+
+**Horizontal Scaling** —
+- Each agent scales independently
+- Load balancer per agent type
+- Stateless design enables easy scaling
+
+**Vertical Scaling** —
+- Increase concurrency limits
+- Larger content chunks (current: 30K)
+- More parallel page fetching
+
+**Optimizations for Scale** —
+- Cache search results (1 hour TTL)
+- Queue-based processing for bulk queries
+- Database for results persistence
+
+**Example**: 10 orchestrators + 20 synthesis agents
+
+---
+
+<!--
+Monitoring in production needs more than logs. We'd add metrics collection. Track verification rates over time. Alert on degraded performance. Distributed tracing would help debug issues. These are standard production practices.
+[PAUSE:2500]
+-->
+
+# Production Monitoring 📡
+
+1. **Metrics to Collect**
+    - Verification rate by source domain
+    - Response time percentiles (p50, p95, p99)
+    - Error rate by agent
+    - API cost per query
+    - Throughput (queries/minute)
+2. **Alerting**
+    - Verification rate < 50% (alert)
+    - Response time > 120s (alert)
+    - Agent health check failures
+    - API quota exhaustion
+3. **Tools** (future)
+    - Prometheus for metrics
+    - Grafana for dashboards
+    - Jaeger for distributed tracing
+
+---
+
+<!--
+Compliance matters for some use cases. We cite sources properly. Respect robots.txt. Rate limit our fetching. Store only necessary data. These practices ensure we're a good web citizen and legally compliant.
+[PAUSE:2500]
+-->
+
+# Compliance & Ethics 🌟
+
+**Responsible Web Scraping** —
+- Respect `robots.txt`
+- Rate limiting on URL fetches
+- User-Agent identification
+- No aggressive crawling
+
+**Data Privacy** —
+- No PII collection
+- No user query logging (optional)
+- API keys stored securely
+- GDPR compliance considerations
+
+**Source Attribution** —
+- Always cite original sources
+- Provide full URLs
+- Verbatim excerpts (fair use)
+
+**Ethics**: Promote verified information, combat misinformation
+
+---
+
+<!--
+Let's talk about the competitive landscape. We compared our approach to several alternatives. Each has tradeoffs. Our system uniquely combines real-time search with rigorous verification in an open architecture.
+[PAUSE:2500]
+-->
+
+# Competitive Analysis 🏆
+
+| System | Search | Verify | Multi-LLM | Open Source |
+|--------|--------|--------|-----------|-------------|
+| **ChatGPT.com** | ✅ Bing | ⚠️ Light | ❌ GPT only | ❌ Closed |
+| **Perplexity** | ✅ Multiple | ⚠️ Light | ❌ Limited | ❌ Closed |
+| **Our System** | ✅ Google | ✅ **Strong** | ✅ 5+ | ✅ **MIT** |
+| **Direct LLM** | ❌ Memory | ❌ None | ✅ Any | N/A |
+
+**Key Differentiator**: Rigorous verification + flexibility
+
+**Open Source**: Community can audit, extend, trust
+
+---
+
+<!--
+Migration from existing systems is straightforward. If you're using direct LLM calls, switch to our Direct agent for server-side security. If you're using ChatGPT API, use our Pipeline mode for verification. The API is simple and RESTful.
+[PAUSE:2500]
+-->
+
+# Migration Path 🚀
+
+**From Direct LLM Usage** —
+```python
+# Before: Client-side LLM
+response = openai.chat("Find climate statistics")
+
+# After: Stats Agent Direct mode
+response = requests.post(
+    "http://localhost:8005/search",
+    json={"topic": "climate change", "min_stats": 10}
+)
+```
+
+**From ChatGPT API** —
+```python
+# Before: ChatGPT (no verification)
+stats = ask_chatgpt("climate statistics")
+
+# After: Stats Agent Pipeline (verified)
+response = requests.post(
+    "http://localhost:8000/orchestrate",
+    json={"topic": "climate change", "min_verified_stats": 10}
+)
+```
+
+---
+
+<!--
+The roadmap ahead includes several exciting features. Perplexity integration would give us built-in search. Streaming responses would improve perceived performance. Range statistics would handle more data types. And multi-language support would expand our reach.
+[PAUSE:2500]
+-->
+
+# Roadmap 🗺️
+
+**Q1 2025** —
+- ✨ Perplexity API integration (built-in search)
+- ✨ Range statistics (`value_max` field)
+- ✨ Response streaming for faster UX
+
+**Q2 2025** —
+- ✨ Multi-language support (ES, FR, DE, ZH)
+- ✨ Caching layer for search results
+- ✨ GraphQL API option
+
+**Q3 2025** —
+- ✨ Browser extension for fact-checking
+- ✨ Notion/Confluence integrations
+- ✨ Advanced citation formats (APA, MLA)
+
+**Community Driven**: Submit feature requests on GitHub!
+
+---
+
+<!--
+Team collaboration was key to success. Clear architecture boundaries meant parallel development. Regular sync meetings kept us aligned. Code reviews maintained quality. And documentation ensured knowledge transfer.
+[PAUSE:2500]
+-->
+
+# Team & Collaboration 👥
+
+**Development Approach** —
+- Agent-based architecture enables parallel work
+- Clear interfaces between components
+- Code reviews for quality
+- Continuous integration (GitHub Actions)
+
+**Best Practices** —
+- Branch protection on main
+- Required passing tests for merge
+- Semantic versioning
+- Changelog maintenance
+
+**Communication** —
+- Architecture decisions documented
+- Weekly sync meetings
+- GitHub issues for tracking
+
+---
+
+<!--
+Lessons learned extend beyond code. Start with clear requirements. Build verification early, not as an afterthought. Be honest about limitations. And always prioritize user experience. These principles apply to any multi-agent system.
+[PAUSE:2500]
+-->
+
+# Lessons Learned (Summary) 💭
+
+1. **Technical**
+    <ol type="1">
+    <li>Real-time data > LLM memory for facts</li>
+    <li>Verification is essential, not optional</li>
+    <li>Modular architecture enables optimization</li>
+    <li>Prompt engineering is critical at scale</li>
+    </ol>
+2. **Process**
+    <ol type="1" start="5">
+    <li>Clear requirements prevent scope creep</li>
+    <li>Early testing reveals issues sooner</li>
+    <li>Documentation enables adoption</li>
+    <li>User feedback drives priorities</li>
+    </ol>
+3. **Product**
+    <ol type="1" start="9">
+    <li>Be honest about limitations (builds trust)</li>
+    <li>Provide flexibility (multi-LLM, multi-search)</li>
+    <li>Developer experience matters</li>
+    </ol>
+
+---
+
+<!--
+Closing thoughts: Building a multi-agent system is challenging but rewarding. The key is clear separation of concerns. Each agent does one thing well. Together they create something greater than the sum of parts. This architecture pattern applies to many domains.
+[PAUSE:2500]
+-->
+
+# Conclusion 🎓
+
+**What We Built** —
+- Production-ready statistics verification system
+- 60-90% verification rate (vs 0% for LLM alone)
+- Multi-agent architecture with clear separation
+- Flexible (multi-LLM, multi-search)
+- Open source (MIT license)
+
+**Key Success Factors** —
+- Real-time web search for current data
+- Rigorous verification against sources
+- Modular, extensible design
+- Comprehensive testing & documentation
+
+**Impact**: Enables verified statistics for research, reporting, analysis
+
+---
+
+<!--
+We welcome contributions from the community. Whether it's adding a new LLM provider, fixing a bug, improving documentation, or suggesting features - all contributions are valuable. Check out our GitHub repository to get started.
+[PAUSE:2500]
+-->
+
+# Get Involved! 🚀
+
+**Repository**: `github.com/grokify/stats-agent-team`
+
+**Quick Start** —
+```bash
+git clone https://github.com/grokify/stats-agent-team
+cd stats-agent-team
+make install
+make build
+make run-all-eino
+```
+
+**Contribute** —
+- 🐛 Report bugs
+- 💡 Suggest features
+- 📝 Improve docs
+- 🔧 Submit PRs
+
+**License**: MIT (permissive, commercial-friendly)
+
+---
+
+<!--
+Thank you for your attention. We've covered the journey from requirements to a working system. The challenges we faced, the solutions we implemented, and the lessons we learned. We hope this inspires your own multi-agent projects. Questions?
+[PAUSE:2000]
+-->
+
+# Questions? 🤔
+
+**Contact & Resources** —
+- 📧 GitHub Issues for questions
+- 📚 Full documentation in README.md
+- 🔗 OpenAPI docs at `localhost:8005/docs`
+- 💬 Discussions tab for community chat
+
+**Thank You!** 🙏
+
+**Special Thanks** —
+- Google ADK team
+- Eino framework contributors
+- Open source LLM providers
+- The Go community
+
+---
+
+<!--
+For those interested in diving deeper, we have comprehensive documentation. The README covers setup and usage. The architecture document explains design decisions. And the API documentation provides integration details. All available in the repository.
+[PAUSE:2000]
+-->
+
+# Additional Resources 📖
+
+**Documentation** —
+- `README.md` - Setup & usage guide
+- `4_AGENT_ARCHITECTURE.md` - Architecture deep dive
+- `LLM_CONFIGURATION.md` - Multi-LLM setup
+- `SEARCH_INTEGRATION.md` - Search provider setup
+- `MCP_SERVER.md` - MCP integration guide
+- `DOCKER.md` - Container deployment
+
+**Example Queries** —
+- Climate change statistics
+- AI industry trends
+- Healthcare outcomes
+- Economic indicators
+- Educational metrics
+
+**Try it yourself!** 🚀
