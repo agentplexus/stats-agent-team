@@ -22,18 +22,18 @@ The system implements a **4-agent architecture** with clear separation of concer
 ┌─────────────────────────────────────────────────────────┐
 │                   User Request                          │
 │              "Find climate change statistics"           │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
+└───────────────────┬─────────────────────────────────────┘
+                    │
+                    ▼
 ┌─────────────────────────────────────────────────────────┐
 │            ORCHESTRATION AGENT                          │
 │              (Port 8000 - Both ADK/Eino)                │
 │  • Coordinates 4-agent workflow                         │
 │  • Manages retry logic                                  │
 │  • Ensures quality standards                            │
-└───┬──────────────┬──────────────┬───────────────────────┘
-    │              │              │
-    ▼              ▼              ▼
+└─────┬─────────────┬────────────────┬────────────────────┘
+      │             │                │
+      ▼             ▼                ▼
 ┌────────────┐ ┌──────────┐ ┌─────────────────┐
 │  RESEARCH  │ │SYNTHESIS │ │  VERIFICATION   │
 │   AGENT    │ │  AGENT   │ │     AGENT       │
@@ -44,9 +44,9 @@ The system implements a **4-agent architecture** with clear separation of concer
 │ • Filter   │ │• LLM     │ │• Check numbers  │
 │   Sources  │ │  Extract │ │• Flag errors    │
 └────────────┘ └──────────┘ └─────────────────┘
-     │              │              │
-     ▼              ▼              ▼
-  URLs only    Statistics     Verified Stats
+      │             │                │
+      ▼             ▼                ▼
+  URLs only     Statistics     Verified Stats
 ```
 
 ### Agent Responsibilities
