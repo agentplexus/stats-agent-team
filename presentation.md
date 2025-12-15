@@ -245,6 +245,8 @@ style: |
   }
 ---
 
+<!-- _paginate: false -->
+
 <!--
 Welcome to our presentation on the Statistics Agent Team project. Today, we'll explore how we built a sophisticated multi-agent system for finding and verifying statistics from the web using Go and large language models.
 [PAUSE:1000]
