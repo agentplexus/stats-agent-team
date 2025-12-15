@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -168,7 +169,16 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 	log.Println("Documentation available at: http://localhost:8005/docs")
 	log.Println("===========================================")
 
-	if err := http.ListenAndServe(":8005", router); err != nil {
+	// Create HTTP server with timeouts
+	server := &http.Server{
+		Addr:         ":8005",
+		Handler:      router,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
 }

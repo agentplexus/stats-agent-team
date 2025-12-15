@@ -64,7 +64,7 @@ func (cmd *SearchCommand) Execute([]string) error { // param `args []string`
 			fmt.Println("mode: Direct LLM search (fast, like ChatGPT)")
 		}
 		fmt.Println()
-		resp, err = callDirectLLMSearch(cfg, topic, cmd.MinStats, cmd.DirectVerify)
+		resp, err = callDirectLLMSearch(topic, cmd.MinStats, cmd.DirectVerify)
 		if err != nil {
 			return fmt.Errorf("direct LLM search failed: %w", err)
 		}
@@ -233,7 +233,7 @@ stats-agent search "renewable energy" --reputable-only
 	}
 }
 
-func callDirectLLMSearch(cfg *config.Config, topic string, minStats int, verify bool) (*models.OrchestrationResponse, error) {
+func callDirectLLMSearch(topic string, minStats int, verify bool) (*models.OrchestrationResponse, error) {
 	// Get direct agent URL from config or use default
 	directURL := os.Getenv("DIRECT_AGENT_URL")
 	if directURL == "" {

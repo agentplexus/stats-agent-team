@@ -173,7 +173,7 @@ func (ra *ResearchAgent) HandleResearchRequest(w http.ResponseWriter, r *http.Re
 		req.MinStatistics = 10
 	}
 	if req.MaxStatistics == 0 {
-		req.MaxStatistics = 30  // Increased from 10 to match ChatGPT.com performance
+		req.MaxStatistics = 30 // Increased from 10 to match ChatGPT.com performance
 	}
 
 	resp, err := ra.Research(r.Context(), &req)
