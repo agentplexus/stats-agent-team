@@ -95,22 +95,26 @@ The system implements a **4-agent architecture** with clear separation of concer
 
 ## Features
 
-- ✅ **Three search modes**: Direct LLM (fast), Hybrid (direct + verify), and Full pipeline (thorough) ⭐ NEW
-- ✅ **Direct LLM search** - Single LLM call with URLs, no agents needed 🚀
-- ✅ **Hybrid mode** - LLM discovery + web verification, best of both worlds ⭐ NEW
-- ✅ **Multi-agent orchestration** with chains and workflow coordination
-- ✅ **Google ADK integration** for LLM-based agents
-- ✅ **Eino framework** for deterministic graph orchestration
-- ✅ **Human-in-the-loop retry** - Prompts user when partial results found ⭐ NEW
-- ✅ **Multi-LLM providers** (Gemini, Claude, OpenAI, Ollama, xAI Grok) via unified interface
-- ✅ **MCP Server** for integration with Claude Code and other MCP clients
-- ✅ **Docker deployment** for easy containerized setup 🐳
-- ✅ **Real web search** via Serper/SerpAPI for finding actual statistics 🔍
-- ✅ **Source verification** to prevent hallucinations
-- ✅ **Reputable source prioritization** (government, academic, research orgs)
-- ✅ **Structured JSON output** with complete metadata
-- ✅ **HTTP APIs** for all agents
-- ✅ **Function tools** for structured agent capabilities
+### Core Capabilities
+- ✅ **Multi-agent pipeline** - Full verification workflow (Research → Synthesis → Verification) ⭐ **RECOMMENDED**
+- ✅ **Real web search** - Google search via Serper/SerpAPI (30 URLs searched by default) 🔍
+- ✅ **Comprehensive extraction** - Processes 15+ pages, reads 30K chars per page for thorough coverage
+- ✅ **Source verification** - Validates excerpts and values match actual web pages
+- ✅ **Human-in-the-loop retry** - Prompts user when partial results found
+- ✅ **Reputable source prioritization** - Government, academic, research organizations
+
+### Alternative Modes
+- ✅ **Direct LLM mode** - Fast but uses LLM memory (⚠️ not recommended for statistics)
+- ✅ **Hybrid mode** - LLM discovery + web verification (⚠️ low verification rate)
+- ✅ **OpenAPI documentation** - Interactive Swagger UI for Direct agent (port 8005)
+
+### Technical Stack
+- ✅ **Multi-LLM providers** - Gemini, Claude, OpenAI, Ollama, xAI Grok via unified interface
+- ✅ **Google ADK integration** - For LLM-based agents
+- ✅ **Eino framework** - Deterministic graph orchestration ⭐ Recommended
+- ✅ **Huma v2** - OpenAPI 3.1 docs for Direct agent
+- ✅ **MCP Server** - Integration with Claude Code and other MCP clients
+- ✅ **Docker deployment** - Easy containerized setup 🐳
 
 ## Output Format
 
@@ -266,70 +270,49 @@ make run-orchestration-eino  # Eino version (deterministic, recommended)
 
 The CLI supports three modes: **Direct LLM search** (fast, like ChatGPT), **Direct + Verification** (hybrid), and **Multi-agent verification pipeline** (thorough, verified).
 
-##### Direct Mode (Fast, Recommended for Quick Results)
+##### Direct Mode (⚠️ Not Recommended for Statistics)
 
-Direct mode uses a single LLM call to find statistics with sources - similar to ChatGPT:
-
-```bash
-# Fast search using direct LLM (no agents needed)
-./bin/stats-agent search "climate change" --direct
-
-# Request specific number of statistics
-./bin/stats-agent search "AI adoption" --direct --min-stats 15
-
-# JSON output only
-./bin/stats-agent search "renewable energy" --direct --output json
-
-# With specific LLM provider
-LLM_PROVIDER=openai OPENAI_API_KEY=your_key \
-  ./bin/stats-agent search "cybersecurity 2024" --direct --min-stats 20
-```
-
-**Advantages of Direct Mode:**
-- ⚡ **Fast** - Single LLM call, no multi-agent pipeline
-- 🔗 **URLs included** - Returns source URLs like ChatGPT
-- 🔐 **Server-side LLM** - API keys configured on server, not client
-- 💰 **Lower cost** - Single LLM call instead of multiple
-- 📚 **OpenAPI docs** - Interactive Swagger UI at http://localhost:8005/docs
-
-**⚠️ Limitation:** Statistics are **LLM-claimed**, not web-verified (trusts LLM's training data)
-
-##### Direct + Verification Mode (Hybrid - Best of Both Worlds) ⭐ NEW
-
-Combines fast LLM search with actual web verification:
+Direct mode uses a single LLM call to find statistics from memory - similar to ChatGPT without web search:
 
 ```bash
-# Option 1: Start both agents for hybrid mode with one command
-make run-direct-verify
-
-# Option 2: Start agents separately
-# Terminal 1: Start the direct agent server (handles LLM calls server-side)
+# Start direct agent first
 make run-direct
 
-# Terminal 2: For hybrid mode, also start verification agent
-make run-verification
-
-# Then in another terminal:
-# Direct mode - LLM search only
+# Then query (fast but uses LLM memory)
 ./bin/stats-agent search "climate change" --direct
-
-# Hybrid mode - LLM + web verification
-./bin/stats-agent search "climate change" --direct --direct-verify
-
-# Request more statistics with verification
-./bin/stats-agent search "AI adoption" --direct --direct-verify --min-stats 15
 ```
 
-**Advantages of Hybrid Mode:**
-- ⚡ **Fast** - Single LLM call for discovery (like ChatGPT)
-- ✅ **Verified** - Web scraping validates each claim
-- 🎯 **Accurate** - Filters out LLM hallucinations
-- 💡 **Efficient** - No research/synthesis agents needed, just verification
+**Why Not Recommended for Statistics:**
+- ❌ **Uses LLM memory** - Not real-time web search (training data up to Jan 2025)
+- ❌ **Outdated URLs** - LLM guesses URLs where stats came from
+- ❌ **Low accuracy** - Pages may have moved, changed, or be paywalled
+- ⚠️ **0% verification rate** - When combined with `--direct-verify`, most claims fail
 
-**How it works:**
-1. LLM provides statistics with source URLs (fast)
-2. Verification agent fetches each URL and validates (thorough)
-3. Returns only web-verified statistics (reliable)
+**When to Use:**
+- ✅ General knowledge questions
+- ✅ Concept explanations
+- ✅ Quick brainstorming (accept unverified data)
+
+**For statistics, use Pipeline mode instead** (see below)
+
+##### Hybrid Mode (⚠️ Also Not Recommended - Low Verification Rate)
+
+Combines Direct mode with verification, but suffers from the same LLM memory issues:
+
+```bash
+# Start both agents
+make run-direct-verify
+
+# Then query
+./bin/stats-agent search "climate change" --direct --direct-verify
+```
+
+**Why Not Recommended:**
+- ❌ **Low verification rate** - Typically 0-30% of LLM claims verify
+- ❌ **Same LLM memory problem** - URLs are guessed, not from real search
+- ⚠️ **Slow with poor results** - Verification overhead but few verified stats
+
+**For reliable statistics, use Pipeline mode instead**
 
 ##### Multi-Agent Pipeline Mode (Thorough Verification)
 
