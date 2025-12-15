@@ -247,6 +247,8 @@ style: |
 
 <!--
 Welcome to our presentation on the Statistics Agent Team project. Today, we'll explore how we built a sophisticated multi-agent system for finding and verifying statistics from the web using Go and large language models.
+[PAUSE:1000]
+This project was born out of a fundamental problem: how can we trust the statistics that AI systems give us? As we built this system, we encountered numerous technical challenges, from L L M hallucinations to architectural decisions about security and scalability. We'll walk through each challenge and show you how we solved them.
 [PAUSE:1500]
 -->
 
@@ -261,6 +263,8 @@ Built with Google ADK, Eino, and Multi-LLM Support
 
 <!--
 Let's start by understanding what problem we're trying to solve. When you ask a chatbot for statistics, how do you know if the numbers are accurate? Can you verify the source? This is the core challenge we addressed.
+[PAUSE:1500]
+The fundamental issue is that large language models are trained on historical data and often hallucinate statistics. They'll confidently give you numbers that sound plausible but are completely fabricated. Even worse, they'll generate URLs that look legitimate but lead to pages that don't exist or have moved. This creates a credibility crisis. How can researchers, journalists, or analysts trust A I generated statistics when there's no way to verify them?
 [PAUSE:2000]
 -->
 
@@ -280,6 +284,8 @@ Let's start by understanding what problem we're trying to solve. When you ask a 
 
 <!--
 We established clear requirements for what success looks like. The system must not only find statistics but verify them against actual web sources. Speed matters, but accuracy is paramount.
+[PAUSE:1500]
+The key challenge here was balancing comprehensiveness with performance. We needed to search enough sources to find diverse statistics, extract them intelligently without missing any, and verify each one rigorously, all while keeping response times under sixty seconds. Setting these concrete targets, especially the sixty to ninety percent verification rate goal, gave us a clear benchmark to measure against. Most importantly, we insisted on supporting multiple L L M providers from the start, because we knew different organizations have different preferences and constraints.
 [PAUSE:2000]
 -->
 
@@ -302,6 +308,8 @@ We established clear requirements for what success looks like. The system must n
 
 <!--
 We chose a four-agent architecture with clear separation of concerns. Each agent has a specific responsibility in the pipeline. This modular design allows us to optimize each component independently.
+[PAUSE:1500]
+The architecture decision was crucial. We could have built a monolithic system where one L L M does everything, but we learned early on that this doesn't work. Different tasks need different capabilities. Search needs to be fast and comprehensive, but doesn't need an L L M at all. Extraction needs sophisticated language understanding. Verification needs to be rigorous and deterministic. By separating these concerns, we could optimize each agent independently, swap out implementations, and debug issues more easily. This modular approach also meant multiple developers could work in parallel without stepping on each other's toes.
 [PAUSE:2500]
 -->
 
@@ -351,7 +359,9 @@ The research agent is our foundation. It performs web search using Google via Se
 ---
 
 <!--
-The synthesis agent is where the heavy lifting happens. It fetches actual web pages and uses an LLM to intelligently extract statistics. We built this with Google's ADK framework for robust LLM operations.
+The synthesis agent is where the heavy lifting happens. It fetches actual web pages and uses an L L M to intelligently extract statistics. We built this with Google's A D K framework for robust L L M operations.
+[PAUSE:1500]
+This agent turned out to be the most challenging to get right. The problem is that web pages are messy. They have navigation, ads, and irrelevant content mixed with the statistics we want. We needed to extract just the numerical data with enough context to understand what it means, while preserving the exact wording so we can verify it later. We also had to handle different page structures, formats, and writing styles. The L L M is perfect for this kind of intelligent extraction, but we had to carefully tune how much content to give it and how many pages to process to get good coverage.
 [PAUSE:2500]
 -->
 
@@ -376,6 +386,8 @@ The synthesis agent is where the heavy lifting happens. It fetches actual web pa
 
 <!--
 Here's a critical insight we learned. When we first tested, the synthesis agent would only find a handful of statistics. We discovered we needed to cast a much wider net because many candidates fail verification. The five-x multiplier accounts for this reality.
+[PAUSE:1500]
+This was probably our biggest "aha moment" during development. Our initial version processed only five pages with fifteen thousand characters each, and used a conservative two-x multiplier. We'd get back maybe five to eight statistics. Meanwhile, Chat G P T dot com was returning twenty plus statistics on the same query. We were confused at first. Was their L L M just better? The real issue was that many statistics fail verification. Pages move. Content changes. Excerpts don't match exactly. So even if you extract fifty candidate statistics, only thirty percent might verify successfully. That's why we needed to be aggressive upfront, processing fifteen plus pages with thirty thousand characters each, and using a five-x multiplier. Cast a wide net, then filter rigorously.
 [PAUSE:3000]
 -->
 
@@ -400,7 +412,9 @@ multiplier := 5          // (increased from 2x)
 ---
 
 <!--
-The verification agent is what sets our system apart. It doesn't just trust what the LLM says - it actually fetches the source URL and validates the excerpt exists word-for-word. This is where accuracy comes from.
+The verification agent is what sets our system apart. It doesn't just trust what the L L M says, it actually fetches the source U R L and validates the excerpt exists word for word. This is where accuracy comes from.
+[PAUSE:1500]
+This is the trust layer of our system. When the synthesis agent extracts a statistic and says "I found this on this U R L," we don't just take its word for it. We independently fetch that exact U R L again, extract the text, and search for the claimed excerpt. If we find it verbatim, great. If not, we use a light L L M check for fuzzy matching to handle minor formatting differences. But fundamentally, we're validating that the statistic actually exists in the source. This catches L L M hallucinations, pages that have changed, paywalls, broken links, and all sorts of other real-world issues. It's more expensive and slower, but it's the only way to achieve real accuracy.
 [PAUSE:2500]
 -->
 
@@ -425,7 +439,9 @@ The verification agent is what sets our system apart. It doesn't just trust what
 ---
 
 <!--
-We implemented two orchestration approaches. The ADK version uses an LLM to make decisions about workflow. The Eino version uses a deterministic graph. Both work, but Eino is faster and more predictable for production use.
+We implemented two orchestration approaches. The A D K version uses an L L M to make decisions about workflow. The Eino version uses a deterministic graph. Both work, but Eino is faster and more predictable for production use.
+[PAUSE:1500]
+This was an interesting architectural choice. Initially we used Google A D K for orchestration, where an L L M decides what to do next. It's flexible and adaptive but has problems. The L L M might make different decisions on the same input, leading to non-deterministic behavior. It's slower because every decision requires an L L M call. And it's harder to debug because the L L M's reasoning isn't always clear. So we built a second implementation using Eino, with a deterministic directed graph. Every query follows the same path: validate, research, synthesize, verify, format. It's faster, cheaper, reproducible, and much easier to reason about. For production systems, deterministic behavior is usually better than adaptive flexibility.
 [PAUSE:2500]
 -->
 
@@ -478,7 +494,9 @@ FormatOutput → User
 ---
 
 <!--
-One of our biggest challenges was the direct mode. Initially, we thought letting an LLM directly answer from memory would be useful. What we found was eye-opening - zero percent verification rate. This taught us the importance of real-time web search.
+One of our biggest challenges was the direct mode. Initially, we thought letting an L L M directly answer from memory would be useful. What we found was eye opening: zero percent verification rate. This taught us the importance of real-time web search.
+[PAUSE:1500]
+This was a humbling discovery. We built a direct mode where the L L M answers from its training data, just like asking Chat G P T without web search. The L L M would confidently return ten statistics with seemingly legitimate U R Ls. But when we ran them through verification, literally zero verified. The problem? The L L M was guessing U R Ls based on patterns it learned during training. It would say "according to this N I H study" and generate a plausible looking N I H dot gov U R L, but that specific page didn't exist, had moved, or never contained that statistic. The L L M's training data was up to January twenty twenty-five, but web pages change constantly. This was our first major lesson: for real-time factual information, L L M memory is not enough. You absolutely need live web search.
 [PAUSE:3000]
 -->
 
@@ -502,7 +520,9 @@ One of our biggest challenges was the direct mode. Initially, we thought letting
 ---
 
 <!--
-Here's a real comparison we did. We asked both systems about the same topic. ChatGPT dot com returned many verifiable statistics because it uses real-time Bing search. Our direct mode returned plausible-looking numbers but with completely wrong URLs. This comparison drove our architecture decisions.
+Here's a real comparison we did. We asked both systems about the same topic. Chat G P T dot com returned many verifiable statistics because it uses real-time Bing search. Our direct mode returned plausible looking numbers but with completely wrong U R Ls. This comparison drove our architecture decisions.
+[PAUSE:1500]
+This table tells the whole story. When we tested Chat G P T dot com, the web version, not the A P I, on the query "A I trends," it returned over twenty statistics, and ninety percent of them verified. Our direct mode returned ten statistics, and zero percent verified. Initially we thought maybe Open A I's L L M was just better than Gemini. But that wasn't it. The key insight is in the "why" column. Chat G P T dot com's success comes from real-time Bing search integration, not from having a better language model. It searches the web live, fetches current pages, and extracts statistics from actual sources. That's exactly what we needed to do. So we built pipeline mode with Serper and Serp A P I integration for real-time Google search, and immediately our verification rate jumped to sixty to ninety percent. The lesson: architecture matters more than model quality for this use case.
 [PAUSE:3000]
 -->
 
@@ -549,7 +569,9 @@ Based on this learning, we added clear warnings to our documentation. Direct mod
 ---
 
 <!--
-The second major challenge was LLM provider flexibility. Different teams use different LLM vendors. We needed to support them all without duplicating code. The solution was a factory pattern with provider abstraction.
+The second major challenge was L L M provider flexibility. Different teams use different L L M vendors. We needed to support them all without duplicating code. The solution was a factory pattern with provider abstraction.
+[PAUSE:1500]
+This challenge emerged from real-world requirements. Some organizations are all in on Google Gemini. Others prefer Anthropic Claude for its reasoning capabilities. Some teams want Open A I for familiarity. Others need to use local models via Ollama for privacy or cost reasons. And then there's X A I Grok for those who want cutting edge performance. Each provider has completely different A P Is, authentication methods, model names, rate limits, and pricing. We could have just picked one and stuck with it, but that would limit adoption. Instead, we needed a flexible architecture that abstracts away these differences, so agents don't care which L L M they're using. The challenge was building this abstraction without sacrificing provider-specific features or performance.
 [PAUSE:2500]
 -->
 
@@ -571,7 +593,9 @@ The second major challenge was LLM provider flexibility. Different teams use dif
 ---
 
 <!--
-Here's how the abstraction works. The gollm library provides a unified interface. We just select a provider via environment variable. The agents don't care which LLM they're using - they just call the standard interface.
+Here's how the abstraction works. The gollm library provides a unified interface. We just select a provider via environment variable. The agents don't care which L L M they're using, they just call the standard interface.
+[PAUSE:1500]
+The factory pattern was key to solving this cleanly. We created a create L L M function that takes a config object and returns a generic client interface. Inside, it switches on the L L M provider string and calls the appropriate provider-specific creation function. Each function handles that provider's quirks: Gemini needs a Google A P I key, Claude needs an Anthropic key, Ollama needs a local U R L and doesn't need an A P I key at all. But they all return the same interface, so the synthesis and verification agents can use any provider without changing their code. Want to test Claude versus Gemini? Just change one environment variable. This flexibility made development much faster and enabled users to choose based on their constraints.
 [PAUSE:2500]
 -->
 
@@ -628,7 +652,9 @@ export LLM_MODEL="llama3:8b"
 ---
 
 <!--
-The third challenge was search integration. Web search APIs are not free, and different organizations prefer different providers. We needed flexibility here too. The metasearch library provided the abstraction we needed.
+The third challenge was search integration. Web search A P Is are not free, and different organizations prefer different providers. We needed flexibility here too. The metasearch library provided the abstraction we needed.
+[PAUSE:1500]
+This was similar to the L L M challenge but for search. Web search A P Is cost money. Serper costs fifty dollars a month for five thousand queries. Serp A P I has different pricing tiers. Some teams already have contracts with specific providers. Others want to use mock data during development to avoid A P I costs. Each search A P I returns results in different formats, with different fields and structures. We needed the same kind of abstraction we built for L L Ms. The metasearch library solves this by providing a unified search interface. You call search normalized, and it returns a standard result format regardless of which provider is actually doing the search. This means the research agent doesn't need to know or care whether it's using Serper, Serp A P I, or a mock provider. Flexibility without complexity.
 [PAUSE:2500]
 -->
 
@@ -653,7 +679,9 @@ result, err := searchClient.SearchNormalized(ctx, params)
 ---
 
 <!--
-Early on, we made a security mistake. The direct mode ran the LLM on the client side. This meant users needed API keys. Not only is this a security risk, but it's inconvenient. We moved to a server-side architecture.
+Early on, we made a security mistake. The direct mode ran the L L M on the client side. This meant users needed A P I keys. Not only is this a security risk, but it's inconvenient. We moved to a server-side architecture.
+[PAUSE:1500]
+This was an architectural flaw we caught relatively early. In our first version of direct mode, the client C L I tool would load the A P I key from the user's environment and make L L M calls directly. This is bad for several reasons. First, every user needs their own A P I key, which is friction for adoption. Second, A P I keys in client environments can leak. Third, you can't update the prompts without users pulling new code. Fourth, there's no centralized rate limiting or cost control. It's a distributed mess. The fix was to create a direct agent server that runs on port eight zero zero five. Now clients make H T T P requests to the server, and the server holds the A P I keys securely. You can update prompts server side, implement rate limiting, monitor costs, and users don't need any credentials. It's the right architecture for production.
 [PAUSE:2500]
 -->
 
@@ -709,7 +737,9 @@ huma.Register(api, operation, handler)
 ---
 
 <!--
-One subtle but important challenge was number formatting. JSON doesn't allow commas in numbers. But LLMs love to format numbers like humans do - with commas. This caused silent parsing failures until we fixed the prompts.
+One subtle but important challenge was number formatting. J S O N doesn't allow commas in numbers. But L L Ms love to format numbers like humans do, with commas. This caused silent parsing failures until we fixed the prompts.
+[PAUSE:1500]
+This was one of those bugs that took way too long to find. The L L M would return what looked like perfectly valid J S O N. The structure was right, all the fields were there, but our J S O N parser would fail with a cryptic error. When we finally inspected the raw L L M output carefully, we found the issue: numbers like two thousand five hundred thirty seven were being written as two comma five three seven. To humans, that's correct formatting. But in J S O N, numbers cannot have commas. It's syntactically invalid. The L L M was being helpful by formatting numbers the way humans expect, but breaking the J S O N spec. The fix was to add very explicit instructions in the prompt: the value field must be a plain number with no commas. We even gave examples. After that, no more parsing errors. This taught us that L L Ms need very explicit formatting instructions, especially for structured output.
 [PAUSE:2500]
 -->
 
@@ -738,7 +768,9 @@ as 75000 (no comma).
 ---
 
 <!--
-We also discovered the importance of explicit completeness instructions. LLMs tend to be lazy - they'll find one or two examples and stop. We had to explicitly tell them to find ALL statistics on a page, not just a few examples.
+We also discovered the importance of explicit completeness instructions. L L Ms tend to be lazy. They'll find one or two examples and stop. We had to explicitly tell them to find all statistics on a page, not just a few examples.
+[PAUSE:1500]
+This was a frustrating pattern we kept seeing. We'd feed the synthesis agent a page about climate change that clearly had ten different statistics scattered throughout. The L L M would extract maybe one or two and call it done. Why? Because L L Ms are trained to be concise and helpful. If you ask for statistics, they assume you want a few representative examples, not an exhaustive list. They're being efficient from their perspective. But we needed completeness. So we had to be extremely explicit in the prompts. We added phrases like "extract every statistic you find, not just one or two," and "if the page contains ten statistics, return ten items in the array." We told it to only return an empty array if absolutely no statistics are found. This kind of explicit instruction made a huge difference, increasing extraction by two to three x per page. The lesson: L L Ms don't read your mind. Be ridiculously explicit about what complete means.
 [PAUSE:2500]
 -->
 
@@ -769,6 +801,8 @@ are found.
 
 <!--
 Deployment was a key consideration. We needed to support both local development and production Docker deployments. Make commands handle local, Docker Compose handles production. Both use the same code and configuration.
+[PAUSE:1500]
+Developer experience matters. You need to be able to run locally for development, but deploy to production easily. We support both with the same codebase. For local development, make run all eino starts all four agents in the foreground where you can see logs. Then you run the C L I client to make requests. For production, docker compose up dash d runs all agents as containerized services. They communicate via H T T P on their assigned ports: eight thousand through eight thousand two, and eight thousand four through eight thousand five. The configuration is identical, just environment variables. This seamless transition from local to production means you're testing the real system locally, not some simplified mock. What you develop is what you deploy.
 [PAUSE:2500]
 -->
 
@@ -795,7 +829,9 @@ curl -X POST http://localhost:8000/orchestrate
 ---
 
 <!--
-We also added an MCP server for integration with Claude Code and other AI tools. This allows our statistics engine to be used as a tool by other AI agents. It's a nice example of composability in multi-agent systems.
+We also added an M C P server for integration with Claude Code and other A I tools. This allows our statistics engine to be used as a tool by other A I agents. It's a nice example of composability in multi-agent systems.
+[PAUSE:1500]
+This is where things get meta. Model Context Protocol, or M C P, is a standard for exposing tools to A I assistants. We implemented an M C P server that wraps our statistics system, making it available to Claude Code, the A I coding assistant. Now, when you're working in Claude Code and ask "find me statistics about renewable energy adoption," Claude Code can call our M C P server, which triggers the full pipeline, searches the web, verifies statistics, and returns results. Claude Code then incorporates those verified statistics into your code or documentation. It's composability at the A I agent level. Our agent team becomes a tool for other agents. This pattern of exposing capabilities via standard protocols is crucial for building ecosystems of specialized agents that work together.
 [PAUSE:2500]
 -->
 
@@ -826,6 +862,8 @@ We also added an MCP server for integration with Claude Code and other AI tools.
 
 <!--
 Let's talk results. The pipeline mode achieves sixty to ninety percent verification rate. Response times are under a minute for most queries. Compare this to direct mode's zero percent verification, and you can see why architecture matters.
+[PAUSE:1500]
+This table summarizes the tradeoffs. Direct mode is fast, five to ten seconds, but has terrible accuracy and zero verification. Pipeline mode takes thirty to sixty seconds, but achieves sixty to ninety percent verification with high accuracy. It searches thirty real U R Ls, processes fifteen plus pages, and validates every statistic. The cost is higher because we're doing real work, making real A P I calls, fetching real pages. But the value is in the verification. If you need actual, verified statistics for a research report or data analysis, pipeline mode is the only choice. If you just want to brainstorm ideas quickly and accuracy doesn't matter, direct mode might be acceptable. The key insight is that there's no free lunch. Accuracy requires work, and work takes time and money.
 [PAUSE:2500]
 -->
 
@@ -845,7 +883,9 @@ Let's talk results. The pipeline mode achieves sixty to ninety percent verificat
 ---
 
 <!--
-Here's a concrete example. When we search for climate change statistics, we get back verified data with exact sources. Notice the verbatim excerpt - that's proof it came from the actual source. This is what makes our system trustworthy.
+Here's a concrete example. When we search for climate change statistics, we get back verified data with exact sources. Notice the verbatim excerpt, that's proof it came from the actual source. This is what makes our system trustworthy.
+[PAUSE:1500]
+This J S O N output shows what a verified statistic looks like. The name field describes what the statistic measures: global temperature increase. The value is one point one with unit degrees Celsius. The source is the I P C C Sixth Assessment Report, a highly reputable climate science organization. The source U R L is the actual page. But most importantly, look at the excerpt field. It contains the verbatim text from that page: "Global surface temperature has increased by approximately one point one degrees Celsius since pre-industrial times." We fetched that page, extracted the text, and found this exact sentence. That's why verified is true. This isn't an L L M guessing or hallucinating. This is real data from a real source, programmatically verified. That's the trust guarantee we provide.
 [PAUSE:2500]
 -->
 
@@ -873,7 +913,9 @@ Here's a concrete example. When we search for climate change statistics, we get 
 ---
 
 <!--
-The technology choices were deliberate. Go provided concurrency and performance. ADK gave us robust LLM operations. Eino provided deterministic orchestration. Together they create a production-ready system.
+The technology choices were deliberate. Go provided concurrency and performance. A D K gave us robust L L M operations. Eino provided deterministic orchestration. Together they create a production-ready system.
+[PAUSE:1500]
+Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The gollm library abstracts multiple L L M providers so we're not locked into one vendor. And metasearch does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
 [PAUSE:2500]
 -->
 
@@ -897,7 +939,9 @@ The technology choices were deliberate. Go provided concurrency and performance.
 ---
 
 <!--
-We learned several key lessons building this system. Real-time search beats LLM memory for current data. Verification is non-negotiable for accuracy. Clear separation of concerns makes debugging easier. And always be explicit with LLMs - they need detailed instructions.
+We learned several key lessons building this system. Real-time search beats L L M memory for current data. Verification is non-negotiable for accuracy. Clear separation of concerns makes debugging easier. And always be explicit with L L Ms, they need detailed instructions.
+[PAUSE:1500]
+These lessons were hard won through trial and error. The zero percent verification rate in direct mode versus sixty to ninety percent in pipeline mode taught us that real-time search is essential. The discovery that many extracted statistics fail verification taught us to always validate against sources. The ability to optimize each agent independently taught us the value of modularity. The J S O N parsing failures and incomplete extractions taught us that prompt engineering is critical, not optional. And the need to support multiple L L M providers and search providers taught us that flexibility drives adoption. These aren't just technical lessons, they're architectural principles that apply to any multi-agent system. Get the architecture right, and the implementation follows. Get it wrong, and you'll fight issues forever.
 [PAUSE:3000]
 -->
 
@@ -918,6 +962,8 @@ We learned several key lessons building this system. Real-time search beats LLM 
 
 <!--
 Some challenges remain. Paywalled content is inaccessible. Different languages need special handling. And we'd love to support statistical ranges, not just single values. These are areas for future enhancement.
+[PAUSE:1500]
+No system is perfect, and ours has known limitations. Paywalled content behind subscriptions like the New York Times or academic journals is inaccessible without credentials. We can see the page exists, but can't fetch the content. Non-English sources require translation layers. And range statistics like "seventy nine to ninety six percent" don't fit our current schema that expects a single value field. These aren't blockers, but they limit coverage. On the roadmap, we're planning to add a value max field for ranges, integrate Perplexity A P I which has built-in search, add caching to avoid redundant searches, implement streaming for better perceived performance, and add multi-language support. The foundation is solid, now it's about expanding capabilities based on user feedback.
 [PAUSE:2500]
 -->
 
@@ -938,7 +984,9 @@ Some challenges remain. Paywalled content is inaccessible. Different languages n
 ---
 
 <!--
-Here's the complete workflow from user query to verified results. Each step is optimized and reliable. The human-in-the-loop retry gives users control when results are partial. This balance of automation and control is key.
+Here's the complete workflow from user query to verified results. Each step is optimized and reliable. The human in the loop retry gives users control when results are partial. This balance of automation and control is key.
+[PAUSE:1500]
+Let's walk through a concrete example. The user runs stats dash agent search "renewable energy" with a minimum of ten statistics. Here's what happens behind the scenes. First, the orchestrator validates the input. Is the topic non-empty? Is ten a reasonable target? Then it calls the research agent, which searches thirty U R Ls via Serper. Next, the synthesis agent processes fifteen plus pages, extracting over four hundred fifty thousand characters of total content. It uses the L L M to extract fifty plus candidate statistics from this corpus. Then comes the critical verification stage. Each candidate is independently validated. Out of fifty candidates, twelve verify successfully, which is a sixty percent verification rate. The orchestrator checks: twelve is greater than or equal to ten, so the quality threshold is met. Finally, it formats the output as J S O N and returns it to the user. Total time: around forty five seconds. The entire process is logged, observable, and reproducible.
 [PAUSE:2500]
 -->
 
@@ -1288,7 +1336,9 @@ Real-world usage patterns emerged. The pipeline mode is used for research report
 ---
 
 <!--
-The cost model is important for production. LLM API costs dominate. Search API costs are secondary. But the value is in accuracy - one wrong statistic in a report can be costly. We provide cost-performance tradeoffs.
+The cost model is important for production. L L M A P I costs dominate. Search A P I costs are secondary. But the value is in accuracy. One wrong statistic in a report can be costly. We provide cost performance tradeoffs.
+[PAUSE:1500]
+Let's be honest about costs. Direct mode costs about one cent per query because it's a single L L M call. Hybrid mode, which uses the L L M to generate statistics then verifies them, costs about three cents. Pipeline mode, the full system with search, synthesis, and verification, costs around ten cents per query. The breakdown: search A P I costs two cents for thirty U R Ls. L L M calls for extracting statistics from fifteen pages and verifying them cost about eight cents total. The main cost driver is how many pages you process. Using Gemini two point five Flash instead of G P T four or Claude reduces costs significantly because Gemini is cheaper per token. But here's the key question: what's the cost of using wrong statistics in your research report or business presentation? Ten cents for verified accuracy is cheap insurance.
 [PAUSE:2500]
 -->
 
@@ -1313,6 +1363,8 @@ The cost model is important for production. LLM API costs dominate. Search API c
 
 <!--
 Scaling considerations matter for high-volume use. Each agent can be independently scaled. Add load balancers in front. Use a message queue for async processing. Cache search results. These patterns enable production deployment.
+[PAUSE:1500]
+The modular architecture really shines when you need to scale. Each agent type runs independently, so you can scale them horizontally based on load. If synthesis is the bottleneck because L L M calls are slow, run twenty synthesis agents behind a load balancer while keeping ten orchestrators. If you need higher throughput, scale vertically by increasing concurrency limits, processing larger content chunks, or fetching more pages in parallel. For even better performance at scale, add a caching layer for search results with a one hour T T L, so repeated queries for the same topic use cached U R Ls. Use a message queue like Rabbit M Q or Kafka for async bulk processing. Store results in a database for analytics. The architecture supports all these patterns because the agents are stateless and communicate via H T T P. Going from ten queries per minute to thousands just requires infrastructure, not code changes.
 [PAUSE:2500]
 -->
 
@@ -1392,6 +1444,8 @@ Compliance matters for some use cases. We cite sources properly. Respect robots.
 
 <!--
 Let's talk about the competitive landscape. We compared our approach to several alternatives. Each has tradeoffs. Our system uniquely combines real-time search with rigorous verification in an open architecture.
+[PAUSE:1500]
+How do we stack up against existing solutions? Chat G P T dot com does search using Bing and has light verification, but only supports G P T models and is closed source. Perplexity uses multiple search providers with light verification, but has limited L L M options and is also closed. Direct L L M usage, just asking an L L M without search, has no verification at all, though you can use any L L M. Our system stands out in two ways. First, we have strong verification, actually fetching sources and validating excerpts programmatically. Second, we're completely open source under M I T license and support five plus L L M providers. The community can audit our code, see exactly how verification works, extend it for their needs, and choose their preferred L L M and search providers. Transparency and flexibility are our competitive advantages.
 [PAUSE:2500]
 -->
 
@@ -1445,6 +1499,8 @@ response = requests.post(
 
 <!--
 The roadmap ahead includes several exciting features. Perplexity integration would give us built-in search. Streaming responses would improve perceived performance. Range statistics would handle more data types. And multi-language support would expand our reach.
+[PAUSE:1500]
+Looking ahead, we have an exciting roadmap. Q one twenty twenty-five priorities include integrating Perplexity A P I, which has built-in search so we wouldn't need separate search providers, adding a value max field to support range statistics like "seventy nine to ninety six percent," and implementing response streaming so users see results as they're found rather than waiting for everything. Q two focuses on multi-language support for Spanish, French, German, and Chinese sources, a caching layer to reduce redundant searches and costs, and a Graph Q L A P I option for more flexible querying. Q three gets ambitious with a browser extension for real-time fact checking as you browse, integrations with Notion and Confluence for embedding verified statistics in documentation, and advanced citation formats like A P A and M L A for academic use. This roadmap is community driven. Submit feature requests on GitHub, and we'll prioritize based on demand.
 [PAUSE:2500]
 -->
 
@@ -1497,6 +1553,8 @@ Team collaboration was key to success. Clear architecture boundaries meant paral
 
 <!--
 Lessons learned extend beyond code. Start with clear requirements. Build verification early, not as an afterthought. Be honest about limitations. And always prioritize user experience. These principles apply to any multi-agent system.
+[PAUSE:1500]
+These eleven lessons fall into three categories. Technical lessons: real-time data beats L L M memory, verification is essential not optional, modular architecture enables optimization, and prompt engineering is critical at scale. Process lessons: clear requirements prevent scope creep, early testing reveals issues sooner, documentation enables adoption, and user feedback drives priorities. Product lessons: be honest about limitations to build trust, provide flexibility to drive adoption through multi L L M and multi search support, and prioritize developer experience because if it's hard to use locally, it won't get used in production. These aren't just lessons for statistics agents. They apply to any A I system, any multi-agent architecture, any production service. Architecture, process, and product thinking matter as much as code quality.
 [PAUSE:2500]
 -->
 
@@ -1527,6 +1585,8 @@ Lessons learned extend beyond code. Start with clear requirements. Build verific
 
 <!--
 Closing thoughts: Building a multi-agent system is challenging but rewarding. The key is clear separation of concerns. Each agent does one thing well. Together they create something greater than the sum of parts. This architecture pattern applies to many domains.
+[PAUSE:1500]
+Let's wrap up with what we've built and what it means. We created a production-ready system that achieves sixty to ninety percent verification of statistics, compared to zero percent for L L Ms answering from memory. That's the fundamental value proposition: trust. Researchers, journalists, and analysts can now use A I to find statistics and actually trust the results because we provide verifiable sources. The multi-agent architecture with clear separation, research, synthesis, verification, orchestration, enables independent optimization and debugging. The flexibility to use any L L M provider or search provider means different organizations can adopt based on their constraints. And being open source under M I T license means the community can audit, extend, and trust the system. This project proves that with the right architecture, you can combine the intelligence of L L Ms with the accuracy of real-time verification.
 [PAUSE:2500]
 -->
 
@@ -1579,6 +1639,8 @@ make run-all-eino
 
 <!--
 Thank you for your attention. We've covered the journey from requirements to a working system. The challenges we faced, the solutions we implemented, and the lessons we learned. We hope this inspires your own multi-agent projects. Questions?
+[PAUSE:1500]
+We've covered a lot today. From the fundamental problem of L L M hallucinations to the architecture that solves it. From zero percent verification in direct mode to sixty to ninety percent in pipeline mode. From single L L M support to five plus providers. From client-side insecurity to proper server-side architecture. From J S O N parsing bugs to comprehensive prompt engineering. Every challenge taught us something. Every solution opened new possibilities. If you want to try it yourself, the repo is on GitHub at github dot com slash grokify slash stats dash agent dash team. The documentation is comprehensive, setup is straightforward, and we welcome contributions. Special thanks to the Google A D K team, Eino framework contributors, and the entire open source community. Now, let's open it up for questions.
 [PAUSE:2000]
 -->
 
