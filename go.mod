@@ -3,7 +3,7 @@ module github.com/grokify/stats-agent-team
 go 1.25.3
 
 require (
-	github.com/cloudwego/eino v0.7.10
+	github.com/cloudwego/eino v0.7.11
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/grokify/gollm v0.6.1
@@ -16,7 +16,7 @@ require (
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/auth v0.17.0 // indirect
+	cloud.google.com/go/auth v0.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
