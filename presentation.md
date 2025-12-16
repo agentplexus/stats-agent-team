@@ -1352,7 +1352,7 @@ Let's be honest about costs. Direct mode costs about one cent per query because 
 | LLM Calls | $0.01 | $0.03 | $0.08 |
 | **Total** | **$0.01** | **$0.03** | **$0.10** |
 
-**Cost Drivers** —
+**Cost Drivers**
 - Number of pages processed (15+)
 - LLM provider choice (Gemini < Claude < GPT-4o/GPT-5)
 - Verification attempts
