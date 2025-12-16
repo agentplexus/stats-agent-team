@@ -1130,25 +1130,22 @@ Testing was multi-layered. Unit tests for individual functions. Integration test
 
 # Testing Strategy 🧪
 
-**Unit Tests**
-- Individual function validation
-- LLM provider factory
-- JSON parsing edge cases
-
-**Integration Tests**
-- Agent-to-agent communication
-- HTTP endpoint validation
-- Error handling flows
-
-**End-to-End Tests**
-- Complete pipeline execution
-- Verification rate validation
-- Performance benchmarks
-
-**Manual Testing**
-- Known statistics verification
-- Multi-provider compatibility
-- Edge case exploration
+1. **Unit Tests**
+    - Individual function validation
+    - LLM provider factory
+    - JSON parsing edge cases
+2. **Integration Tests**
+    - Agent-to-agent communication
+    - HTTP endpoint validation
+    - Error handling flows
+3. **End-to-End Tests**
+    - Complete pipeline execution
+    - Verification rate validation
+    - Performance benchmarks
+4. **Manual Testing**
+    - Known statistics verification
+    - Multi-provider compatibility
+    - Edge case exploration
 
 ---
 
@@ -1215,23 +1212,20 @@ Performance optimization was iterative. We profiled each agent. Added caching wh
 
 # Performance Optimization 🚄
 
-**Research Agent**
-- Parallel URL searches where supported
-- Connection pooling for HTTP clients
-
-**Synthesis Agent**
-- Parallel page fetching (up to 5 concurrent)
-- Content truncation (30K chars max)
-- Efficient JSON parsing
-
-**Verification Agent**
-- Batch verification where possible
-- Early exit on clear failures
-- LLM only for fuzzy matching
-
-**Overall**
-- 45-second average for 10 verified statistics
-- Scales linearly with min_stats target
+1. **Research Agent**
+    - Parallel URL searches where supported
+    - Connection pooling for HTTP clients
+2. **Synthesis Agent**
+    - Parallel page fetching (up to 5 concurrent)
+    - Content truncation (30K chars max)
+    - Efficient JSON parsing
+3. **Verification Agent**
+    - Batch verification where possible
+    - Early exit on clear failures
+    - LLM only for fuzzy matching
+4. **Overall**
+    - 45-second average for 10 verified statistics
+    - Scales linearly with min_stats target
 
 ---
 
