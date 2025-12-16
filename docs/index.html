@@ -499,7 +499,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="the-problem-%F0%9F%8E%AF">The Problem <img class="emoji" draggable="false" alt="🎯" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f3af.svg" data-marp-twemoji=""/></h1>
 <p><strong>Challenge</strong>: Finding verified, numerical statistics from reputable web sources</p>
-<p><strong>Pain Points</strong> —</p>
+<p><strong>Pain Points</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> LLMs hallucinate statistics and sources</li>
 <li><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> URLs from LLM memory are often outdated or wrong</li>
@@ -1271,7 +1271,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="agent-1-research-agent-%F0%9F%94%8D">Agent 1: Research Agent <img class="emoji" draggable="false" alt="🔍" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f50d.svg" data-marp-twemoji=""/></h1>
 <p><strong>Responsibility</strong>: Find relevant web sources</p>
-<p><strong>Implementation</strong> —</p>
+<p><strong>Implementation</strong> (Google ADK)</p>
 <ul>
 <li>No LLM required (pure search)</li>
 <li>Integrates with Serper/SerpAPI via <code>metasearch</code> library</li>
@@ -1530,7 +1530,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="agent-2-synthesis-agent-%F0%9F%93%8A">Agent 2: Synthesis Agent <img class="emoji" draggable="false" alt="📊" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4ca.svg" data-marp-twemoji=""/></h1>
 <p><strong>Responsibility</strong>: Extract statistics from web pages</p>
-<p><strong>Implementation</strong> (Google ADK):</p>
+<p><strong>Implementation</strong> (Google ADK)</p>
 <ul>
 <li>Fetches webpage content (30K chars per page)</li>
 <li>LLM analyzes text for numerical statistics</li>
@@ -1789,7 +1789,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="synthesis-agent-key-learnings-%F0%9F%92%A1">Synthesis Agent: Key Learnings <img class="emoji" draggable="false" alt="💡" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4a1.svg" data-marp-twemoji=""/></h1>
 <p><strong>Problem</strong>: Low statistical yield (5-8 stats vs ChatGPT's 20+)</p>
-<p><strong>Root Cause Analysis</strong> —</p>
+<p><strong>Root Cause Analysis</strong></p>
 <ul>
 <li>Too few pages processed (only 5)</li>
 <li>Too little content per page (15K chars)</li>
@@ -2046,7 +2046,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="agent-3-verification-agent-%E2%9C%85">Agent 3: Verification Agent <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/></h1>
 <p><strong>Responsibility</strong>: Validate statistics against sources</p>
-<p><strong>Implementation</strong> (Google ADK):</p>
+<p><strong>Implementation</strong> (Google ADK)</p>
 <ul>
 <li>Re-fetches source URLs</li>
 <li>Checks excerpts exist verbatim</li>
@@ -2305,7 +2305,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="9" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="agent-4-orchestration-agent-%F0%9F%8E%AD">Agent 4: Orchestration Agent <img class="emoji" draggable="false" alt="🎭" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f3ad.svg" data-marp-twemoji=""/></h1>
-<p><strong>Two Implementations Available</strong> —</p>
+<p><strong>Two Implementations Available</strong></p>
 <h2 id="option-a-google-adk-llm-driven">Option A: Google ADK (LLM-driven)</h2>
 <ul>
 <li>Uses LLM to decide workflow steps</li>
@@ -2828,10 +2828,10 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="challenge-1-direct-mode-failure-%E2%9A%A0%EF%B8%8F">Challenge 1: Direct Mode Failure <img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" data-marp-twemoji=""/></h1>
 <p><strong>Initial Idea</strong>: Let LLM answer from memory (like ChatGPT)</p>
-<p><strong>Implementation</strong> —</p>
+<p><strong>Implementation</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">./stats-agent search <span class="hljs-string">&quot;AI trends&quot;</span> --direct
 </code></pre>
-<p><strong>The Problem</strong> —</p>
+<p><strong>The Problem</strong></p>
 <ul>
 <li>LLM returns statistics from training data (up to Jan 2025)</li>
 <li>URLs are <strong>guessed</strong> - not from real search</li>
@@ -3360,13 +3360,13 @@ section::before {
 " lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="solution-pipeline-mode-%E2%9C%85">Solution: Pipeline Mode <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/></h1>
-<p><strong>What We Changed</strong> —</p>
+<p><strong>What We Changed</strong></p>
 <ul>
 <li>Made Pipeline mode the default</li>
 <li>Added warnings to Direct mode docs</li>
 <li>Implemented hybrid mode (Direct + Verification)</li>
 </ul>
-<p><strong>README Warning</strong> —</p>
+<p><strong>README Warning</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-markdown"><img class="emoji" draggable="false" alt="⚠" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" data-marp-twemoji=""/> Direct Mode - Not Recommended for Statistics
 <span class="hljs-bullet">-</span> <img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Uses LLM memory (training data)
 <span class="hljs-bullet">-</span> <img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Outdated URLs
@@ -3620,7 +3620,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="challenge-2-multi-llm-support-%F0%9F%94%A7">Challenge 2: Multi-LLM Support <img class="emoji" draggable="false" alt="🔧" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f527.svg" data-marp-twemoji=""/></h1>
 <p><strong>Requirement</strong>: Support multiple LLM providers</p>
-<p><strong>Supported Providers</strong> —</p>
+<p><strong>Supported Providers</strong></p>
 <ul>
 <li>Google Gemini (default) - <code>gemini-2.5-flash</code> / <code>gemini-2.5-pro</code></li>
 <li>Anthropic Claude - <code>claude-sonnet-4-20250514</code> / <code>claude-opus-4-1-20250805</code></li>
@@ -4135,7 +4135,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="16" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="llm-configuration-example-%F0%9F%92%BB">LLM Configuration Example <img class="emoji" draggable="false" alt="💻" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4bb.svg" data-marp-twemoji=""/></h1>
-<p><strong>Simple Environment Variables</strong> —</p>
+<p><strong>Simple Environment Variables</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash"><span class="hljs-comment"># Use Gemini (default)</span>
 <span class="hljs-built_in">export</span> GOOGLE_API_KEY=<span class="hljs-string">&quot;your-key&quot;</span>
 
@@ -4654,7 +4654,7 @@ section::before {
 <span class="hljs-built_in">export</span> GOOGLE_API_KEY=<span class="hljs-string">&quot;key&quot;</span>
 ./stats-agent search <span class="hljs-string">&quot;topic&quot;</span> --direct
 </code></pre>
-<p><strong>Problem</strong> —</p>
+<p><strong>Problem</strong></p>
 <ul>
 <li>Clients need API keys (security risk)</li>
 <li>Hard to update prompts</li>
@@ -4911,14 +4911,14 @@ section::before {
 " lang="en-US" data-marpit-pagination="19" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="direct-agent-server-implementation-%F0%9F%8C%90">Direct Agent Server Implementation <img class="emoji" draggable="false" alt="🌐" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f310.svg" data-marp-twemoji=""/></h1>
-<p><strong>Built with Huma v2 + Chi router</strong> —</p>
+<p><strong>Built with Huma v2 + Chi router</strong></p>
 <ul>
 <li>OpenAPI 3.1 automatic generation</li>
 <li>Interactive Swagger UI at <code>/docs</code></li>
 <li>Type-safe request/response handling</li>
 <li>Proper HTTP timeouts</li>
 </ul>
-<p><strong>Example</strong> —</p>
+<p><strong>Example</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-go"><span class="hljs-keyword">type</span> DirectSearchInput <span class="hljs-keyword">struct</span> {
     Body <span class="hljs-keyword">struct</span> {
         Topic    <span class="hljs-type">string</span> <span class="hljs-string">`json:&quot;topic&quot; minLength:&quot;1&quot;`</span>
@@ -5173,7 +5173,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="20" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="challenge-5-json-number-format-%F0%9F%94%A2">Challenge 5: JSON Number Format <img class="emoji" draggable="false" alt="🔢" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f522.svg" data-marp-twemoji=""/></h1>
-<p><strong>The Bug</strong> —</p>
+<p><strong>The Bug</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span><span class="hljs-number">537</span>  <span class="hljs-comment">// <img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Invalid JSON!</span>
 <span class="hljs-punctuation">}</span>
@@ -5432,18 +5432,15 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="prompt-engineering-lessons-%F0%9F%93%9D">Prompt Engineering Lessons <img class="emoji" draggable="false" alt="📝" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4dd.svg" data-marp-twemoji=""/></h1>
 <p><strong>Problem</strong>: LLM returns 1-2 statistics, stops</p>
-<p><strong>Bad Prompt</strong> —</p>
+<p><strong>Bad Prompt</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code>Find statistics about climate change.
 </code></pre>
-<p><strong>Good Prompt</strong> —</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code>Extract EVERY statistic you find, not just one or two.
-Be thorough and comprehensive.
+<p><strong>Good Prompt</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code>Extract EVERY statistic you find, not just one or two. Be thorough and comprehensive.
 
-If the page contains 10 statistics, return 10 items
-in the array.
+If the page contains 10 statistics, return 10 items in the array.
 
-Return empty array [] ONLY if absolutely no statistics
-are found.
+Return empty array [] ONLY if absolutely no statistics are found.
 </code></pre>
 <p><strong>Impact</strong>: 2-3x more statistics extracted per page</p>
 </section>
@@ -5690,7 +5687,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="22" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="deployment-architecture-%F0%9F%90%B3">Deployment Architecture <img class="emoji" draggable="false" alt="🐳" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f433.svg" data-marp-twemoji=""/></h1>
-<p><strong>Two Deployment Methods</strong> —</p>
+<p><strong>Two Deployment Methods</strong></p>
 <h2 id="local-development">Local Development</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">make run-all-eino  <span class="hljs-comment"># Start all 4 agents</span>
 ./bin/stats-agent search <span class="hljs-string">&quot;topic&quot;</span>
@@ -5956,7 +5953,7 @@ section::before {
   <span class="hljs-punctuation">}</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
-<p><strong>Tools Available</strong> —</p>
+<p><strong>Tools Available</strong></p>
 <ul>
 <li><code>search_statistics</code> - Full pipeline search</li>
 <li><code>verify_statistic</code> - Single verification</li>
@@ -6493,7 +6490,7 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="real-world-example-%F0%9F%8C%8D">Real-World Example <img class="emoji" draggable="false" alt="🌍" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f30d.svg" data-marp-twemoji=""/></h1>
 <p><strong>Query</strong>: &quot;climate change statistics&quot;</p>
-<p><strong>Result</strong> —</p>
+<p><strong>Result</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Global temperature increase&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.1</span><span class="hljs-punctuation">,</span>
@@ -6751,21 +6748,21 @@ section::before {
 " lang="en-US" data-marpit-pagination="26" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="technology-stack-%F0%9F%9B%A0%EF%B8%8F">Technology Stack <img class="emoji" draggable="false" alt="🛠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f6e0.svg" data-marp-twemoji=""/></h1>
-<p><strong>Language &amp; Runtime</strong> —</p>
+<p><strong>Language &amp; Runtime</strong></p>
 <ul>
 <li>Go 1.21+ - Concurrency, performance, simple deployment</li>
 </ul>
-<p><strong>Agent Frameworks</strong> —</p>
+<p><strong>Agent Frameworks</strong></p>
 <ul>
 <li><strong>Google ADK</strong> - LLM-based agent operations</li>
 <li><strong>Eino</strong> - Deterministic graph orchestration</li>
 </ul>
-<p><strong>API &amp; Docs</strong> —</p>
+<p><strong>API &amp; Docs</strong></p>
 <ul>
 <li><strong>Huma v2</strong> - OpenAPI 3.1 generation</li>
 <li><strong>Chi v5</strong> - Lightweight HTTP router</li>
 </ul>
-<p><strong>Integrations</strong> —</p>
+<p><strong>Integrations</strong></p>
 <ul>
 <li><strong>gollm</strong> - Multi-provider LLM abstraction</li>
 <li><strong>metasearch</strong> - Unified search API</li>
@@ -7285,13 +7282,13 @@ section::before {
 " lang="en-US" data-marpit-pagination="28" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="challenges--future-work-%F0%9F%9A%80">Challenges &amp; Future Work <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f680.svg" data-marp-twemoji=""/></h1>
-<p><strong>Current Limitations</strong> —</p>
+<p><strong>Current Limitations</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Paywalled content inaccessible</li>
 <li><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Non-English sources need translation</li>
 <li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" data-marp-twemoji=""/> Range statistics (e.g., &quot;79-96%&quot;) need schema updates</li>
 </ul>
-<p><strong>Future Enhancements</strong> —</p>
+<p><strong>Future Enhancements</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Add <code>value_max</code> field for ranges</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Perplexity API integration (built-in search)</li>
@@ -7545,7 +7542,7 @@ section::before {
 <h1 id="complete-workflow-example-%F0%9F%94%84">Complete Workflow Example <img class="emoji" draggable="false" alt="🔄" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f504.svg" data-marp-twemoji=""/></h1>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">./stats-agent search <span class="hljs-string">&quot;renewable energy&quot;</span> --min-stats 10
 </code></pre>
-<p><strong>What Happens</strong> —</p>
+<p><strong>What Happens</strong></p>
 <ol>
 <li><strong>Orchestrator</strong> validates input</li>
 <li><strong>Research</strong> searches 30 URLs via Serper</li>
@@ -7808,13 +7805,13 @@ Synthesis Agent: Total candidates: 52 from 15 pages
 Verification Agent: Verified 10/15 candidates (67%)
 Orchestration: Target met (10 verified)
 </code></pre>
-<p><strong>Health Checks</strong> —</p>
+<p><strong>Health Checks</strong></p>
 <ul>
 <li><code>/health</code> endpoint on each agent</li>
 <li>Docker health checks in production</li>
 <li>Timeout monitoring (60s max)</li>
 </ul>
-<p><strong>Metrics to Track</strong> —</p>
+<p><strong>Metrics to Track</strong></p>
 <ul>
 <li>Verification rate per query</li>
 <li>Average response time</li>
@@ -8064,7 +8061,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="31" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="developer-experience-%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB">Developer Experience <img class="emoji" draggable="false" alt="👨‍💻" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f468-200d-1f4bb.svg" data-marp-twemoji=""/></h1>
-<p><strong>Simple Commands</strong> —</p>
+<p><strong>Simple Commands</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash"><span class="hljs-comment"># Install dependencies</span>
 make install
 
@@ -8326,14 +8323,14 @@ section::before {
 " lang="en-US" data-marpit-pagination="32" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="configuration-management-%E2%9A%99%EF%B8%8F">Configuration Management <img class="emoji" draggable="false" alt="⚙️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2699.svg" data-marp-twemoji=""/></h1>
-<p><strong>Environment-Based</strong> —</p>
+<p><strong>Environment-Based</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash"><span class="hljs-comment"># .env file</span>
 LLM_PROVIDER=gemini
 GOOGLE_API_KEY=your-key
 SEARCH_PROVIDER=serper
 SERPER_API_KEY=your-key
 </code></pre>
-<p><strong>Override per Agent</strong> —</p>
+<p><strong>Override per Agent</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash"><span class="hljs-comment"># Use different LLM for synthesis</span>
 <span class="hljs-built_in">export</span> SYNTHESIS_LLM_PROVIDER=claude
 <span class="hljs-built_in">export</span> SYNTHESIS_LLM_MODEL=claude-sonnet-4-20250514
@@ -8876,25 +8873,25 @@ section::before {
 " lang="en-US" data-marpit-pagination="34" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="testing-strategy-%F0%9F%A7%AA">Testing Strategy <img class="emoji" draggable="false" alt="🧪" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f9ea.svg" data-marp-twemoji=""/></h1>
-<p><strong>Unit Tests</strong> —</p>
+<p><strong>Unit Tests</strong></p>
 <ul>
 <li>Individual function validation</li>
 <li>LLM provider factory</li>
 <li>JSON parsing edge cases</li>
 </ul>
-<p><strong>Integration Tests</strong> —</p>
+<p><strong>Integration Tests</strong></p>
 <ul>
 <li>Agent-to-agent communication</li>
 <li>HTTP endpoint validation</li>
 <li>Error handling flows</li>
 </ul>
-<p><strong>End-to-End Tests</strong> —</p>
+<p><strong>End-to-End Tests</strong></p>
 <ul>
 <li>Complete pipeline execution</li>
 <li>Verification rate validation</li>
 <li>Performance benchmarks</li>
 </ul>
-<p><strong>Manual Testing</strong> —</p>
+<p><strong>Manual Testing</strong></p>
 <ul>
 <li>Known statistics verification</li>
 <li>Multi-provider compatibility</li>
@@ -9144,7 +9141,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="35" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="error-handling--resilience-%F0%9F%9B%A1%EF%B8%8F">Error Handling &amp; Resilience <img class="emoji" draggable="false" alt="🛡️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f6e1.svg" data-marp-twemoji=""/></h1>
-<p><strong>Graceful Degradation</strong> —</p>
+<p><strong>Graceful Degradation</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-go"><span class="hljs-comment">// If source unreachable, mark failed</span>
 <span class="hljs-keyword">if</span> err := fetchURL(url); err != <span class="hljs-literal">nil</span> {
     <span class="hljs-keyword">return</span> VerificationResult{
@@ -9153,13 +9150,13 @@ section::before {
     }
 }
 </code></pre>
-<p><strong>Retry Logic</strong> —</p>
+<p><strong>Retry Logic</strong></p>
 <ul>
 <li>HTTP retries with exponential backoff</li>
 <li>Automatic quality check retries</li>
 <li>Human-in-the-loop for partial results</li>
 </ul>
-<p><strong>User-Friendly Messages</strong> —</p>
+<p><strong>User-Friendly Messages</strong></p>
 <ul>
 <li>&quot;Found 8 of 10 requested, continue? (y/n)&quot;</li>
 <li>Clear error messages with remediation steps</li>
@@ -9408,19 +9405,19 @@ section::before {
 " lang="en-US" data-marpit-pagination="36" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="security-considerations-%F0%9F%94%90">Security Considerations <img class="emoji" draggable="false" alt="🔐" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f510.svg" data-marp-twemoji=""/></h1>
-<p><strong>API Key Management</strong> —</p>
+<p><strong>API Key Management</strong></p>
 <ul>
 <li>Environment variables only (never in code)</li>
 <li>Server-side storage (clients don't need keys)</li>
 <li>Per-agent key rotation possible</li>
 </ul>
-<p><strong>Input Validation</strong> —</p>
+<p><strong>Input Validation</strong></p>
 <ul>
 <li>Topic length limits (500 chars)</li>
 <li>Min/max stats bounds (1-100)</li>
 <li>URL validation before fetching</li>
 </ul>
-<p><strong>Timeouts</strong> —</p>
+<p><strong>Timeouts</strong></p>
 <ul>
 <li>HTTP request timeouts (30-60s)</li>
 <li>LLM generation timeouts</li>
@@ -9671,24 +9668,24 @@ section::before {
 " lang="en-US" data-marpit-pagination="37" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="performance-optimization-%F0%9F%9A%84">Performance Optimization <img class="emoji" draggable="false" alt="🚄" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f684.svg" data-marp-twemoji=""/></h1>
-<p><strong>Research Agent</strong> —</p>
+<p><strong>Research Agent</strong></p>
 <ul>
 <li>Parallel URL searches where supported</li>
 <li>Connection pooling for HTTP clients</li>
 </ul>
-<p><strong>Synthesis Agent</strong> —</p>
+<p><strong>Synthesis Agent</strong></p>
 <ul>
 <li>Parallel page fetching (up to 5 concurrent)</li>
 <li>Content truncation (30K chars max)</li>
 <li>Efficient JSON parsing</li>
 </ul>
-<p><strong>Verification Agent</strong> —</p>
+<p><strong>Verification Agent</strong></p>
 <ul>
 <li>Batch verification where possible</li>
 <li>Early exit on clear failures</li>
 <li>LLM only for fuzzy matching</li>
 </ul>
-<p><strong>Overall</strong> —</p>
+<p><strong>Overall</strong></p>
 <ul>
 <li>45-second average for 10 verified statistics</li>
 <li>Scales linearly with min_stats target</li>
@@ -10198,19 +10195,19 @@ section::before {
 " lang="en-US" data-marpit-pagination="39" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="documentation-strategy-%F0%9F%93%9A">Documentation Strategy <img class="emoji" draggable="false" alt="📚" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4da.svg" data-marp-twemoji=""/></h1>
-<p><strong>README.md</strong> —</p>
+<p><strong>README.md</strong></p>
 <ul>
 <li>Comprehensive setup instructions</li>
 <li>Clear mode comparisons</li>
 <li>Warning callouts for limitations</li>
 </ul>
-<p><strong>Code Documentation</strong> —</p>
+<p><strong>Code Documentation</strong></p>
 <ul>
 <li>Inline comments for complex logic</li>
 <li>Function documentation (godoc format)</li>
 <li>Architecture decision records (ADRs)</li>
 </ul>
-<p><strong>API Documentation</strong> —</p>
+<p><strong>API Documentation</strong></p>
 <ul>
 <li>OpenAPI 3.1 specification (Huma)</li>
 <li>Interactive Swagger UI at <code>/docs</code></li>
@@ -10461,14 +10458,14 @@ section::before {
 " lang="en-US" data-marpit-pagination="40" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="extensibility--contributions-%F0%9F%A4%9D">Extensibility &amp; Contributions <img class="emoji" draggable="false" alt="🤝" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f91d.svg" data-marp-twemoji=""/></h1>
-<p><strong>Easy to Extend</strong> —</p>
+<p><strong>Easy to Extend</strong></p>
 <ul>
 <li>Add new LLM provider: Implement <code>gollm</code> interface</li>
 <li>Add new search provider: Implement <code>metasearch</code> interface</li>
 <li>Add new agent: Follow existing patterns</li>
 <li>Add new verification rules: Extend verification agent</li>
 </ul>
-<p><strong>Contribution Areas</strong> —</p>
+<p><strong>Contribution Areas</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="🔧" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f527.svg" data-marp-twemoji=""/> New LLM providers (e.g., Perplexity)</li>
 <li><img class="emoji" draggable="false" alt="🌍" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f30d.svg" data-marp-twemoji=""/> Multi-language support</li>
@@ -11276,19 +11273,19 @@ section::before {
 " lang="en-US" data-marpit-pagination="43" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="scaling-considerations-%F0%9F%93%88">Scaling Considerations <img class="emoji" draggable="false" alt="📈" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4c8.svg" data-marp-twemoji=""/></h1>
-<p><strong>Horizontal Scaling</strong> —</p>
+<p><strong>Horizontal Scaling</strong></p>
 <ul>
 <li>Each agent scales independently</li>
 <li>Load balancer per agent type</li>
 <li>Stateless design enables easy scaling</li>
 </ul>
-<p><strong>Vertical Scaling</strong> —</p>
+<p><strong>Vertical Scaling</strong></p>
 <ul>
 <li>Increase concurrency limits</li>
 <li>Larger content chunks (current: 30K)</li>
 <li>More parallel page fetching</li>
 </ul>
-<p><strong>Optimizations for Scale</strong> —</p>
+<p><strong>Optimizations for Scale</strong></p>
 <ul>
 <li>Cache search results (1 hour TTL)</li>
 <li>Queue-based processing for bulk queries</li>
@@ -11809,21 +11806,21 @@ section::before {
 " lang="en-US" data-marpit-pagination="45" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="compliance--ethics-%F0%9F%8C%9F">Compliance &amp; Ethics <img class="emoji" draggable="false" alt="🌟" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f31f.svg" data-marp-twemoji=""/></h1>
-<p><strong>Responsible Web Scraping</strong> —</p>
+<p><strong>Responsible Web Scraping</strong></p>
 <ul>
 <li>Respect <code>robots.txt</code></li>
 <li>Rate limiting on URL fetches</li>
 <li>User-Agent identification</li>
 <li>No aggressive crawling</li>
 </ul>
-<p><strong>Data Privacy</strong> —</p>
+<p><strong>Data Privacy</strong></p>
 <ul>
 <li>No PII collection</li>
 <li>No user query logging (optional)</li>
 <li>API keys stored securely</li>
 <li>GDPR compliance considerations</li>
 </ul>
-<p><strong>Source Attribution</strong> —</p>
+<p><strong>Source Attribution</strong></p>
 <ul>
 <li>Always cite original sources</li>
 <li>Provide full URLs</li>
@@ -12361,7 +12358,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="47" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="migration-path-%F0%9F%9A%80">Migration Path <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f680.svg" data-marp-twemoji=""/></h1>
-<p><strong>From Direct LLM Usage</strong> —</p>
+<p><strong>From Direct LLM Usage</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># Before: Client-side LLM</span>
 response = openai.chat(<span class="hljs-string">&quot;Find climate statistics&quot;</span>)
 
@@ -12371,7 +12368,7 @@ response = requests.post(
     json={<span class="hljs-string">&quot;topic&quot;</span>: <span class="hljs-string">&quot;climate change&quot;</span>, <span class="hljs-string">&quot;min_stats&quot;</span>: <span class="hljs-number">10</span>}
 )
 </code></pre>
-<p><strong>From ChatGPT API</strong> —</p>
+<p><strong>From ChatGPT API</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># Before: ChatGPT (no verification)</span>
 stats = ask_chatgpt(<span class="hljs-string">&quot;climate statistics&quot;</span>)
 
@@ -12625,19 +12622,19 @@ section::before {
 " lang="en-US" data-marpit-pagination="48" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="roadmap-%F0%9F%97%BA%EF%B8%8F">Roadmap <img class="emoji" draggable="false" alt="🗺️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f5fa.svg" data-marp-twemoji=""/></h1>
-<p><strong>Q1 2025</strong> —</p>
+<p><strong>Q1 2025</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Perplexity API integration (built-in search)</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Range statistics (<code>value_max</code> field)</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Response streaming for faster UX</li>
 </ul>
-<p><strong>Q2 2025</strong> —</p>
+<p><strong>Q2 2025</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Multi-language support (ES, FR, DE, ZH)</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Caching layer for search results</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> GraphQL API option</li>
 </ul>
-<p><strong>Q3 2025</strong> —</p>
+<p><strong>Q3 2025</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Browser extension for fact-checking</li>
 <li><img class="emoji" draggable="false" alt="✨" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2728.svg" data-marp-twemoji=""/> Notion/Confluence integrations</li>
@@ -12888,21 +12885,21 @@ section::before {
 " lang="en-US" data-marpit-pagination="49" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="team--collaboration-%F0%9F%91%A5">Team &amp; Collaboration <img class="emoji" draggable="false" alt="👥" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f465.svg" data-marp-twemoji=""/></h1>
-<p><strong>Development Approach</strong> —</p>
+<p><strong>Development Approach</strong></p>
 <ul>
 <li>Agent-based architecture enables parallel work</li>
 <li>Clear interfaces between components</li>
 <li>Code reviews for quality</li>
 <li>Continuous integration (GitHub Actions)</li>
 </ul>
-<p><strong>Best Practices</strong> —</p>
+<p><strong>Best Practices</strong></p>
 <ul>
 <li>Branch protection on main</li>
 <li>Required passing tests for merge</li>
 <li>Semantic versioning</li>
 <li>Changelog maintenance</li>
 </ul>
-<p><strong>Communication</strong> —</p>
+<p><strong>Communication</strong></p>
 <ul>
 <li>Architecture decisions documented</li>
 <li>Weekly sync meetings</li>
@@ -13418,7 +13415,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="51" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="conclusion-%F0%9F%8E%93">Conclusion <img class="emoji" draggable="false" alt="🎓" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f393.svg" data-marp-twemoji=""/></h1>
-<p><strong>What We Built</strong> —</p>
+<p><strong>What We Built</strong></p>
 <ul>
 <li>Production-ready statistics verification system</li>
 <li>60-90% verification rate (vs 0% for LLM alone)</li>
@@ -13426,7 +13423,7 @@ section::before {
 <li>Flexible (multi-LLM, multi-search)</li>
 <li>Open source (MIT license)</li>
 </ul>
-<p><strong>Key Success Factors</strong> —</p>
+<p><strong>Key Success Factors</strong></p>
 <ul>
 <li>Real-time web search for current data</li>
 <li>Rigorous verification against sources</li>
@@ -13679,14 +13676,14 @@ section::before {
 ;" data-marpit-pagination-total="54">
 <h1 id="get-involved-%F0%9F%9A%80">Get Involved! <img class="emoji" draggable="false" alt="🚀" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f680.svg" data-marp-twemoji=""/></h1>
 <p><strong>Repository</strong>: <code>github.com/grokify/stats-agent-team</code></p>
-<p><strong>Quick Start</strong> —</p>
+<p><strong>Quick Start</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/grokify/stats-agent-team
 <span class="hljs-built_in">cd</span> stats-agent-team
 make install
 make build
 make run-all-eino
 </code></pre>
-<p><strong>Contribute</strong> —</p>
+<p><strong>Contribute</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="🐛" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f41b.svg" data-marp-twemoji=""/> Report bugs</li>
 <li><img class="emoji" draggable="false" alt="💡" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4a1.svg" data-marp-twemoji=""/> Suggest features</li>
@@ -13938,7 +13935,7 @@ section::before {
 " lang="en-US" data-marpit-pagination="53" style="--paginate:true;--theme:default;--style:@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap')
 ;" data-marpit-pagination-total="54">
 <h1 id="questions-%F0%9F%A4%94">Questions? <img class="emoji" draggable="false" alt="🤔" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f914.svg" data-marp-twemoji=""/></h1>
-<p><strong>Contact &amp; Resources</strong> —</p>
+<p><strong>Contact &amp; Resources</strong></p>
 <ul>
 <li><img class="emoji" draggable="false" alt="📧" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4e7.svg" data-marp-twemoji=""/> GitHub Issues for questions</li>
 <li><img class="emoji" draggable="false" alt="📚" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4da.svg" data-marp-twemoji=""/> Full documentation in README.md</li>
@@ -13946,7 +13943,7 @@ section::before {
 <li><img class="emoji" draggable="false" alt="💬" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f4ac.svg" data-marp-twemoji=""/> Discussions tab for community chat</li>
 </ul>
 <p><strong>Thank You!</strong> <img class="emoji" draggable="false" alt="🙏" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f64f.svg" data-marp-twemoji=""/></p>
-<p><strong>Special Thanks</strong> —</p>
+<p><strong>Special Thanks</strong></p>
 <ul>
 <li>Google ADK team</li>
 <li>Eino framework contributors</li>
