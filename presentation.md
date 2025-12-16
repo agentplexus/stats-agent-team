@@ -664,7 +664,7 @@ This was similar to the L L M challenge but for search. Web search A P Is cost m
 
 **Requirement**: Support multiple search providers
 
-**Options** —
+**Options**
 - **Serper API** - $50/month, 5K queries (recommended)
 - **SerpAPI** - Alternative with different pricing
 - **Mock** - For development without API keys
@@ -1668,7 +1668,7 @@ For those interested in diving deeper, we have comprehensive documentation. The 
 
 # Additional Resources 📖
 
-**Documentation** —
+**Documentation**
 - `README.md` - Setup & usage guide
 - `4_AGENT_ARCHITECTURE.md` - Architecture deep dive
 - `LLM_CONFIGURATION.md` - Multi-LLM setup
@@ -1676,7 +1676,7 @@ For those interested in diving deeper, we have comprehensive documentation. The 
 - `MCP_SERVER.md` - MCP integration guide
 - `DOCKER.md` - Container deployment
 
-**Example Queries** —
+**Example Queries**
 - Climate change statistics
 - AI industry trends
 - Healthcare outcomes
