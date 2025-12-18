@@ -10,8 +10,8 @@ require (
 	github.com/grokify/metasearch v0.4.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.1.0
-	google.golang.org/adk v0.2.0
-	google.golang.org/genai v1.39.0
+	google.golang.org/adk v0.3.0
+	google.golang.org/genai v1.40.0
 )
 
 require (
