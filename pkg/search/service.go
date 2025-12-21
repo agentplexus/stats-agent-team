@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/grokify/metasearch"
-	"github.com/grokify/metasearch/client"
+	"github.com/grokify/metaserp"
+	"github.com/grokify/metaserp/client"
 	"github.com/grokify/stats-agent-team/pkg/config"
 )
 
-// Service provides web search capabilities using metasearch
+// Service provides web search capabilities using metaserp
 type Service struct {
 	client *client.Client
 }
@@ -50,7 +50,7 @@ func NewService(cfg *config.Config) (*Service, error) {
 		return nil, fmt.Errorf("unsupported search provider: %s (use 'serper' or 'serpapi')", cfg.SearchProvider)
 	}
 
-	// Create metasearch client with specific engine
+	// Create metaserp client with specific engine
 	c, err := client.NewWithEngine(engineName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search client: %w", err)
@@ -67,8 +67,8 @@ func (s *Service) Search(ctx context.Context, query string, numResults int) (*Se
 		numResults = 10
 	}
 
-	// Perform normalized search using metasearch
-	result, err := s.client.SearchNormalized(ctx, metasearch.SearchParams{
+	// Perform normalized search using metaserp
+	result, err := s.client.SearchNormalized(ctx, metaserp.SearchParams{
 		Query:      query,
 		NumResults: numResults,
 		Language:   "en",
