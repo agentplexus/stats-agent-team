@@ -339,7 +339,7 @@ The research agent is our foundation. It performs web search using Google via Se
 
 **Implementation** (Google ADK)
 - No LLM required (pure search)
-- Integrates with Serper/SerpAPI via `metasearch` library
+- Integrates with Serper/SerpAPI via `metaserp` library
 - Filters for reputable domains
 - Returns 30 URLs by default
 
@@ -671,9 +671,9 @@ export LLM_MODEL="llama3:8b"
 ---
 
 <!--
-The third challenge was search integration. Web search A P Is are not free, and different organizations prefer different providers. We needed flexibility here too. The metasearch library provided the abstraction we needed.
+The third challenge was search integration. Web search A P Is are not free, and different organizations prefer different providers. We needed flexibility here too. The MetaSerp library provided the abstraction we needed.
 [PAUSE:1500]
-This was similar to the L L M challenge but for search. Web search A P Is cost money. Serper costs fifty dollars a month for five thousand queries. Serp A P I has different pricing tiers. Some teams already have contracts with specific providers. Others want to use mock data during development to avoid A P I costs. Each search A P I returns results in different formats, with different fields and structures. We needed the same kind of abstraction we built for L L Ms. The metasearch library solves this by providing a unified search interface. You call search normalized, and it returns a standard result format regardless of which provider is actually doing the search. This means the research agent doesn't need to know or care whether it's using Serper, Serp A P I, or a mock provider. Flexibility without complexity.
+This was similar to the L L M challenge but for search. Web search A P Is cost money. Serper costs fifty dollars a month for five thousand queries. Serp A P I has different pricing tiers. Some teams already have contracts with specific providers. Others want to use mock data during development to avoid A P I costs. Each search A P I returns results in different formats, with different fields and structures. We needed the same kind of abstraction we built for L L Ms. The MetaSerp library solves this by providing a unified search interface. You call search normalized, and it returns a standard result format regardless of which provider is actually doing the search. This means the research agent doesn't need to know or care whether it's using Serper, Serp A P I, or a mock provider. Flexibility without complexity.
 [PAUSE:2500]
 -->
 
@@ -688,7 +688,7 @@ This was similar to the L L M challenge but for search. Web search A P Is cost m
 
 **Challenge**: Different APIs, different response formats
 
-**Solution**: `metasearch` library abstraction
+**Solution**: `metaserp` library abstraction
 
 ```go
 // Unified interface - works with any provider
@@ -952,7 +952,7 @@ This J S O N output shows what a verified statistic looks like. The name field d
 <!--
 The technology choices were deliberate. Go provided concurrency and performance. A D K gave us robust L L M operations. Eino provided deterministic orchestration. Together they create a production-ready system.
 [PAUSE:1500]
-Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The gollm library abstracts multiple L L M providers so we're not locked into one vendor. And metasearch does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
+Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The gollm library abstracts multiple L L M providers so we're not locked into one vendor. And MetaSerp does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
 [PAUSE:2500]
 -->
 
@@ -973,7 +973,7 @@ Let's talk about why we chose each technology. Go was chosen for its concurrency
 
 **Integrations**
 - **gollm** - Multi-provider LLM abstraction
-- **metasearch** - Unified search API
+- **metaserp** - Unified search API
 
 ---
 
@@ -1343,7 +1343,7 @@ Community and extensibility were design goals. The multi-provider support means 
 
 **Easy to Extend**
 - Add new LLM provider: Implement `gollm` interface
-- Add new search provider: Implement `metasearch` interface
+- Add new search provider: Implement `metaserp` interface
 - Add new agent: Follow existing patterns
 - Add new verification rules: Extend verification agent
 

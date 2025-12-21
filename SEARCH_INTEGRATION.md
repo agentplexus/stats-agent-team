@@ -4,7 +4,7 @@ This document explains how the Statistics Agent Team integrates with web search 
 
 ## Overview
 
-The research agent uses the [grokify/metasearch](https://github.com/grokify/metasearch) library to perform web searches across multiple search engine providers. This enables the system to find real, verifiable statistics from reputable sources on the web.
+The research agent uses the [grokify/metaserp](https://github.com/grokify/metaserp) library (aka MetaSerp) to perform web searches across multiple search engine providers. This enables the system to find real, verifiable statistics from reputable sources on the web.
 
 ## Supported Search Providers
 
@@ -86,7 +86,7 @@ Research agent will use mock data. Set SERPER_API_KEY or SERPAPI_API_KEY to enab
 │  │   (pkg/search/service.go)          │    │
 │  │                                    │    │
 │  │   ┌──────────────────────────┐    │    │
-│  │   │  Metasearch Library      │    │    │
+│  │   │  MetaSerp Library        │    │    │
 │  │   │  - Serper Client         │    │    │
 │  │   │  - SerpAPI Client        │    │    │
 │  │   └──────────────────────────┘    │    │
@@ -113,7 +113,7 @@ Research agent will use mock data. Set SERPER_API_KEY or SERPAPI_API_KEY to enab
 
 1. **User requests statistics** on a topic (e.g., "climate change")
 2. **Research agent** calls search service
-3. **Search service** uses metasearch to query Serper/SerpAPI
+3. **Search service** uses MetaSerp to query Serper/SerpAPI
 4. **Search API** returns Google search results
 5. **Research agent** analyzes results (currently extracts metadata, will use LLM in future)
 6. **Candidate statistics** are created with:
@@ -318,7 +318,7 @@ Future enhancements planned:
 
 ## References
 
-- [Metasearch Library](https://github.com/grokify/metasearch)
+- [MetaSerp Library](https://github.com/grokify/metaserp)
 - [Serper API Docs](https://serper.dev/documentation)
 - [SerpAPI Docs](https://serpapi.com/search-api)
 - [Google ADK Docs](https://google.github.io/adk-docs/)

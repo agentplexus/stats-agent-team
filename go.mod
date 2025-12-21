@@ -8,7 +8,6 @@ require (
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/grokify/gollm v0.6.1
-	github.com/grokify/metasearch v0.4.0
 	github.com/grokify/metaserp v0.5.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.1.0

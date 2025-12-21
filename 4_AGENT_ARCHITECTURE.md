@@ -41,7 +41,7 @@ The Statistics Agent Team now uses a **4-agent architecture** with clear separat
 
 **Files**:
 - `agents/research/main.go` - Simplified to focus on search only
-- `pkg/search/service.go` - Metasearch integration
+- `pkg/search/service.go` - MetaSerp integration
 
 **API**:
 ```json
