@@ -196,7 +196,23 @@ func main() {
 		log.Fatalf("Failed to create research agent: %v", err)
 	}
 
-	// Start HTTP server with timeout
+	// Start A2A server if enabled (standard protocol for agent interoperability)
+	// Note: Research Agent is Tool-based, but wrapped in ADK for A2A compatibility
+	if cfg.A2AEnabled {
+		a2aServer, err := NewA2AServer(researchAgent, "9001")
+		if err != nil {
+			log.Printf("Failed to create A2A server: %v", err)
+		} else {
+			go func() {
+				if err := a2aServer.Start(context.Background()); err != nil {
+					log.Printf("A2A server error: %v", err)
+				}
+			}()
+			log.Println("Research Agent A2A server started on :9001")
+		}
+	}
+
+	// Start HTTP server with timeout (for custom security: SPIFFE, KYA, XAA, and observability)
 	server := &http.Server{
 		Addr:         ":8001",
 		ReadTimeout:  30 * time.Second,
@@ -213,8 +229,8 @@ func main() {
 	})
 
 	log.Println("Research Agent HTTP server starting on :8001")
-	log.Println("Role: Find relevant sources via web search (no LLM)")
-	log.Println("Next step: Synthesis Agent extracts statistics from these sources")
+	log.Println("Role: Find relevant sources via web search (Tool-based, no LLM reasoning)")
+	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}

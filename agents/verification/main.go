@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	// A2A and ADK imports
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
 	"google.golang.org/adk/tool"
@@ -216,7 +217,22 @@ func main() {
 		log.Fatalf("Failed to create verification agent: %v", err)
 	}
 
-	// Start HTTP server with timeout
+	// Start A2A server if enabled (standard protocol for agent interoperability)
+	if cfg.A2AEnabled {
+		a2aServer, err := NewA2AServer(verificationAgent, "9002")
+		if err != nil {
+			log.Printf("Failed to create A2A server: %v", err)
+		} else {
+			go func() {
+				if err := a2aServer.Start(context.Background()); err != nil {
+					log.Printf("A2A server error: %v", err)
+				}
+			}()
+			log.Println("Verification Agent A2A server started on :9002")
+		}
+	}
+
+	// Start HTTP server with timeout (for custom security: SPIFFE, KYA, XAA, and observability)
 	server := &http.Server{
 		Addr:         ":8002",
 		ReadTimeout:  45 * time.Second,
@@ -233,7 +249,7 @@ func main() {
 	})
 
 	log.Println("Verification Agent HTTP server starting on :8002")
-	log.Println("(ADK agent initialized for future A2A integration)")
+	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}

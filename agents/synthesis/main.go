@@ -378,7 +378,22 @@ func main() {
 		log.Fatalf("Failed to create synthesis agent: %v", err)
 	}
 
-	// Start HTTP server with timeout
+	// Start A2A server if enabled
+	if cfg.A2AEnabled {
+		a2aServer, err := NewA2AServer(synthesisAgent, "9004")
+		if err != nil {
+			log.Printf("Failed to create A2A server: %v", err)
+		} else {
+			go func() {
+				if err := a2aServer.Start(context.Background()); err != nil {
+					log.Printf("A2A server error: %v", err)
+				}
+			}()
+			log.Println("Synthesis Agent A2A server started on :9004")
+		}
+	}
+
+	// Start HTTP server with timeout (backward compatible)
 	server := &http.Server{
 		Addr:         ":8004",
 		ReadTimeout:  60 * time.Second,

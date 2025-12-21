@@ -335,7 +335,22 @@ func main() {
 		log.Fatalf("Failed to create orchestration agent: %v", err)
 	}
 
-	// Start HTTP server with timeout
+	// Start A2A server if enabled (standard protocol for agent interoperability)
+	if cfg.A2AEnabled {
+		a2aServer, err := NewA2AServer(orchestrationAgent, "9000")
+		if err != nil {
+			log.Printf("Failed to create A2A server: %v", err)
+		} else {
+			go func() {
+				if err := a2aServer.Start(context.Background()); err != nil {
+					log.Printf("A2A server error: %v", err)
+				}
+			}()
+			log.Println("ADK Orchestration Agent A2A server started on :9000")
+		}
+	}
+
+	// Start HTTP server with timeout (for custom security: SPIFFE, KYA, XAA, and observability)
 	server := &http.Server{
 		Addr:         ":8000",
 		ReadTimeout:  60 * time.Second,
@@ -351,8 +366,9 @@ func main() {
 		}
 	})
 
-	log.Println("Orchestration Agent HTTP server starting on :8000")
-	log.Println("(ADK agent initialized for future A2A integration)")
+	log.Println("ADK Orchestration Agent HTTP server starting on :8000")
+	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
+	log.Println("Note: Sub-agent calls currently use HTTP; see a2a.go for A2A client notes")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
