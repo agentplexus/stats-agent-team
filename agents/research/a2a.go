@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/a2aproject/a2a-go/a2a"
 	"github.com/a2aproject/a2a-go/a2asrv"
@@ -19,8 +20,6 @@ import (
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
-
-	"github.com/grokify/stats-agent-team/pkg/models"
 )
 
 // A2AServer represents the A2A protocol server for the Research Agent.
@@ -96,7 +95,7 @@ Do not analyze or summarize - just return the raw search results.`,
 }
 
 // Start starts the A2A server
-func (s *A2AServer) Start(ctx context.Context) error {
+func (s *A2AServer) Start(context.Context) error {
 	agentPath := "/invoke"
 
 	// Build agent card
@@ -130,7 +129,7 @@ func (s *A2AServer) Start(ctx context.Context) error {
 	// Health check
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	log.Printf("Research Agent A2A server starting on %s", s.baseURL.String())
@@ -138,7 +137,11 @@ func (s *A2AServer) Start(ctx context.Context) error {
 	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
 	log.Printf("  Note: Tool-based agent (search API), LLM only for A2A protocol compatibility")
 
-	return http.Serve(s.listener, mux)
+	server := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	return server.Serve(s.listener)
 }
 
 // URL returns the base URL
@@ -149,9 +152,4 @@ func (s *A2AServer) URL() string {
 // Close closes the server
 func (s *A2AServer) Close() error {
 	return s.listener.Close()
-}
-
-// Helper to convert search results to models format
-func searchResultsToModels(results []models.SearchResult) []models.SearchResult {
-	return results
 }

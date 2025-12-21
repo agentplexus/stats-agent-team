@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/a2aproject/a2a-go/a2a"
 	"github.com/a2aproject/a2a-go/a2asrv"
@@ -106,7 +107,7 @@ The workflow is deterministic (graph-based, not LLM-driven).`,
 }
 
 // Start starts the A2A server
-func (s *A2AServer) Start(ctx context.Context) error {
+func (s *A2AServer) Start(context.Context) error {
 	agentPath := "/invoke"
 
 	// Build agent card
@@ -140,7 +141,7 @@ func (s *A2AServer) Start(ctx context.Context) error {
 	// Health check
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	log.Printf("Eino Orchestration Agent A2A server starting on %s", s.baseURL.String())
@@ -148,7 +149,11 @@ func (s *A2AServer) Start(ctx context.Context) error {
 	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
 	log.Printf("  Note: Uses Eino graph-based orchestration (deterministic, not LLM-driven)")
 
-	return http.Serve(s.listener, mux)
+	server := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	return server.Serve(s.listener)
 }
 
 // URL returns the base URL

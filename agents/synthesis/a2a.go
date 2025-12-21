@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/a2aproject/a2a-go/a2a"
 	"github.com/a2aproject/a2a-go/a2asrv"
@@ -39,7 +40,7 @@ func NewA2AServer(agent *SynthesisAgent, port string) (*A2AServer, error) {
 }
 
 // Start starts the A2A server
-func (s *A2AServer) Start(ctx context.Context) error {
+func (s *A2AServer) Start(context.Context) error {
 	agentPath := "/invoke"
 
 	// Build agent card with skills extracted from the ADK agent
@@ -73,14 +74,18 @@ func (s *A2AServer) Start(ctx context.Context) error {
 	// Add health check endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	log.Printf("Synthesis Agent A2A server starting on %s", s.baseURL.String())
 	log.Printf("  Agent Card: %s%s", s.baseURL.String(), a2asrv.WellKnownAgentCardPath)
 	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
 
-	return http.Serve(s.listener, mux)
+	server := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	return server.Serve(s.listener)
 }
 
 // URL returns the base URL of the A2A server
