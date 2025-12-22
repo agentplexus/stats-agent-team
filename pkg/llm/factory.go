@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/grokify/fluxllm"
-	fluxllmhook "github.com/grokify/observai/integrations/fluxllm"
-	"github.com/grokify/observai/llmops"
+	"github.com/grokify/metallm"
+	metallmhook "github.com/grokify/metaobserve/integrations/metallm"
+	"github.com/grokify/metaobserve/llmops"
 	"google.golang.org/adk/model"
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/genai"
@@ -15,15 +15,15 @@ import (
 	"github.com/grokify/stats-agent-team/pkg/llm/adapters"
 
 	// Import observability providers (driver registration via init())
-	_ "github.com/grokify/observai/llmops/langfuse"
-	_ "github.com/grokify/observai/llmops/opik"
-	_ "github.com/grokify/observai/llmops/phoenix"
+	_ "github.com/grokify/metaobserve/llmops/langfuse"
+	_ "github.com/grokify/metaobserve/llmops/opik"
+	_ "github.com/grokify/metaobserve/llmops/phoenix"
 )
 
 // ModelFactory creates LLM models based on configuration
 type ModelFactory struct {
 	cfg      *config.Config
-	obsHook  fluxllm.ObservabilityHook
+	obsHook  metallm.ObservabilityHook
 	obsClose func() error
 }
 
@@ -42,7 +42,7 @@ func NewModelFactory(cfg *config.Config) *ModelFactory {
 }
 
 // initObservability initializes the observability provider and returns a hook
-func (mf *ModelFactory) initObservability() (fluxllm.ObservabilityHook, func() error) {
+func (mf *ModelFactory) initObservability() (metallm.ObservabilityHook, func() error) {
 	opts := []llmops.ClientOption{
 		llmops.WithProjectName(mf.cfg.ObservabilityProject),
 	}
@@ -62,7 +62,7 @@ func (mf *ModelFactory) initObservability() (fluxllm.ObservabilityHook, func() e
 		return nil, nil
 	}
 
-	return fluxllmhook.NewHook(provider), provider.Close
+	return metallmhook.NewHook(provider), provider.Close
 }
 
 // Close cleans up resources (call when factory is no longer needed)
@@ -112,7 +112,7 @@ func (mf *ModelFactory) createGeminiModel(ctx context.Context) (model.LLM, error
 	})
 }
 
-// createClaudeModel creates a Claude model using FluxLLM
+// createClaudeModel creates a Claude model using MetaLLM
 func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 	apiKey := mf.cfg.ClaudeAPIKey
 	if apiKey == "" {
@@ -128,7 +128,7 @@ func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 		modelName = "claude-3-5-sonnet-20241022"
 	}
 
-	return adapters.NewFluxLLMAdapterWithConfig(adapters.FluxLLMAdapterConfig{
+	return adapters.NewMetaLLMAdapterWithConfig(adapters.MetaLLMAdapterConfig{
 		ProviderName:      "anthropic",
 		APIKey:            apiKey,
 		ModelName:         modelName,
@@ -136,7 +136,7 @@ func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 	})
 }
 
-// createOpenAIModel creates an OpenAI model using FluxLLM
+// createOpenAIModel creates an OpenAI model using MetaLLM
 func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
 	apiKey := mf.cfg.OpenAIAPIKey
 	if apiKey == "" {
@@ -152,7 +152,7 @@ func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
 		modelName = "gpt-4o-mini" // Use mini for cost efficiency
 	}
 
-	return adapters.NewFluxLLMAdapterWithConfig(adapters.FluxLLMAdapterConfig{
+	return adapters.NewMetaLLMAdapterWithConfig(adapters.MetaLLMAdapterConfig{
 		ProviderName:      "openai",
 		APIKey:            apiKey,
 		ModelName:         modelName,
@@ -160,7 +160,7 @@ func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
 	})
 }
 
-// createXAIModel creates an xAI Grok model using FluxLLM
+// createXAIModel creates an xAI Grok model using MetaLLM
 func (mf *ModelFactory) createXAIModel() (model.LLM, error) {
 	apiKey := mf.cfg.XAIAPIKey
 	if apiKey == "" {
@@ -176,7 +176,7 @@ func (mf *ModelFactory) createXAIModel() (model.LLM, error) {
 		modelName = "grok-3"
 	}
 
-	return adapters.NewFluxLLMAdapterWithConfig(adapters.FluxLLMAdapterConfig{
+	return adapters.NewMetaLLMAdapterWithConfig(adapters.MetaLLMAdapterConfig{
 		ProviderName:      "xai",
 		APIKey:            apiKey,
 		ModelName:         modelName,
@@ -184,7 +184,7 @@ func (mf *ModelFactory) createXAIModel() (model.LLM, error) {
 	})
 }
 
-// createOllamaModel creates an Ollama model using FluxLLM
+// createOllamaModel creates an Ollama model using MetaLLM
 func (mf *ModelFactory) createOllamaModel() (model.LLM, error) {
 	modelName := mf.cfg.LLMModel
 	if modelName == "" {
@@ -192,8 +192,8 @@ func (mf *ModelFactory) createOllamaModel() (model.LLM, error) {
 	}
 
 	// Ollama doesn't need an API key for local instances
-	// FluxLLM will use the base URL from environment or default to localhost
-	return adapters.NewFluxLLMAdapterWithConfig(adapters.FluxLLMAdapterConfig{
+	// MetaLLM will use the base URL from environment or default to localhost
+	return adapters.NewMetaLLMAdapterWithConfig(adapters.MetaLLMAdapterConfig{
 		ProviderName:      "ollama",
 		APIKey:            "",
 		ModelName:         modelName,

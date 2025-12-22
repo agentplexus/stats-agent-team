@@ -9,9 +9,9 @@ The Statistics Agent Team now supports **4 LLM providers** through a unified int
 | Provider | Status | Default Model | Integration Method |
 |----------|--------|---------------|-------------------|
 | **Gemini** | ✅ Working | `gemini-2.0-flash-exp` | Google ADK (native) |
-| **Claude** | ✅ Working | `claude-3-5-sonnet-20241022` | gollm adapter |
-| **OpenAI** | ✅ Working | `gpt-4o-mini` | gollm adapter |
-| **Ollama** | ✅ Working | `llama3.2` | gollm adapter |
+| **Claude** | ✅ Working | `claude-3-5-sonnet-20241022` | MetaLLM adapter |
+| **OpenAI** | ✅ Working | `gpt-4o-mini` | MetaLLM adapter |
+| **Ollama** | ✅ Working | `llama3.2` | MetaLLM adapter |
 
 ## Quick Start
 
@@ -65,9 +65,9 @@ The system uses **two integration paths**:
    - Uses `google.golang.org/adk/model/gemini`
    - Native ADK support, most efficient
 
-2. **Claude, OpenAI, Ollama** → Via gollm adapter
-   - Uses `github.com/grokify/gollm` v0.5.1
-   - Adapter: `pkg/llm/adapters/gollm_adapter.go`
+2. **Claude, OpenAI, Ollama** → Via MetaLLM adapter
+   - Uses `github.com/grokify/metallm` v0.8.0
+   - Adapter: `pkg/llm/adapters/metallm_adapter.go`
    - Implements ADK's `model.LLM` interface
 
 ### Code Organization
@@ -76,8 +76,8 @@ The system uses **two integration paths**:
 pkg/llm/
 ├── factory.go              # LLM factory with multi-provider support
 └── adapters/
-    └── gollm_adapter.go    # ADK interface adapter for gollm
-                            # (Self-contained, can move to gollm repo)
+    └── metallm_adapter.go  # ADK interface adapter for MetaLLM
+                            # (Self-contained, can move to MetaLLM repo)
 ```
 
 ### How It Works
@@ -89,31 +89,31 @@ func (mf *ModelFactory) CreateModel(ctx context.Context) (model.LLM, error) {
     case "gemini":
         return mf.createGeminiModel(ctx)  // Native ADK
     case "claude":
-        return adapters.NewGollmAdapter("anthropic", apiKey, model)
+        return adapters.NewMetaLLMAdapter("anthropic", apiKey, model)
     case "openai":
-        return adapters.NewGollmAdapter("openai", apiKey, model)
+        return adapters.NewMetaLLMAdapter("openai", apiKey, model)
     case "ollama":
-        return adapters.NewGollmAdapter("ollama", "", model)
+        return adapters.NewMetaLLMAdapter("ollama", "", model)
     }
 }
 ```
 
-### gollm Adapter
+### MetaLLM Adapter
 
-The adapter (`pkg/llm/adapters/gollm_adapter.go`) is **self-contained** and portable:
+The adapter (`pkg/llm/adapters/metallm_adapter.go`) is **self-contained** and portable:
 
 ```go
-type GollmAdapter struct {
-    client *gollm.ChatClient
+type MetaLLMAdapter struct {
+    client *metallm.ChatClient
     model  string
 }
 
 // Implements google.golang.org/adk/model.LLM interface
-func (g *GollmAdapter) GenerateContent(ctx context.Context,
+func (m *MetaLLMAdapter) GenerateContent(ctx context.Context,
     req *model.LLMRequest, stream bool) iter.Seq2[*model.LLMResponse, error]
 ```
 
-**Design Intent:** This entire `adapters/` directory can be moved to `gollm` as `pkg/adk/` for broader ecosystem use.
+**Design Intent:** This entire `adapters/` directory can be moved to `metallm` as `pkg/adk/` for broader ecosystem use.
 
 ## Provider Comparison
 
@@ -278,10 +278,10 @@ export LLM_MODEL=llama3.2
 ## Future Enhancements
 
 ### Planned
-- [ ] Move `pkg/llm/adapters/` to `gollm` as `pkg/adk/`
+- [ ] Move `pkg/llm/adapters/` to `metallm` as `pkg/adk/`
 - [ ] Add streaming support for faster responses
 - [ ] Add response caching to reduce API costs
-- [ ] Support for additional gollm providers (AWS Bedrock, Azure, etc.)
+- [ ] Support for additional metallm providers (AWS Bedrock, Azure, etc.)
 
 ### Possible
 - [ ] Automatic failover between providers
@@ -293,10 +293,10 @@ export LLM_MODEL=llama3.2
 
 - **[LLM_INTEGRATION.md](LLM_INTEGRATION.md)** - Complete LLM integration guide
 - **[4_AGENT_ARCHITECTURE.md](4_AGENT_ARCHITECTURE.md)** - 4-agent architecture details
-- **[gollm repository](https://github.com/grokify/gollm)** - Multi-provider LLM library
+- **[MetaLLM repository](https://github.com/grokify/metallm)** - Multi-provider LLM library
 
 ## Credits
 
 - **Google ADK**: Native Gemini support
-- **gollm**: Multi-provider abstraction layer
+- **MetaLLM**: Multi-provider abstraction layer
 - Integration design: Unified adapter pattern for portability

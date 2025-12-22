@@ -11,22 +11,22 @@ All agents support the following LLM providers:
 | Provider | Model | Configuration | Integration |
 |----------|-------|---------------|-------------|
 | **Gemini** (Default) | `gemini-2.0-flash-exp` | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | Google ADK (native) ✅ |
-| **Claude** | `claude-3-5-sonnet-20241022` | `CLAUDE_API_KEY` or `ANTHROPIC_API_KEY` | gollm adapter ✅ |
-| **OpenAI** | `gpt-4o-mini` | `OPENAI_API_KEY` | gollm adapter ✅ |
-| **Ollama** | `llama3.2` | `OLLAMA_URL` (local) | gollm adapter ✅ |
+| **Claude** | `claude-3-5-sonnet-20241022` | `CLAUDE_API_KEY` or `ANTHROPIC_API_KEY` | MetaLLM adapter ✅ |
+| **OpenAI** | `gpt-4o-mini` | `OPENAI_API_KEY` | MetaLLM adapter ✅ |
+| **Ollama** | `llama3.2` | `OLLAMA_URL` (local) | MetaLLM adapter ✅ |
 
 ## Architecture
 
-### Multi-Provider Support via gollm
+### Multi-Provider Support via MetaLLM
 
 The system uses **two integration paths**:
 
 1. **Gemini**: Direct via Google ADK (native)
-2. **Claude, OpenAI, Ollama**: Via `gollm` adapter (`pkg/llm/adapters/gollm_adapter.go`)
+2. **Claude, OpenAI, Ollama**: Via `metallm` adapter (`pkg/llm/adapters/metallm_adapter.go`)
 
-The `gollm` adapter implements the ADK `model.LLM` interface, allowing seamless multi-provider support.
+The `metallm` adapter implements the ADK `model.LLM` interface, allowing seamless multi-provider support.
 
-**Design Note:** The `pkg/llm/adapters/` directory is self-contained and can be moved to the `gollm` repository as `pkg/adk/` for broader reuse.
+**Design Note:** The `pkg/llm/adapters/` directory is self-contained and can be moved to the `metallm` repository as `pkg/adk/` for broader reuse.
 
 ### Shared Base Agent (`pkg/agent/base.go`)
 

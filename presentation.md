@@ -605,12 +605,12 @@ This challenge emerged from real-world requirements. Some organizations are all 
 
 **Challenge**: Each provider has different APIs, models, rate limits
 
-**Solution**: Abstraction via `fluxllm` library
+**Solution**: Abstraction via `metallm` library
 
 ---
 
 <!--
-Here's how the abstraction works. The fluxllm library provides a unified interface. We just select a provider via environment variable. The agents don't care which L L M they're using, they just call the standard interface.
+Here's how the abstraction works. The metallm library provides a unified interface. We just select a provider via environment variable. The agents don't care which L L M they're using, they just call the standard interface.
 [PAUSE:1500]
 The factory pattern was key to solving this cleanly. We created a create L L M function that takes a config object and returns a generic client interface. Inside, it switches on the L L M provider string and calls the appropriate provider-specific creation function. Each function handles that provider's quirks: Gemini needs a Google A P I key, Claude needs an Anthropic key, Ollama needs a local U R L and doesn't need an A P I key at all. But they all return the same interface, so the synthesis and verification agents can use any provider without changing their code. Want to test Claude versus Gemini? Just change one environment variable. This flexibility made development much faster and enabled users to choose based on their constraints.
 [PAUSE:2500]
@@ -952,7 +952,7 @@ This J S O N output shows what a verified statistic looks like. The name field d
 <!--
 The technology choices were deliberate. Go provided concurrency and performance. A D K gave us robust L L M operations. Eino provided deterministic orchestration. Together they create a production-ready system.
 [PAUSE:1500]
-Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The gollm library abstracts multiple L L M providers so we're not locked into one vendor. And MetaSerp does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
+Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The Meta L L M library abstracts multiple L L M providers so we're not locked into one vendor. And MetaSerp does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
 [PAUSE:2500]
 -->
 
@@ -972,8 +972,8 @@ Let's talk about why we chose each technology. Go was chosen for its concurrency
 - **Huma v2** - OpenAPI 3.1 generation
 
 **Integrations**
-- **fluxllm** - Multi-provider LLM abstraction
-- **observai** - Unified LLM observability (Opik, Langfuse, Phoenix)
+- **metallm** - Multi-provider LLM abstraction
+- **metaobserve** - Unified LLM observability (Opik, Langfuse, Phoenix)
 - **metaserp** - Unified search API
 
 ---
@@ -1087,7 +1087,7 @@ Orchestration: Target met (10 verified)
 - Docker health checks in production
 - Timeout monitoring (60s max)
 
-**LLM Observability** (via ObservAI)
+**LLM Observability** (via MetaObserve)
 - Automatic tracing of all LLM calls
 - Token usage and cost tracking
 - Supports: Comet Opik, Langfuse, Arize Phoenix
@@ -1348,7 +1348,7 @@ Community and extensibility were design goals. The multi-provider support means 
 # Extensibility & Contributions 🤝
 
 **Easy to Extend**
-- Add new LLM provider: Implement `fluxllm` interface
+- Add new LLM provider: Implement `metallm` interface
 - Add new search provider: Implement `metaserp` interface
 - Add new agent: Follow existing patterns
 - Add new verification rules: Extend verification agent
@@ -1477,7 +1477,7 @@ Monitoring in production needs more than logs. We'd add metrics collection. Trac
     - Agent health check failures
     - API quota exhaustion
 3. **Tools**
-    - ObservAI for LLM tracing (Opik, Langfuse, Phoenix) ✅
+    - MetaObserve for LLM tracing (Opik, Langfuse, Phoenix) ✅
     - Prometheus for metrics (future)
     - Grafana for dashboards (future)
     - Jaeger for distributed tracing (future)

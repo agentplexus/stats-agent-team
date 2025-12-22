@@ -113,7 +113,7 @@ The system implements a **4-agent architecture** with clear separation of concer
 - ✅ **Google ADK integration** - For LLM-based agents
 - ✅ **Eino framework** - Deterministic graph orchestration ⭐ Recommended
 - ✅ **A2A Protocol** - Agent-to-Agent interoperability (Google standard) 🔗
-- ✅ **LLM Observability** - ObservAI integration (Opik, Langfuse, Phoenix) 👁️
+- ✅ **LLM Observability** - MetaObserve integration (Opik, Langfuse, Phoenix) 👁️
 - ✅ **Huma v2** - OpenAPI 3.1 docs for Direct agent
 - ✅ **MCP Server** - Integration with Claude Code and other MCP clients
 - ✅ **Docker deployment** - Easy containerized setup 🐳
@@ -510,8 +510,8 @@ stats-agent/
 ├── pkg/
 │   ├── config/            # Configuration management
 │   ├── direct/            # Direct LLM search service
-│   ├── llm/               # Multi-provider LLM factory (FluxLLM + ObservAI)
-│   │   └── adapters/      # FluxLLM adapter for ADK integration
+│   ├── llm/               # Multi-provider LLM factory (MetaLLM + MetaObserve)
+│   │   └── adapters/      # MetaLLM adapter for ADK integration
 │   ├── models/            # Shared data models
 │   └── orchestration/     # Orchestration logic
 ├── main.go                # CLI entry point
@@ -548,10 +548,10 @@ make clean
   - [Google ADK (Agent Development Kit)](https://github.com/google/adk-go) - LLM-based agents + A2A protocol ⭐
   - [Eino](https://github.com/cloudwego/eino) - Deterministic graph orchestration ⭐
 - **LLM Integration**:
-  - [FluxLLM](https://github.com/grokify/fluxllm) - Multi-provider LLM abstraction
+  - [MetaLLM](https://github.com/grokify/metallm) - Multi-provider LLM abstraction
   - Supports: Gemini, Claude, OpenAI, xAI Grok, Ollama
 - **Observability**:
-  - [ObservAI](https://github.com/grokify/observai) - Unified LLM observability
+  - [MetaObserve](https://github.com/grokify/metaobserve) - Unified LLM observability
   - Supports: Comet Opik, Langfuse, Arize Phoenix
 - **Protocols**:
   - HTTP - Custom security, flexibility (ports 800x)
@@ -604,8 +604,8 @@ Contributions welcome! Please:
 
 - Built with [Google ADK (Agent Development Kit)](https://github.com/google/adk-go)
 - Uses [Eino](https://github.com/cloudwego/eino) for deterministic orchestration
-- Multi-LLM support via [FluxLLM](https://github.com/grokify/fluxllm)
-- LLM observability via [ObservAI](https://github.com/grokify/observai)
+- Multi-LLM support via [MetaLLM](https://github.com/grokify/metallm)
+- LLM observability via [MetaObserve](https://github.com/grokify/metaobserve)
 - A2A protocol for agent interoperability
 - Inspired by multi-agent collaboration frameworks
 

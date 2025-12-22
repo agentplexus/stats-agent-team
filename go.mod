@@ -7,9 +7,9 @@ require (
 	github.com/cloudwego/eino v0.7.11
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/go-chi/chi/v5 v5.2.3
-	github.com/grokify/fluxllm v0.7.1
+	github.com/grokify/metallm v0.8.0
+	github.com/grokify/metaobserve v0.3.0
 	github.com/grokify/metaserp v0.5.0
-	github.com/grokify/observai v0.2.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.1.0
 	google.golang.org/adk v0.3.0
