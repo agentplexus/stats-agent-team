@@ -11,8 +11,8 @@ import (
 
 	"github.com/jessevdk/go-flags"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/models"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // Options defines the CLI options structure

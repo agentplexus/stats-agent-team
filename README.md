@@ -113,7 +113,7 @@ The system implements a **4-agent architecture** with clear separation of concer
 - ✅ **Google ADK integration** - For LLM-based agents
 - ✅ **Eino framework** - Deterministic graph orchestration ⭐ Recommended
 - ✅ **A2A Protocol** - Agent-to-Agent interoperability (Google standard) 🔗
-- ✅ **LLM Observability** - MetaObserve integration (Opik, Langfuse, Phoenix) 👁️
+- ✅ **LLM Observability** - OmniObserve integration (Opik, Langfuse, Phoenix) 👁️
 - ✅ **Huma v2** - OpenAPI 3.1 docs for Direct agent
 - ✅ **MCP Server** - Integration with Claude Code and other MCP clients
 - ✅ **Docker deployment** - Easy containerized setup 🐳
@@ -165,7 +165,7 @@ The system returns verified statistics in JSON format:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/grokify/stats-agent.git
+git clone https://github.com/agentplexus/stats-agent.git
 cd stats-agent
 ```
 
@@ -510,8 +510,8 @@ stats-agent/
 ├── pkg/
 │   ├── config/            # Configuration management
 │   ├── direct/            # Direct LLM search service
-│   ├── llm/               # Multi-provider LLM factory (MetaLLM + MetaObserve)
-│   │   └── adapters/      # MetaLLM adapter for ADK integration
+│   ├── llm/               # Multi-provider LLM factory (OmniLLM + OmniObserve)
+│   │   └── adapters/      # OmniLLM adapter for ADK integration
 │   ├── models/            # Shared data models
 │   └── orchestration/     # Orchestration logic
 ├── main.go                # CLI entry point
@@ -548,16 +548,16 @@ make clean
   - [Google ADK (Agent Development Kit)](https://github.com/google/adk-go) - LLM-based agents + A2A protocol ⭐
   - [Eino](https://github.com/cloudwego/eino) - Deterministic graph orchestration ⭐
 - **LLM Integration**:
-  - [MetaLLM](https://github.com/grokify/metallm) - Multi-provider LLM abstraction
+  - [OmniLLM](https://github.com/agentplexus/omnillm) - Multi-provider LLM abstraction
   - Supports: Gemini, Claude, OpenAI, xAI Grok, Ollama
 - **Observability**:
-  - [MetaObserve](https://github.com/grokify/metaobserve) - Unified LLM observability
+  - [OmniObserve](https://github.com/agentplexus/omniobserve) - Unified LLM observability
   - Supports: Comet Opik, Langfuse, Arize Phoenix
 - **Protocols**:
   - HTTP - Custom security, flexibility (ports 800x)
   - A2A - Agent-to-Agent interoperability (ports 900x)
 - **Search**:
-  - [MetaSerp](https://github.com/grokify/metaserp) - Unified serp API abstraction
+  - [OmniSerp](https://github.com/agentplexus/omniserp) - Unified serp API abstraction
   - Supports: Serper.dev, SerpAPI 
 
 ## How It Works
@@ -606,24 +606,24 @@ Contributions welcome! Please:
 
 - Built with [Google ADK (Agent Development Kit)](https://github.com/google/adk-go)
 - Uses [Eino](https://github.com/cloudwego/eino) for deterministic orchestration
-- Multi-LLM support via [MetaLLM](https://github.com/grokify/metallm)
-- LLM observability via [MetaObserve](https://github.com/grokify/metaobserve)
+- Multi-LLM support via [OmniLLM](https://github.com/agentplexus/omnillm)
+- LLM observability via [OmniObserve](https://github.com/agentplexus/omniobserve)
 - A2A protocol for agent interoperability
 - Inspired by multi-agent collaboration frameworks
 
- [used-by-svg]: https://sourcegraph.com/github.com/grokify/stats-agent-team/-/badge.svg
- [used-by-url]: https://sourcegraph.com/github.com/grokify/stats-agent-team?badge
- [build-status-svg]: https://github.com/grokify/stats-agent-team/actions/workflows/ci.yaml/badge.svg?branch=main
- [build-status-url]: https://github.com/grokify/stats-agent-team/actions/workflows/ci.yaml
- [lint-status-svg]: https://github.com/grokify/stats-agent-team/actions/workflows/lint.yaml/badge.svg?branch=main
- [lint-status-url]: https://github.com/grokify/stats-agent-team/actions/workflows/lint.yaml
- [goreport-svg]: https://goreportcard.com/badge/github.com/grokify/stats-agent-team
- [goreport-url]: https://goreportcard.com/report/github.com/grokify/stats-agent-team
- [codeclimate-status-svg]: https://codeclimate.com/github/grokify/stats-agent-team/badges/gpa.svg
- [codeclimate-status-url]: https://codeclimate.com/github/grokify/stats-agent-team
- [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/grokify/stats-agent-team
- [docs-godoc-url]: https://pkg.go.dev/github.com/grokify/stats-agent-team
- [loc-svg]: https://tokei.rs/b1/github/grokify/stats-agent-team
- [repo-url]: https://github.com/grokify/stats-agent-team
+ [used-by-svg]: https://sourcegraph.com/github.com/agentplexus/stats-agent-team/-/badge.svg
+ [used-by-url]: https://sourcegraph.com/github.com/agentplexus/stats-agent-team?badge
+ [build-status-svg]: https://github.com/agentplexus/stats-agent-team/actions/workflows/ci.yaml/badge.svg?branch=main
+ [build-status-url]: https://github.com/agentplexus/stats-agent-team/actions/workflows/ci.yaml
+ [lint-status-svg]: https://github.com/agentplexus/stats-agent-team/actions/workflows/lint.yaml/badge.svg?branch=main
+ [lint-status-url]: https://github.com/agentplexus/stats-agent-team/actions/workflows/lint.yaml
+ [goreport-svg]: https://goreportcard.com/badge/github.com/agentplexus/stats-agent-team
+ [goreport-url]: https://goreportcard.com/report/github.com/agentplexus/stats-agent-team
+ [codeclimate-status-svg]: https://codeclimate.com/github/agentplexus/stats-agent-team/badges/gpa.svg
+ [codeclimate-status-url]: https://codeclimate.com/github/agentplexus/stats-agent-team
+ [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/agentplexus/stats-agent-team
+ [docs-godoc-url]: https://pkg.go.dev/github.com/agentplexus/stats-agent-team
+ [loc-svg]: https://tokei.rs/b1/github/agentplexus/stats-agent-team
+ [repo-url]: https://github.com/agentplexus/stats-agent-team
  [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
- [license-url]: https://github.com/grokify/stats-agent-team/blob/master/LICENSE
+ [license-url]: https://github.com/agentplexus/stats-agent-team/blob/master/LICENSE

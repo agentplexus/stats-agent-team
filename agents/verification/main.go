@@ -15,9 +15,9 @@ import (
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
 
-	agentbase "github.com/grokify/stats-agent-team/pkg/agent"
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/models"
+	agentbase "github.com/agentplexus/stats-agent-team/pkg/agent"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // VerificationAgent uses ADK for validating statistics

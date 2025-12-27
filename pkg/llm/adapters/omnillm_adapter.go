@@ -5,69 +5,69 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/grokify/metallm"
-	"github.com/grokify/metallm/provider"
+	"github.com/agentplexus/omnillm"
+	"github.com/agentplexus/omnillm/provider"
 	"google.golang.org/adk/model"
 	"google.golang.org/genai"
 )
 
-// MetaLLMAdapterConfig holds configuration for creating a MetaLLM adapter
-type MetaLLMAdapterConfig struct {
+// OmniLLMAdapterConfig holds configuration for creating a OmniLLM adapter
+type OmniLLMAdapterConfig struct {
 	ProviderName      string
 	APIKey            string
 	ModelName         string
-	ObservabilityHook metallm.ObservabilityHook
+	ObservabilityHook omnillm.ObservabilityHook
 }
 
-// MetaLLMAdapter adapts MetaLLM ChatClient to ADK's LLM interface
-type MetaLLMAdapter struct {
-	client *metallm.ChatClient
+// OmniLLMAdapter adapts OmniLLM ChatClient to ADK's LLM interface
+type OmniLLMAdapter struct {
+	client *omnillm.ChatClient
 	model  string
 }
 
-// NewMetaLLMAdapter creates a new MetaLLM adapter
-func NewMetaLLMAdapter(providerName, apiKey, modelName string) (*MetaLLMAdapter, error) {
-	return NewMetaLLMAdapterWithConfig(MetaLLMAdapterConfig{
+// NewOmniLLMAdapter creates a new OmniLLM adapter
+func NewOmniLLMAdapter(providerName, apiKey, modelName string) (*OmniLLMAdapter, error) {
+	return NewOmniLLMAdapterWithConfig(OmniLLMAdapterConfig{
 		ProviderName: providerName,
 		APIKey:       apiKey,
 		ModelName:    modelName,
 	})
 }
 
-// NewMetaLLMAdapterWithConfig creates a new MetaLLM adapter with full configuration
-func NewMetaLLMAdapterWithConfig(cfg MetaLLMAdapterConfig) (*MetaLLMAdapter, error) {
+// NewOmniLLMAdapterWithConfig creates a new OmniLLM adapter with full configuration
+func NewOmniLLMAdapterWithConfig(cfg OmniLLMAdapterConfig) (*OmniLLMAdapter, error) {
 	// For ollama, API key is optional
 	if cfg.ProviderName != "ollama" && cfg.APIKey == "" {
 		return nil, fmt.Errorf("%s API key is required", cfg.ProviderName)
 	}
 
-	// Create MetaLLM config
-	config := metallm.ClientConfig{
-		Provider:          metallm.ProviderName(cfg.ProviderName),
+	// Create OmniLLM config
+	config := omnillm.ClientConfig{
+		Provider:          omnillm.ProviderName(cfg.ProviderName),
 		APIKey:            cfg.APIKey,
 		ObservabilityHook: cfg.ObservabilityHook,
 	}
 
-	client, err := metallm.NewClient(config)
+	client, err := omnillm.NewClient(config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create MetaLLM client: %w", err)
+		return nil, fmt.Errorf("failed to create OmniLLM client: %w", err)
 	}
 
-	return &MetaLLMAdapter{
+	return &OmniLLMAdapter{
 		client: client,
 		model:  cfg.ModelName,
 	}, nil
 }
 
 // Name returns the model name
-func (m *MetaLLMAdapter) Name() string {
+func (m *OmniLLMAdapter) Name() string {
 	return m.model
 }
 
 // GenerateContent implements the LLM interface
-func (m *MetaLLMAdapter) GenerateContent(ctx context.Context, req *model.LLMRequest, stream bool) iter.Seq2[*model.LLMResponse, error] {
+func (m *OmniLLMAdapter) GenerateContent(ctx context.Context, req *model.LLMRequest, stream bool) iter.Seq2[*model.LLMResponse, error] {
 	return func(yield func(*model.LLMResponse, error) bool) {
-		// Convert ADK request to MetaLLM request
+		// Convert ADK request to OmniLLM request
 		messages := make([]provider.Message, 0)
 
 		for _, content := range req.Contents {
@@ -89,20 +89,20 @@ func (m *MetaLLMAdapter) GenerateContent(ctx context.Context, req *model.LLMRequ
 			})
 		}
 
-		// Create MetaLLM request
-		metalReq := &provider.ChatCompletionRequest{
+		// Create OmniLLM request
+		omniReq := &provider.ChatCompletionRequest{
 			Model:    m.model,
 			Messages: messages,
 		}
 
-		// Call MetaLLM API
-		resp, err := m.client.CreateChatCompletion(ctx, metalReq)
+		// Call OmniLLM API
+		resp, err := m.client.CreateChatCompletion(ctx, omniReq)
 		if err != nil {
-			yield(nil, fmt.Errorf("MetaLLM API error: %w", err))
+			yield(nil, fmt.Errorf("OmniLLM API error: %w", err))
 			return
 		}
 
-		// Convert MetaLLM response to ADK response
+		// Convert OmniLLM response to ADK response
 		if len(resp.Choices) > 0 {
 			adkResp := &model.LLMResponse{
 				Content: &genai.Content{

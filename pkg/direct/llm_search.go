@@ -13,9 +13,9 @@ import (
 	"google.golang.org/adk/model"
 	"google.golang.org/genai"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/llm"
-	"github.com/grokify/stats-agent-team/pkg/models"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/llm"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // LLMSearchService provides direct LLM-based statistics search (like ChatGPT)

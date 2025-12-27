@@ -12,9 +12,9 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/models"
-	"github.com/grokify/stats-agent-team/pkg/orchestration"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
+	"github.com/agentplexus/stats-agent-team/pkg/orchestration"
 )
 
 const (

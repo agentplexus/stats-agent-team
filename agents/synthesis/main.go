@@ -16,9 +16,9 @@ import (
 	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
 
-	agentbase "github.com/grokify/stats-agent-team/pkg/agent"
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/models"
+	agentbase "github.com/agentplexus/stats-agent-team/pkg/agent"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // SynthesisAgent extracts statistics from webpage content using LLM

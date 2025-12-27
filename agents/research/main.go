@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/models"
-	"github.com/grokify/stats-agent-team/pkg/search"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
+	"github.com/agentplexus/stats-agent-team/pkg/search"
 )
 
 // ResearchAgent finds relevant sources using web search

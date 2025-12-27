@@ -11,8 +11,8 @@ import (
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/model"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/llm"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/llm"
 )
 
 // BaseAgent provides common functionality for all agents

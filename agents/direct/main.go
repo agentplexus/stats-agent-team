@@ -11,9 +11,9 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/direct"
-	"github.com/grokify/stats-agent-team/pkg/models"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/direct"
+	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // DirectAgent provides HTTP API for direct LLM search
@@ -82,7 +82,7 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 
 	api.OpenAPI().Info.Contact = &huma.Contact{
 		Name: "Stats Agent Team",
-		URL:  "https://github.com/grokify/stats-agent-team",
+		URL:  "https://github.com/agentplexus/stats-agent-team",
 	}
 
 	// Add server information

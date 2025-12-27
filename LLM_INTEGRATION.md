@@ -266,7 +266,7 @@ curl -X POST http://localhost:8004/synthesize \
 To add LLM support to a new agent:
 
 ```go
-import agentbase "github.com/grokify/stats-agent-team/pkg/agent"
+import agentbase "github.com/agentplexus/stats-agent-team/pkg/agent"
 
 type MyAgent struct {
     *agentbase.BaseAgent

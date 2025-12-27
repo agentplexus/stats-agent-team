@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/grokify/stats-agent-team/pkg/config"
-	"github.com/grokify/stats-agent-team/pkg/orchestration"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/orchestration"
 )
 
 func main() {

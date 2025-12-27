@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/grokify/metaserp"
-	"github.com/grokify/metaserp/client"
-	"github.com/grokify/stats-agent-team/pkg/config"
+	"github.com/agentplexus/omniserp"
+	"github.com/agentplexus/omniserp/client"
+	"github.com/agentplexus/stats-agent-team/pkg/config"
 )
 
 // Service provides web search capabilities using metaserp
@@ -67,8 +67,8 @@ func (s *Service) Search(ctx context.Context, query string, numResults int) (*Se
 		numResults = 10
 	}
 
-	// Perform normalized search using metaserp
-	result, err := s.client.SearchNormalized(ctx, metaserp.SearchParams{
+	// Perform normalized search using omniserp
+	result, err := s.client.SearchNormalized(ctx, omniserp.SearchParams{
 		Query:      query,
 		NumResults: numResults,
 		Language:   "en",

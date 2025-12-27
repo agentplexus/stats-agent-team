@@ -4,7 +4,7 @@ This document explains how the Statistics Agent Team integrates with web search 
 
 ## Overview
 
-The research agent uses the [grokify/metaserp](https://github.com/grokify/metaserp) library (aka MetaSerp) to perform web searches across multiple search engine providers. This enables the system to find real, verifiable statistics from reputable sources on the web.
+The research agent uses the [agentplexus/omniserp](https://github.com/agentplexus/omniserp) library (aka OmniSerp) to perform web searches across multiple search engine providers. This enables the system to find real, verifiable statistics from reputable sources on the web.
 
 ## Supported Search Providers
 
@@ -318,7 +318,7 @@ Future enhancements planned:
 
 ## References
 
-- [MetaSerp Library](https://github.com/grokify/metaserp)
+- [OmniSerp Library](https://github.com/agentplexus/omniserp)
 - [Serper API Docs](https://serper.dev/documentation)
 - [SerpAPI Docs](https://serpapi.com/search-api)
 - [Google ADK Docs](https://google.github.io/adk-docs/)

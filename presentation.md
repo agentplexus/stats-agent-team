@@ -339,7 +339,7 @@ The research agent is our foundation. It performs web search using Google via Se
 
 **Implementation** (Google ADK)
 - No LLM required (pure search)
-- Integrates with Serper/SerpAPI via `metaserp` library
+- Integrates with Serper/SerpAPI via `omniserp` library
 - Filters for reputable domains
 - Returns 30 URLs by default
 
@@ -605,12 +605,12 @@ This challenge emerged from real-world requirements. Some organizations are all 
 
 **Challenge**: Each provider has different APIs, models, rate limits
 
-**Solution**: Abstraction via `metallm` library
+**Solution**: Abstraction via `omnillm` library
 
 ---
 
 <!--
-Here's how the abstraction works. The metallm library provides a unified interface. We just select a provider via environment variable. The agents don't care which L L M they're using, they just call the standard interface.
+Here's how the abstraction works. The omnillm library provides a unified interface. We just select a provider via environment variable. The agents don't care which L L M they're using, they just call the standard interface.
 [PAUSE:1500]
 The factory pattern was key to solving this cleanly. We created a create L L M function that takes a config object and returns a generic client interface. Inside, it switches on the L L M provider string and calls the appropriate provider-specific creation function. Each function handles that provider's quirks: Gemini needs a Google A P I key, Claude needs an Anthropic key, Ollama needs a local U R L and doesn't need an A P I key at all. But they all return the same interface, so the synthesis and verification agents can use any provider without changing their code. Want to test Claude versus Gemini? Just change one environment variable. This flexibility made development much faster and enabled users to choose based on their constraints.
 [PAUSE:2500]
@@ -671,13 +671,13 @@ export LLM_MODEL="llama3:8b"
 ---
 
 <!--
-The third challenge was search integration. Web search A P Is are not free, and different organizations prefer different providers. We needed flexibility here too. The MetaSerp library provided the abstraction we needed.
+The third challenge was search integration. Web search A P Is are not free, and different organizations prefer different providers. We needed flexibility here too. The OmniSerp library provided the abstraction we needed.
 [PAUSE:1500]
-This was similar to the L L M challenge but for search. Web search A P Is cost money. Serper costs fifty dollars a month for five thousand queries. Serp A P I has different pricing tiers. Some teams already have contracts with specific providers. Others want to use mock data during development to avoid A P I costs. Each search A P I returns results in different formats, with different fields and structures. We needed the same kind of abstraction we built for L L Ms. The MetaSerp library solves this by providing a unified search interface. You call search normalized, and it returns a standard result format regardless of which provider is actually doing the search. This means the research agent doesn't need to know or care whether it's using Serper, Serp A P I, or a mock provider. Flexibility without complexity.
+This was similar to the L L M challenge but for search. Web search A P Is cost money. Serper costs fifty dollars a month for five thousand queries. Serp A P I has different pricing tiers. Some teams already have contracts with specific providers. Others want to use mock data during development to avoid A P I costs. Each search A P I returns results in different formats, with different fields and structures. We needed the same kind of abstraction we built for L L Ms. The OmniSerp library solves this by providing a unified search interface. You call search normalized, and it returns a standard result format regardless of which provider is actually doing the search. This means the research agent doesn't need to know or care whether it's using Serper, Serp A P I, or a mock provider. Flexibility without complexity.
 [PAUSE:2500]
 -->
 
-# Challenge 3: Search Provider Options 🔍
+# Challenge 3: Search Providers 🔍
 
 **Requirement**: Support multiple search providers
 
@@ -688,7 +688,7 @@ This was similar to the L L M challenge but for search. Web search A P Is cost m
 
 **Challenge**: Different APIs, different response formats
 
-**Solution**: `metaserp` library abstraction
+**Solution**: `omniserp` library abstraction
 
 ```go
 // Unified interface - works with any provider
@@ -704,7 +704,7 @@ This was an architectural flaw we caught relatively early. In our first version 
 [PAUSE:2500]
 -->
 
-# Challenge 4: Security Architecture 🔒
+# Challenge 4: Security 🔒
 
 **Initial Design**: Client-side LLM (❌ Bad)
 ```bash
@@ -731,7 +731,7 @@ The server-side architecture also gave us an opportunity to add proper API docum
 [PAUSE:2500]
 -->
 
-# Direct Agent Server Implementation 🌐
+# Direct Agent Implementation 🌐
 
 **Built with Huma v2 + Chi router**
 - OpenAPI 3.1 automatic generation
@@ -762,7 +762,7 @@ This was one of those bugs that took way too long to find. The L L M would retur
 [PAUSE:2500]
 -->
 
-# Challenge 5: JSON Number Format 🔢
+# Challenge 5: JSON Numbers 🔢
 
 **The Bug**
 ```json
@@ -839,6 +839,9 @@ Developer experience matters. You need to be able to run locally for development
 
 # Deployment Architecture 🐳
 
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<div>
+
 **Two Deployment Methods**
 
 ## Local Development
@@ -854,6 +857,8 @@ curl -X POST http://localhost:8000/orchestrate  # HTTP
 # or via A2A: POST http://localhost:9000/invoke
 ```
 
+</div><div>
+
 **Same code, same config** - seamless transition!
 
 | Agent | HTTP | A2A |
@@ -862,6 +867,9 @@ curl -X POST http://localhost:8000/orchestrate  # HTTP
 | Research | :8001 | :9001 |
 | Verification | :8002 | :9002 |
 | Synthesis | :8004 | :9004 |
+
+</div>
+</div>
 
 ---
 
@@ -952,7 +960,7 @@ This J S O N output shows what a verified statistic looks like. The name field d
 <!--
 The technology choices were deliberate. Go provided concurrency and performance. A D K gave us robust L L M operations. Eino provided deterministic orchestration. Together they create a production-ready system.
 [PAUSE:1500]
-Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The Meta L L M library abstracts multiple L L M providers so we're not locked into one vendor. And MetaSerp does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
+Let's talk about why we chose each technology. Go was chosen for its concurrency model, fast performance, and simple deployment. You get a single binary with no dependencies. Google A D K provides robust L L M operations with built-in retry logic, structured output, and tool calling. It handles the complexity of L L M interactions. Eino provides deterministic graph-based orchestration with type safety and reproducible behavior. Huma v2 generates Open A P I three point one specs automatically, giving us great documentation for free. Chi v5 is a lightweight H T T P router that doesn't get in the way. The Omni L L M library abstracts multiple L L M providers so we're not locked into one vendor. And OmniSerp does the same for search A P Is. These choices prioritize flexibility, reliability, and developer experience. We could build new features quickly without fighting the tech stack.
 [PAUSE:2500]
 -->
 
@@ -972,9 +980,9 @@ Let's talk about why we chose each technology. Go was chosen for its concurrency
 - **Huma v2** - OpenAPI 3.1 generation
 
 **Integrations**
-- **metallm** - Multi-provider LLM abstraction
-- **metaobserve** - Unified LLM observability (Opik, Langfuse, Phoenix)
-- **metaserp** - Unified search API
+- **omnillm** - Multi-provider LLM abstraction
+- **omniobserve** - Unified LLM observability (Opik, Langfuse, Phoenix)
+- **omniserp** - Unified search API
 
 ---
 
@@ -1082,20 +1090,27 @@ Verification Agent: Verified 10/15 candidates (67%)
 Orchestration: Target met (10 verified)
 ```
 
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<div>
+
 **Health Checks**
 - `/health` endpoint on each agent
 - Docker health checks in production
 - Timeout monitoring (60s max)
 
-**LLM Observability** (via MetaObserve)
+**LLM Observability** (via OmniObserve)
 - Automatic tracing of all LLM calls
 - Token usage and cost tracking
 - Supports: Comet Opik, Langfuse, Arize Phoenix
+
+</div><div>
 
 **Metrics to Track**
 - Verification rate per query
 - Average response time
 - Cost per query (API calls)
+
+</div></div>
 
 ---
 
@@ -1348,8 +1363,8 @@ Community and extensibility were design goals. The multi-provider support means 
 # Extensibility & Contributions 🤝
 
 **Easy to Extend**
-- Add new LLM provider: Implement `metallm` interface
-- Add new search provider: Implement `metaserp` interface
+- Add new LLM provider: Implement `omnillm` interface
+- Add new search provider: Implement `omniserp` interface
 - Add new agent: Follow existing patterns
 - Add new verification rules: Extend verification agent
 
@@ -1477,7 +1492,7 @@ Monitoring in production needs more than logs. We'd add metrics collection. Trac
     - Agent health check failures
     - API quota exhaustion
 3. **Tools**
-    - MetaObserve for LLM tracing (Opik, Langfuse, Phoenix) ✅
+    - OmniObserve for LLM tracing (Opik, Langfuse, Phoenix) ✅
     - Prometheus for metrics (future)
     - Grafana for dashboards (future)
     - Jaeger for distributed tracing (future)
@@ -1697,11 +1712,11 @@ We welcome contributions from the community. Whether it's adding a new LLM provi
 
 # Get Involved! 🚀
 
-**Repository**: `github.com/grokify/stats-agent-team`
+**Repository**: `github.com/agentplexus/stats-agent-team`
 
 **Quick Start**
 ```bash
-git clone https://github.com/grokify/stats-agent-team
+git clone https://github.com/agentplexus/stats-agent-team
 cd stats-agent-team
 make install
 make build
@@ -1721,7 +1736,7 @@ make run-all-eino
 <!--
 Thank you for your attention. We've covered the journey from requirements to a working system. The challenges we faced, the solutions we implemented, and the lessons we learned. We hope this inspires your own multi-agent projects. Questions?
 [PAUSE:1500]
-We've covered a lot today. From the fundamental problem of L L M hallucinations to the architecture that solves it. From zero percent verification in direct mode to sixty to ninety percent in pipeline mode. From single L L M support to five plus providers. From client-side insecurity to proper server-side architecture. From J S O N parsing bugs to comprehensive prompt engineering. Every challenge taught us something. Every solution opened new possibilities. If you want to try it yourself, the repo is on GitHub at github dot com slash grokify slash stats dash agent dash team. The documentation is comprehensive, setup is straightforward, and we welcome contributions. Special thanks to the Google A D K team, Eino framework contributors, and the entire open source community. Now, let's open it up for questions.
+We've covered a lot today. From the fundamental problem of L L M hallucinations to the architecture that solves it. From zero percent verification in direct mode to sixty to ninety percent in pipeline mode. From single L L M support to five plus providers. From client-side insecurity to proper server-side architecture. From J S O N parsing bugs to comprehensive prompt engineering. Every challenge taught us something. Every solution opened new possibilities. If you want to try it yourself, the repo is on GitHub at github dot com slash agent plexus slash stats dash agent dash team. The documentation is comprehensive, setup is straightforward, and we welcome contributions. Special thanks to the Google A D K team, Eino framework contributors, and the entire open source community. Now, let's open it up for questions.
 [PAUSE:2000]
 -->
 

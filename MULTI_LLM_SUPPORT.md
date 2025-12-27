@@ -9,9 +9,9 @@ The Statistics Agent Team now supports **4 LLM providers** through a unified int
 | Provider | Status | Default Model | Integration Method |
 |----------|--------|---------------|-------------------|
 | **Gemini** | ✅ Working | `gemini-2.0-flash-exp` | Google ADK (native) |
-| **Claude** | ✅ Working | `claude-3-5-sonnet-20241022` | MetaLLM adapter |
-| **OpenAI** | ✅ Working | `gpt-4o-mini` | MetaLLM adapter |
-| **Ollama** | ✅ Working | `llama3.2` | MetaLLM adapter |
+| **Claude** | ✅ Working | `claude-3-5-sonnet-20241022` | OmniLLM adapter |
+| **OpenAI** | ✅ Working | `gpt-4o-mini` | OmniLLM adapter |
+| **Ollama** | ✅ Working | `llama3.2` | OmniLLM adapter |
 
 ## Quick Start
 
@@ -65,9 +65,9 @@ The system uses **two integration paths**:
    - Uses `google.golang.org/adk/model/gemini`
    - Native ADK support, most efficient
 
-2. **Claude, OpenAI, Ollama** → Via MetaLLM adapter
-   - Uses `github.com/grokify/metallm` v0.8.0
-   - Adapter: `pkg/llm/adapters/metallm_adapter.go`
+2. **Claude, OpenAI, Ollama** → Via OmniLLM adapter
+   - Uses `github.com/agentplexus/omnillm` v0.8.0
+   - Adapter: `pkg/llm/adapters/omnillm_adapter.go`
    - Implements ADK's `model.LLM` interface
 
 ### Code Organization
@@ -76,8 +76,8 @@ The system uses **two integration paths**:
 pkg/llm/
 ├── factory.go              # LLM factory with multi-provider support
 └── adapters/
-    └── metallm_adapter.go  # ADK interface adapter for MetaLLM
-                            # (Self-contained, can move to MetaLLM repo)
+    └── omnillm_adapter.go  # ADK interface adapter for OmniLLM
+                            # (Self-contained, can move to OmniLLM repo)
 ```
 
 ### How It Works
@@ -293,10 +293,10 @@ export LLM_MODEL=llama3.2
 
 - **[LLM_INTEGRATION.md](LLM_INTEGRATION.md)** - Complete LLM integration guide
 - **[4_AGENT_ARCHITECTURE.md](4_AGENT_ARCHITECTURE.md)** - 4-agent architecture details
-- **[MetaLLM repository](https://github.com/grokify/metallm)** - Multi-provider LLM library
+- **[OmniLLM repository](https://github.com/agentplexus/omnillm)** - Multi-provider LLM library
 
 ## Credits
 
 - **Google ADK**: Native Gemini support
-- **MetaLLM**: Multi-provider abstraction layer
+- **OmniLLM**: Multi-provider abstraction layer
 - Integration design: Unified adapter pattern for portability
