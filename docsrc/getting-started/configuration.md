@@ -1,0 +1,140 @@
+# Configuration
+
+## Environment Variables
+
+### LLM Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LLM_PROVIDER` | LLM provider: `gemini`, `claude`, `openai`, `xai`, `ollama` | `gemini` |
+| `LLM_MODEL` | Model name (provider-specific) | See defaults below |
+| `LLM_API_KEY` | Generic API key (overrides provider-specific) | - |
+| `LLM_BASE_URL` | Base URL for custom endpoints (Ollama, etc.) | - |
+
+### Provider-Specific API Keys
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | Google API key for Gemini | **Required for Gemini** |
+| `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY` | Anthropic API key for Claude | **Required for Claude** |
+| `OPENAI_API_KEY` | OpenAI API key | **Required for OpenAI** |
+| `XAI_API_KEY` | xAI API key for Grok | **Required for xAI** |
+| `OLLAMA_URL` | Ollama server URL | `http://localhost:11434` |
+
+### Default Models by Provider
+
+| Provider | Default Model | Alternative |
+|----------|---------------|-------------|
+| Gemini | `gemini-2.5-flash` | `gemini-2.5-pro` |
+| Claude | `claude-sonnet-4-20250514` | `claude-opus-4-1-20250805` |
+| OpenAI | `gpt-4o` | `gpt-5` |
+| xAI | `grok-4-1-fast-reasoning` | `grok-4-1-fast-non-reasoning` |
+| Ollama | `llama3:8b` | `mistral:7b` |
+
+See [LLM Configuration](../guides/llm-configuration.md) for detailed LLM setup.
+
+### Search Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SEARCH_PROVIDER` | Search provider: `serper`, `serpapi` | `serper` |
+| `SERPER_API_KEY` | Serper API key (get from serper.dev) | Required for real search |
+| `SERPAPI_API_KEY` | SerpAPI key (alternative provider) | Required for SerpAPI |
+
+!!! note
+    Without a search API key, the research agent will use mock data. See [Search Integration](../guides/search-integration.md) for setup details.
+
+### Observability Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OBSERVABILITY_ENABLED` | Enable LLM observability | `false` |
+| `OBSERVABILITY_PROVIDER` | Provider: `opik`, `langfuse`, `phoenix` | `opik` |
+| `OBSERVABILITY_API_KEY` | API key for the provider | - |
+| `OBSERVABILITY_ENDPOINT` | Custom endpoint (optional) | Provider default |
+| `OBSERVABILITY_PROJECT` | Project name for grouping traces | `stats-agent-team` |
+
+**Supported Providers:**
+
+- [Comet Opik](https://www.comet.com/site/products/opik/) - LLM tracing and evaluation
+- [Langfuse](https://langfuse.com/) - Open-source LLM observability
+- [Arize Phoenix](https://phoenix.arize.com/) - ML observability platform
+
+### Agent URL Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `RESEARCH_AGENT_URL` | Research agent URL | `http://localhost:8001` |
+| `SYNTHESIS_AGENT_URL` | Synthesis agent URL | `http://localhost:8004` |
+| `VERIFICATION_AGENT_URL` | Verification agent URL | `http://localhost:8002` |
+| `ORCHESTRATOR_URL` | Orchestrator URL (both ADK/Eino) | `http://localhost:8000` |
+
+## Port Configuration
+
+Each agent exposes both HTTP and A2A (Agent-to-Agent) protocol endpoints:
+
+| Agent | HTTP Port | A2A Port | Description |
+|-------|-----------|----------|-------------|
+| **Orchestration (ADK/Eino)** | **8000** | **9000** | Graph-based workflow coordination |
+| Research (ADK) | 8001 | 9001 | Web search via Serper/SerpAPI |
+| Verification (ADK) | 8002 | 9002 | LLM-based verification |
+| Synthesis (ADK) | 8004 | 9004 | LLM-based statistics extraction |
+| **Direct (Huma)** | **8005** | - | Direct LLM search with OpenAPI docs |
+
+### A2A Endpoints per Agent
+
+- `GET /.well-known/agent-card.json` - Agent discovery
+- `POST /invoke` - JSON-RPC execution
+
+Enable A2A with: `A2A_ENABLED=true`
+
+## Project Structure
+
+```
+stats-agent-team/
+├── agents/
+│   ├── direct/             # Direct search agent (Huma + OpenAPI, port 8005)
+│   │   └── main.go
+│   ├── orchestration/      # Orchestration agent (Google ADK, port 8000)
+│   │   └── main.go
+│   ├── orchestration-eino/ # Orchestration agent (Eino, port 8000)
+│   │   └── main.go
+│   ├── research/           # Research agent (port 8001)
+│   │   └── main.go
+│   ├── synthesis/          # Synthesis agent (Google ADK, port 8004)
+│   │   └── main.go
+│   └── verification/       # Verification agent (Google ADK, port 8002)
+│       └── main.go
+├── pkg/
+│   ├── config/            # Configuration management
+│   ├── direct/            # Direct LLM search service
+│   ├── llm/               # Multi-provider LLM factory (OmniLLM + OmniObserve)
+│   │   └── adapters/      # OmniLLM adapter for ADK integration
+│   ├── models/            # Shared data models
+│   └── orchestration/     # Orchestration logic
+├── main.go                # CLI entry point
+├── Makefile               # Build and run commands
+├── go.mod                 # Go dependencies
+├── .env.example           # Environment template
+└── README.md              # This file
+```
+
+## Development Commands
+
+### Building
+
+```bash
+make build
+```
+
+### Running Tests
+
+```bash
+make test
+```
+
+### Cleaning Build Artifacts
+
+```bash
+make clean
+```

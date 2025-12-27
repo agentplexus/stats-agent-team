@@ -1,0 +1,94 @@
+site_name: Stats Agent Team
+site_description: A multi-agent system for finding and verifying statistics from reputable web sources
+site_url: https://agentplexus.github.io/stats-agent-team
+repo_url: https://github.com/agentplexus/stats-agent-team
+repo_name: agentplexus/stats-agent-team
+
+docs_dir: docsrc
+site_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Configuration: getting-started/configuration.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - 4-Agent Architecture: architecture/4-agent-architecture.md
+      - Eino Orchestration: architecture/eino-orchestration.md
+  - Guides:
+      - Docker Deployment: guides/docker.md
+      - Kubernetes Deployment: guides/kubernetes.md
+      - MCP Server Integration: guides/mcp-server.md
+      - LLM Configuration: guides/llm-configuration.md
+      - Multi-LLM Support: guides/multi-llm-support.md
+      - LLM Integration: guides/llm-integration.md
+      - Search Integration: guides/search-integration.md
+  - Operations:
+      - Security: operations/security.md
+      - Scaling: operations/scaling.md
+      - Helm Chart Testing: operations/chart-testing.md
+  - Development:
+      - Lint Fixes: development/lint-fixes.md
+  - Reference:
+      - Roadmap: reference/roadmap.md
+  - Release Notes:
+      - v0.3.0: releases/v0.3.0.md
+      - v0.2.0: releases/v0.2.0.md
+      - v0.1.0: releases/v0.1.0.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/agentplexus/stats-agent-team
+
+copyright: Copyright &copy; 2025 AgentPlexus

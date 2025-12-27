@@ -1,0 +1,265 @@
+# MCP Server for Statistics Agent Team
+
+This document explains how to use the Statistics Agent Team as an MCP (Model Context Protocol) server with MCP clients like Claude Code.
+
+## Overview
+
+The MCP server exposes the Statistics Agent Team's functionality through the Model Context Protocol, allowing AI assistants like Claude to search for and verify statistics on any topic using a multi-agent system.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  MCP Client                              │
+│              (e.g., Claude Code)                         │
+└──────────────────────┬──────────────────────────────────┘
+                       │ MCP Protocol (stdio)
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│              MCP Server                                  │
+│          (stats-agent-team)                             │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+           ┌───────────┴────────────┐
+           │                        │
+┌──────────▼────────┐    ┌─────────▼──────────────┐
+│ Research Agent     │    │ Verification Agent     │
+│ (Gemini + Web)     │───▶│ (Validates sources)    │
+└────────────────────┘    └─────────────────────────┘
+```
+
+## Features
+
+The MCP server provides one tool:
+
+### `search_statistics`
+
+Search for verified statistics on a given topic using a multi-agent system.
+
+**Parameters:**
+- `topic` (string, required): The topic to search statistics for
+- `min_verified_stats` (number, optional): Minimum number of verified statistics to return (default: 10)
+- `max_candidates` (number, optional): Maximum number of candidate statistics to gather (default: 30)
+- `reputable_only` (boolean, optional): Only use reputable sources (default: true)
+
+**Returns:**
+- Markdown-formatted results with verified statistics
+- JSON output with all statistics
+- Human-readable format with sources and verification details
+
+## Prerequisites
+
+1. **Go 1.21+** installed
+2. **API Keys** configured:
+   - `GOOGLE_API_KEY` for Gemini (default LLM)
+   - Or other LLM provider keys as configured
+3. **Research and Verification agents** running:
+   ```bash
+   # Terminal 1: Research Agent
+   ./bin/research
+
+   # Terminal 2: Verification Agent
+   ./bin/verification
+   ```
+
+## Building
+
+```bash
+# Build the MCP server
+go build -o bin/mcp-server ./mcp/server/main.go
+
+# Or use make
+make build-mcp
+```
+
+## Configuration
+
+### Environment Variables
+
+The MCP server uses the same configuration as other agents:
+
+```bash
+# LLM Configuration
+export LLM_PROVIDER=gemini  # or claude, openai, ollama
+export GOOGLE_API_KEY=your-api-key
+
+# Agent URLs (defaults shown)
+export RESEARCH_AGENT_URL=http://localhost:8001
+export VERIFICATION_AGENT_URL=http://localhost:8002
+```
+
+See [LLM_CONFIGURATION.md](LLM_CONFIGURATION.md) for full configuration options.
+
+## Using with Claude Code
+
+### 1. Add to Claude Code Configuration
+
+Add the MCP server to your Claude Code MCP settings file:
+
+**Location:** `~/.config/claude-code/mcp-settings.json` (or similar)
+
+```json
+{
+  "mcpServers": {
+    "stats-agent-team": {
+      "command": "/path/to/stats-agent-team/bin/mcp-server",
+      "env": {
+        "GOOGLE_API_KEY": "your-google-api-key",
+        "RESEARCH_AGENT_URL": "http://localhost:8001",
+        "VERIFICATION_AGENT_URL": "http://localhost:8002"
+      }
+    }
+  }
+}
+```
+
+### 2. Start Required Agents
+
+Before using the MCP server, start the research and verification agents:
+
+```bash
+# Terminal 1: Research Agent
+cd /path/to/stats-agent-team
+export GOOGLE_API_KEY=your-key
+./bin/research
+
+# Terminal 2: Verification Agent
+cd /path/to/stats-agent-team
+export GOOGLE_API_KEY=your-key
+./bin/verification
+```
+
+### 3. Use in Claude Code
+
+The MCP server will automatically start when Claude Code launches. You can now use it by asking Claude to search for statistics:
+
+**Example prompts:**
+- "Search for statistics about climate change"
+- "Find verified statistics on AI adoption rates"
+- "Get statistics about cybersecurity threats in 2024"
+
+Claude will use the `search_statistics` tool to find and verify statistics from reputable sources.
+
+## Example Usage
+
+### Request
+
+```json
+{
+  "topic": "climate change",
+  "min_verified_stats": 5,
+  "max_candidates": 20,
+  "reputable_only": true
+}
+```
+
+### Response
+
+The tool returns formatted markdown output:
+
+```markdown
+# Statistics Search Results
+
+**Topic:** climate change
+**Verified:** 5 statistics
+**Failed:** 3 statistics
+**Total Candidates:** 20
+**Timestamp:** 2025-12-13 10:30:00
+
+## JSON Output
+
+```json
+[
+  {
+    "name": "Global temperature increase since pre-industrial times",
+    "value": 1.1,
+    "unit": "°C",
+    "source": "IPCC Sixth Assessment Report",
+    "source_url": "https://www.ipcc.ch/...",
+    "excerpt": "Global surface temperature has increased by approximately 1.1°C...",
+    "verified": true,
+    "date_found": "2025-12-13T10:30:00Z"
+  }
+]
+```
+
+## Verified Statistics
+
+### 1. Global temperature increase since pre-industrial times
+
+- **Value:** 1.1 °C
+- **Source:** IPCC Sixth Assessment Report
+- **URL:** https://www.ipcc.ch/...
+- **Excerpt:** "Global surface temperature has increased by approximately 1.1°C..."
+- **Verified:** ✓
+- **Date Found:** 2025-12-13
+```
+
+## Troubleshooting
+
+### MCP Server Not Starting
+
+1. **Check logs:** The MCP server logs to stderr, which Claude Code captures
+2. **Verify agents are running:** Research and verification agents must be running
+3. **Check API keys:** Ensure `GOOGLE_API_KEY` or other LLM provider keys are set
+
+### No Statistics Found
+
+1. **Check research agent:** Ensure it's running on port 8001
+2. **Check verification agent:** Ensure it's running on port 8002
+3. **Review topic:** Try a more specific or different topic
+
+### Connection Errors
+
+1. **Check agent URLs:** Verify `RESEARCH_AGENT_URL` and `VERIFICATION_AGENT_URL` are correct
+2. **Check network:** Ensure agents can communicate with each other
+3. **Check ports:** Ensure ports 8001 and 8002 are not blocked
+
+## Development
+
+### Testing the MCP Server
+
+You can test the MCP server manually using the MCP Inspector or by writing a simple client:
+
+```bash
+# Run the server (stdio mode)
+export GOOGLE_API_KEY=your-key
+./bin/mcp-server
+
+# The server expects JSON-RPC messages on stdin
+# See https://modelcontextprotocol.io for protocol details
+```
+
+### Logs
+
+The MCP server logs to stderr:
+- `[MCP] Server running on stdio transport`
+- `[MCP] Searching for statistics on topic: ...`
+- `[MCP] Found N verified statistics (from M candidates)`
+
+## Architecture Details
+
+### Communication Flow
+
+1. **Claude Code → MCP Server:** Claude sends `tools/call` request via stdio
+2. **MCP Server → Eino Orchestrator:** Orchestrator coordinates workflow
+3. **Orchestrator → Research Agent:** HTTP POST to /research endpoint
+4. **Orchestrator → Verification Agent:** HTTP POST to /verify endpoint
+5. **MCP Server → Claude Code:** Returns formatted results via stdio
+
+### Error Handling
+
+- **Tool errors:** Returned with `isError: true` and error message in content
+- **Network errors:** Logged and returned as tool errors
+- **Validation errors:** Topic validation happens before orchestration
+
+## See Also
+
+- [README.md](README.md) - Main project documentation
+- [LLM_CONFIGURATION.md](LLM_CONFIGURATION.md) - LLM provider configuration
+- [MCP Protocol](https://modelcontextprotocol.io) - Official MCP documentation
+- [Claude Code](https://claude.com/claude-code) - Claude Code documentation
+
+## License
+
+MIT - See [LICENSE](LICENSE) for details
