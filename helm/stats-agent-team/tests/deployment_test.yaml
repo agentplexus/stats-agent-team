@@ -1,0 +1,117 @@
+suite: deployment tests
+templates:
+  - research-deployment.yaml
+  - synthesis-deployment.yaml
+  - verification-deployment.yaml
+  - orchestration-deployment.yaml
+
+tests:
+  - it: should create research deployment when enabled
+    template: research-deployment.yaml
+    set:
+      research.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-stats-agent-team-research
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 8001
+
+  - it: should not create research deployment when disabled
+    template: research-deployment.yaml
+    set:
+      research.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set correct replica count
+    template: synthesis-deployment.yaml
+    set:
+      synthesis.enabled: true
+      synthesis.replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should set resource limits correctly
+    template: synthesis-deployment.yaml
+    set:
+      synthesis.enabled: true
+      synthesis.resources.requests.cpu: 500m
+      synthesis.resources.requests.memory: 512Mi
+      synthesis.resources.limits.cpu: 2000m
+      synthesis.resources.limits.memory: 1Gi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 512Mi
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 2000m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 1Gi
+
+  - it: should use correct image
+    template: verification-deployment.yaml
+    set:
+      verification.enabled: true
+      global.image.tag: v1.2.3
+      verification.image.repository: my-registry/verification
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: my-registry/verification:v1\.2\.3
+
+  - it: should include health probes
+    template: orchestration-deployment.yaml
+    set:
+      orchestration.enabled: true
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0].livenessProbe
+      - exists:
+          path: spec.template.spec.containers[0].readinessProbe
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /health
+
+  - it: should apply security context
+    template: research-deployment.yaml
+    set:
+      research.enabled: true
+      podSecurityContext.runAsNonRoot: true
+      podSecurityContext.runAsUser: 1000
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 1000
+
+  - it: should set node selector when provided
+    template: synthesis-deployment.yaml
+    set:
+      synthesis.enabled: true
+      synthesis.nodeSelector:
+        disktype: ssd
+        region: us-west
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+      - equal:
+          path: spec.template.spec.nodeSelector.region
+          value: us-west

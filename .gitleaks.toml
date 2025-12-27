@@ -1,0 +1,31 @@
+# Gitleaks configuration
+# See: https://github.com/gitleaks/gitleaks#configuration
+
+title = "Stats Agent Team Gitleaks Config"
+
+[extend]
+# Use the default gitleaks config as base
+useDefault = true
+
+# Paths to ignore
+[allowlist]
+paths = [
+    '''go\.sum$''',
+    '''go\.mod$''',
+    '''\.trivyignore$''',
+    '''\.gitleaks\.toml$''',
+]
+
+# Specific patterns to ignore (e.g., example values in docs)
+regexes = [
+    '''EXAMPLE_API_KEY''',
+    '''YOUR_.*_KEY''',
+    '''123456789\.dkr\.ecr''',  # Example ECR registry in docs
+    '''stats-agent\.example\.com''',  # Example domain in docs
+]
+
+# Additional rules can be added here
+# [[rules]]
+# id = "custom-rule"
+# description = "Custom secret pattern"
+# regex = '''custom-pattern'''

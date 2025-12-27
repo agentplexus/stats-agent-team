@@ -1,0 +1,81 @@
+{{- if .Values.verification.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-verification
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "verification") | nindent 4 }}
+spec:
+  replicas: {{ .Values.verification.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "verification") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "verification") | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "stats-agent-team.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: verification
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ include "stats-agent-team.image" (dict "global" .Values.global "agent" .Values.verification) }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.verification.service.port }}
+              protocol: TCP
+            {{- if .Values.verification.service.a2aPort }}
+            - name: a2a
+              containerPort: {{ .Values.verification.service.a2aPort }}
+              protocol: TCP
+            {{- end }}
+          env:
+            - name: PORT
+              value: {{ .Values.verification.service.port | quote }}
+            {{- if .Values.verification.service.a2aPort }}
+            - name: A2A_PORT
+              value: {{ .Values.verification.service.a2aPort | quote }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "stats-agent-team.fullname" . }}-config
+            {{- if .Values.secrets.create }}
+            - secretRef:
+                name: {{ include "stats-agent-team.fullname" . }}-secrets
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.verification.resources | nindent 12 }}
+      {{- with .Values.verification.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.verification.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.verification.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

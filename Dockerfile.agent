@@ -1,0 +1,72 @@
+# Parameterized Dockerfile for building individual Stats Agent components
+# Usage: docker build --build-arg AGENT=research -t stats-agent-research .
+#
+# Supported AGENT values:
+#   - research
+#   - synthesis
+#   - verification
+#   - orchestration
+#   - orchestration-eino
+#   - direct
+
+ARG AGENT=research
+
+# Stage 1: Build the specified agent
+FROM golang:1.25-alpine AS builder
+
+ARG AGENT
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+WORKDIR /build
+
+# Copy go mod files first for layer caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the specified agent
+RUN if [ "$AGENT" = "orchestration-eino" ]; then \
+        go build -ldflags="-s -w" -o /build/bin/agent agents/orchestration-eino/main.go; \
+    elif [ "$AGENT" = "orchestration" ]; then \
+        go build -ldflags="-s -w" -o /build/bin/agent agents/orchestration/main.go; \
+    else \
+        go build -ldflags="-s -w" -o /build/bin/agent agents/${AGENT}/main.go; \
+    fi
+
+# Stage 2: Create minimal runtime image
+FROM alpine:3.19
+
+ARG AGENT
+ENV AGENT_NAME=${AGENT}
+
+# Install runtime dependencies
+RUN apk add --no-cache ca-certificates wget
+
+# Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /build/bin/agent /app/agent
+
+# Set ownership
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+# Labels for container metadata
+LABEL org.opencontainers.image.title="Stats Agent - ${AGENT}" \
+      org.opencontainers.image.description="Statistics Agent Team - ${AGENT} component" \
+      org.opencontainers.image.source="https://github.com/agentplexus/stats-agent-team"
+
+# Health check (port configured via env)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/health || exit 1
+
+# Run the agent
+ENTRYPOINT ["/app/agent"]

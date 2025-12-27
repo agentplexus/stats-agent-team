@@ -1,0 +1,99 @@
+# Values for Minikube local development
+# Usage: helm install stats-agent ./helm/stats-agent-team -f ./helm/stats-agent-team/values-minikube.yaml
+
+global:
+  image:
+    # Use local images built with minikube's Docker daemon
+    # To use published images instead: registry: "ghcr.io/agentplexus"
+    registry: ""
+    pullPolicy: Never  # Use locally built images
+    tag: "latest"
+
+# Namespace
+namespace:
+  create: true
+  name: stats-agent
+
+# LLM Configuration for local development
+llm:
+  provider: gemini
+  # For Ollama running on host machine
+  ollamaUrl: "http://host.minikube.internal:11434"
+
+# Search Configuration
+search:
+  provider: serper
+
+# Secrets - override via --set or create manually
+secrets:
+  create: true
+  # Set these via command line:
+  # --set secrets.geminiApiKey=YOUR_KEY
+  # --set secrets.serperApiKey=YOUR_KEY
+
+# Agent configurations optimized for Minikube
+research:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+synthesis:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+verification:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+orchestration:
+  enabled: true
+  replicaCount: 1
+  useEino: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+direct:
+  enabled: false
+
+# Ingress - use NodePort or port-forward instead for Minikube
+ingress:
+  enabled: false
+
+# Relaxed security for local development
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

@@ -1,0 +1,69 @@
+suite: service tests
+templates:
+  - research-service.yaml
+  - synthesis-service.yaml
+  - verification-service.yaml
+  - orchestration-service.yaml
+
+tests:
+  - it: should create research service when enabled
+    template: research-service.yaml
+    set:
+      research.enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 8001
+      - equal:
+          path: spec.ports[0].name
+          value: http
+
+  - it: should not create service when agent is disabled
+    template: synthesis-service.yaml
+    set:
+      synthesis.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should include A2A port when configured
+    template: research-service.yaml
+    set:
+      research.enabled: true
+      research.service.a2aPort: 9001
+    asserts:
+      - lengthEqual:
+          path: spec.ports
+          count: 2
+      - equal:
+          path: spec.ports[1].port
+          value: 9001
+      - equal:
+          path: spec.ports[1].name
+          value: a2a
+
+  - it: should support different service types
+    template: orchestration-service.yaml
+    set:
+      orchestration.enabled: true
+      orchestration.service.type: LoadBalancer
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+
+  - it: should have correct selector labels
+    template: verification-service.yaml
+    set:
+      verification.enabled: true
+    asserts:
+      - exists:
+          path: spec.selector
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: verification

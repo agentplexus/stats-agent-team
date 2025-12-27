@@ -1,0 +1,79 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          # Orchestration agent - main entry point
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stats-agent-team.fullname" . }}-orchestration
+                port:
+                  number: {{ .Values.orchestration.service.port }}
+          # Research agent endpoints
+          {{- if .Values.research.enabled }}
+          - path: /research
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stats-agent-team.fullname" . }}-research
+                port:
+                  number: {{ .Values.research.service.port }}
+          {{- end }}
+          # Synthesis agent endpoints
+          {{- if .Values.synthesis.enabled }}
+          - path: /synthesis
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stats-agent-team.fullname" . }}-synthesis
+                port:
+                  number: {{ .Values.synthesis.service.port }}
+          {{- end }}
+          # Verification agent endpoints
+          {{- if .Values.verification.enabled }}
+          - path: /verification
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stats-agent-team.fullname" . }}-verification
+                port:
+                  number: {{ .Values.verification.service.port }}
+          {{- end }}
+          # Direct agent endpoints (if enabled)
+          {{- if .Values.direct.enabled }}
+          - path: /direct
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stats-agent-team.fullname" . }}-direct
+                port:
+                  number: {{ .Values.direct.service.port }}
+          {{- end }}
+{{- end }}

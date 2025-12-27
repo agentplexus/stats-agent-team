@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-config
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.labels" . | nindent 4 }}
+data:
+  # LLM Configuration
+  LLM_PROVIDER: {{ .Values.llm.provider | quote }}
+  LLM_BASE_URL: {{ .Values.llm.baseUrl | quote }}
+  GEMINI_MODEL: {{ .Values.llm.geminiModel | quote }}
+  CLAUDE_MODEL: {{ .Values.llm.claudeModel | quote }}
+  OPENAI_MODEL: {{ .Values.llm.openaiModel | quote }}
+  OLLAMA_MODEL: {{ .Values.llm.ollamaModel | quote }}
+  OLLAMA_URL: {{ .Values.llm.ollamaUrl | quote }}
+
+  # Search Configuration
+  SEARCH_PROVIDER: {{ .Values.search.provider | quote }}
+
+  # Agent URLs (internal service discovery)
+  {{- $namespace := include "stats-agent-team.namespace" . }}
+  {{- $fullname := include "stats-agent-team.fullname" . }}
+  RESEARCH_AGENT_URL: "http://{{ $fullname }}-research.{{ $namespace }}.svc.cluster.local:{{ .Values.research.service.port }}"
+  SYNTHESIS_AGENT_URL: "http://{{ $fullname }}-synthesis.{{ $namespace }}.svc.cluster.local:{{ .Values.synthesis.service.port }}"
+  VERIFICATION_AGENT_URL: "http://{{ $fullname }}-verification.{{ $namespace }}.svc.cluster.local:{{ .Values.verification.service.port }}"
+  ORCHESTRATION_AGENT_URL: "http://{{ $fullname }}-orchestration.{{ $namespace }}.svc.cluster.local:{{ .Values.orchestration.service.port }}"
+  {{- if .Values.direct.enabled }}
+  DIRECT_AGENT_URL: "http://{{ $fullname }}-direct.{{ $namespace }}.svc.cluster.local:{{ .Values.direct.service.port }}"
+  {{- end }}

@@ -1,0 +1,9 @@
+# Trivy ignore file
+# Add CVE IDs or rule IDs to ignore specific findings
+# See: https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/
+
+# Example: Ignore a specific CVE
+# CVE-2023-12345
+
+# Example: Ignore a specific secret detection rule
+# generic-api-key

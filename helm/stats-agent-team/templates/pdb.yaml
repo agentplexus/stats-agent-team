@@ -1,0 +1,124 @@
+{{/*
+PodDisruptionBudget for all agents
+Following the pattern used by Apache Superset and ArgoCD
+*/}}
+
+{{- if and .Values.research.enabled .Values.research.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-research
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "research") | nindent 4 }}
+spec:
+  {{- if .Values.research.pdb.minAvailable }}
+  minAvailable: {{ .Values.research.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.research.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.research.pdb.maxUnavailable }}
+  {{- end }}
+  {{- if and (not .Values.research.pdb.minAvailable) (not .Values.research.pdb.maxUnavailable) }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "research") | nindent 6 }}
+{{- end }}
+
+{{- if and .Values.synthesis.enabled .Values.synthesis.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-synthesis
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "synthesis") | nindent 4 }}
+spec:
+  {{- if .Values.synthesis.pdb.minAvailable }}
+  minAvailable: {{ .Values.synthesis.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.synthesis.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.synthesis.pdb.maxUnavailable }}
+  {{- end }}
+  {{- if and (not .Values.synthesis.pdb.minAvailable) (not .Values.synthesis.pdb.maxUnavailable) }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "synthesis") | nindent 6 }}
+{{- end }}
+
+{{- if and .Values.verification.enabled .Values.verification.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-verification
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "verification") | nindent 4 }}
+spec:
+  {{- if .Values.verification.pdb.minAvailable }}
+  minAvailable: {{ .Values.verification.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.verification.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.verification.pdb.maxUnavailable }}
+  {{- end }}
+  {{- if and (not .Values.verification.pdb.minAvailable) (not .Values.verification.pdb.maxUnavailable) }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "verification") | nindent 6 }}
+{{- end }}
+
+{{- if and .Values.orchestration.enabled .Values.orchestration.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-orchestration
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "orchestration") | nindent 4 }}
+spec:
+  {{- if .Values.orchestration.pdb.minAvailable }}
+  minAvailable: {{ .Values.orchestration.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.orchestration.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.orchestration.pdb.maxUnavailable }}
+  {{- end }}
+  {{- if and (not .Values.orchestration.pdb.minAvailable) (not .Values.orchestration.pdb.maxUnavailable) }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "orchestration") | nindent 6 }}
+{{- end }}
+
+{{- if and .Values.direct.enabled .Values.direct.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-direct
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "direct") | nindent 4 }}
+spec:
+  {{- if .Values.direct.pdb.minAvailable }}
+  minAvailable: {{ .Values.direct.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.direct.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.direct.pdb.maxUnavailable }}
+  {{- end }}
+  {{- if and (not .Values.direct.pdb.minAvailable) (not .Values.direct.pdb.maxUnavailable) }}
+  maxUnavailable: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "direct") | nindent 6 }}
+{{- end }}

@@ -1,0 +1,93 @@
+suite: PDB tests
+templates:
+  - pdb.yaml
+
+tests:
+  - it: should not create PDB when disabled
+    set:
+      research.enabled: true
+      research.pdb.enabled: false
+      synthesis.enabled: true
+      synthesis.pdb.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should create PDB for research when enabled
+    set:
+      research.enabled: true
+      research.pdb.enabled: true
+      research.pdb.minAvailable: 1
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-stats-agent-team-research
+
+  - it: should set maxUnavailable when specified
+    set:
+      synthesis.enabled: true
+      synthesis.pdb.enabled: true
+      synthesis.pdb.maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2
+      - notExists:
+          path: spec.minAvailable
+
+  - it: should default to maxUnavailable 1 when neither is specified
+    set:
+      verification.enabled: true
+      verification.pdb.enabled: true
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: should support percentage values
+    set:
+      orchestration.enabled: true
+      orchestration.pdb.enabled: true
+      orchestration.pdb.minAvailable: "50%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "50%"
+
+  - it: should create multiple PDBs when multiple agents have pdb enabled
+    set:
+      research.enabled: true
+      research.pdb.enabled: true
+      synthesis.enabled: true
+      synthesis.pdb.enabled: true
+      verification.enabled: true
+      verification.pdb.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: should not create PDB when agent is disabled
+    set:
+      direct.enabled: false
+      direct.pdb.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should have correct selector labels
+    set:
+      research.enabled: true
+      research.pdb.enabled: true
+    asserts:
+      - exists:
+          path: spec.selector.matchLabels
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/component"]
+          value: research

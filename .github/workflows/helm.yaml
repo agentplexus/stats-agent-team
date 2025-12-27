@@ -1,0 +1,310 @@
+name: Helm Chart CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm/**'
+      - '.github/workflows/helm.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'helm/**'
+      - '.github/workflows/helm.yaml'
+  workflow_dispatch:
+
+jobs:
+  # ============================================
+  # Security Scanning
+  # ============================================
+
+  gitleaks:
+    name: Secret Detection (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  trivy-config:
+    name: Config & Secret Scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy config scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: './helm/stats-agent-team'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          trivyignores: .trivyignore
+
+      - name: Run Trivy secret scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'secret'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+  trivy-image:
+    name: Container Vulnerability Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build test image
+        run: |
+          docker build --build-arg AGENT=research -t stats-agent-research:scan -f Dockerfile.agent .
+
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'stats-agent-research:scan'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy SBOM generation
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'stats-agent-research:scan'
+          format: 'cyclonedx'
+          output: 'sbom.json'
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+  # ============================================
+  # Chart Validation
+  # ============================================
+
+  lint:
+    name: Lint Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Helm Lint
+        run: helm lint ./helm/stats-agent-team
+
+      - name: Helm Lint with Minikube values
+        run: helm lint ./helm/stats-agent-team -f ./helm/stats-agent-team/values-minikube.yaml
+
+      - name: Helm Lint with EKS values
+        run: helm lint ./helm/stats-agent-team -f ./helm/stats-agent-team/values-eks.yaml
+
+  unittest:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Install helm-unittest plugin
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest.git
+
+      - name: Run unit tests
+        run: helm unittest ./helm/stats-agent-team
+
+  kubeconform:
+    name: Validate Kubernetes Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate default values
+        run: |
+          helm template stats-agent ./helm/stats-agent-team | \
+            kubeconform -strict -summary -output json \
+              -kubernetes-version 1.29.0 \
+              -schema-location default \
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+
+      - name: Validate with autoscaling enabled
+        run: |
+          helm template stats-agent ./helm/stats-agent-team \
+            --set research.autoscaling.enabled=true \
+            --set synthesis.autoscaling.enabled=true \
+            --set research.pdb.enabled=true \
+            --set synthesis.pdb.enabled=true | \
+            kubeconform -strict -summary -output json \
+              -kubernetes-version 1.29.0
+
+      - name: Validate EKS values
+        run: |
+          helm template stats-agent ./helm/stats-agent-team \
+            -f ./helm/stats-agent-team/values-eks.yaml \
+            --set global.image.registry=123456789.dkr.ecr.us-west-2.amazonaws.com \
+            --set ingress.host=stats-agent.example.com | \
+            kubeconform -strict -summary -output json \
+              -kubernetes-version 1.29.0
+
+  polaris:
+    name: Security & Best Practices
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Install Polaris
+        run: |
+          curl -sL https://github.com/FairwindsOps/polaris/releases/download/8.5.4/polaris_linux_amd64.tar.gz | tar xz
+          sudo mv polaris /usr/local/bin/
+
+      - name: Run Polaris audit
+        run: |
+          helm template stats-agent ./helm/stats-agent-team | \
+            polaris audit --audit-path - \
+              --format pretty \
+              --set-exit-code-below-score 70
+
+  go-validation:
+    name: Go Struct Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run Go validation tests
+        run: go test -v ./pkg/helm/...
+
+  integration:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: [lint, unittest, kubeconform, gitleaks, trivy-config]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: chart-testing
+          node_image: kindest/node:v1.29.0
+
+      - name: Build test images
+        run: |
+          # Build minimal test images (just need to exist for dry-run)
+          for agent in research synthesis verification orchestration-eino direct; do
+            docker build --build-arg AGENT=$agent -t stats-agent-$agent:test -f Dockerfile.agent . || true
+          done
+
+      - name: Load images into Kind
+        run: |
+          for agent in research synthesis verification orchestration-eino direct; do
+            kind load docker-image stats-agent-$agent:test --name chart-testing || true
+          done
+
+      - name: Helm install dry-run
+        run: |
+          helm install stats-agent ./helm/stats-agent-team \
+            --namespace stats-agent \
+            --create-namespace \
+            --dry-run \
+            --debug \
+            --set global.image.tag=test \
+            --set global.image.pullPolicy=Never
+
+      - name: Helm template output
+        run: |
+          helm template stats-agent ./helm/stats-agent-team \
+            --set global.image.tag=test > rendered.yaml
+          echo "=== Rendered Templates ==="
+          cat rendered.yaml
+
+  chart-testing:
+    name: Chart Testing (ct)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2
+
+      - name: List changed charts
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --config ct.yaml 2>/dev/null || echo "")
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run chart-testing lint
+        run: ct lint --config ct.yaml --all

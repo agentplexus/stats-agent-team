@@ -1,0 +1,12 @@
+# chart-testing configuration
+# See: https://github.com/helm/chart-testing
+
+remote: origin
+target-branch: main
+chart-dirs:
+  - helm
+charts:
+  - helm/stats-agent-team
+helm-extra-args: --timeout 600s
+validate-maintainers: false
+check-version-increment: false

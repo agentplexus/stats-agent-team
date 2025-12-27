@@ -1,0 +1,308 @@
+# Default values for stats-agent-team
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  # Container image settings
+  image:
+    # Default: GitHub Container Registry (ghcr.io)
+    # For local/minikube: leave empty and use imagePullPolicy: Never
+    # For AWS ECR: "123456789.dkr.ecr.us-west-2.amazonaws.com"
+    registry: "ghcr.io/agentplexus"
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  # Image pull secrets for private registries
+  imagePullSecrets: []
+  # - name: regcred
+
+# Namespace configuration
+namespace:
+  create: true
+  name: stats-agent
+
+# LLM Provider Configuration
+llm:
+  # Provider: gemini, claude, openai, ollama
+  provider: gemini
+  baseUrl: ""
+
+  # Model overrides (optional)
+  geminiModel: "gemini-2.0-flash-exp"
+  claudeModel: "claude-3-5-sonnet-20241022"
+  openaiModel: "gpt-4"
+  ollamaModel: "llama2"
+  ollamaUrl: "http://ollama:11434"
+
+# Search Provider Configuration
+search:
+  # Provider: serper, serpapi
+  provider: serper
+
+# API Keys - Use secrets in production
+# These can be overridden via --set or external secrets
+secrets:
+  # Set to true to create the secret from values
+  # Set to false if using external secret management (recommended for production)
+  create: true
+
+  # API keys (leave empty and use external secrets in production)
+  geminiApiKey: ""
+  claudeApiKey: ""
+  openaiApiKey: ""
+  anthropicApiKey: ""
+  serperApiKey: ""
+  serpApiKey: ""
+
+# ============================================
+# Agent Configurations
+# ============================================
+
+# Research Agent - Web search via Serper/SerpAPI
+research:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: stats-agent-research
+    tag: ""  # Uses global.image.tag if empty
+
+  service:
+    type: ClusterIP
+    port: 8001
+    a2aPort: 9001
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+    # Custom metrics (optional)
+    # behavior:
+    #   scaleDown:
+    #     stabilizationWindowSeconds: 300
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Synthesis Agent - LLM-based statistic extraction
+synthesis:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: stats-agent-synthesis
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 8004
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Verification Agent - Validates statistics against sources
+verification:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: stats-agent-verification
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 8002
+    a2aPort: 9002
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Orchestration Agent (Eino) - Coordinates the pipeline
+orchestration:
+  enabled: true
+  replicaCount: 1
+
+  # Use Eino-based orchestration (recommended)
+  useEino: true
+
+  image:
+    repository: stats-agent-orchestration-eino
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 8000
+    # A2A port only for non-Eino orchestration
+    a2aPort: 9000
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Direct Agent - Fast LLM-based search (optional)
+direct:
+  enabled: false
+  replicaCount: 1
+
+  image:
+    repository: stats-agent-direct
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 8005
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Pod Disruption Budget
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ============================================
+# Ingress Configuration
+# ============================================
+ingress:
+  enabled: false
+  className: ""  # e.g., "alb" for AWS ALB, "nginx" for nginx-ingress
+  annotations: {}
+    # kubernetes.io/ingress.class: alb
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+
+  # Host configuration
+  host: ""  # e.g., "stats-agent.example.com"
+
+  tls: []
+  # - secretName: stats-agent-tls
+  #   hosts:
+  #     - stats-agent.example.com
+
+# ============================================
+# Service Account
+# ============================================
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# ============================================
+# Pod Security
+# ============================================
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

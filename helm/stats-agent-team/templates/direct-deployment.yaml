@@ -1,0 +1,72 @@
+{{- if .Values.direct.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-direct
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "direct") | nindent 4 }}
+spec:
+  replicas: {{ .Values.direct.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "direct") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "direct") | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "stats-agent-team.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: direct
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ include "stats-agent-team.image" (dict "global" .Values.global "agent" .Values.direct) }}
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.direct.service.port }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{ .Values.direct.service.port | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "stats-agent-team.fullname" . }}-config
+            {{- if .Values.secrets.create }}
+            - secretRef:
+                name: {{ include "stats-agent-team.fullname" . }}-secrets
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.direct.resources | nindent 12 }}
+      {{- with .Values.direct.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.direct.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.direct.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

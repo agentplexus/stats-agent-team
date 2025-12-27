@@ -1,0 +1,199 @@
+{{/*
+HorizontalPodAutoscaler for all agents
+Following the pattern used by Apache Superset and ArgoCD
+*/}}
+
+{{- if and .Values.research.enabled .Values.research.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-research
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "research") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stats-agent-team.fullname" . }}-research
+  minReplicas: {{ .Values.research.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.research.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.research.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.research.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.research.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.research.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.research.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.research.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.synthesis.enabled .Values.synthesis.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-synthesis
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "synthesis") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stats-agent-team.fullname" . }}-synthesis
+  minReplicas: {{ .Values.synthesis.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.synthesis.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.synthesis.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.synthesis.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.synthesis.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.synthesis.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.synthesis.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.synthesis.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.verification.enabled .Values.verification.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-verification
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "verification") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stats-agent-team.fullname" . }}-verification
+  minReplicas: {{ .Values.verification.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.verification.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.verification.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.verification.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.verification.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.verification.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.verification.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.verification.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.orchestration.enabled .Values.orchestration.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-orchestration
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "orchestration") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stats-agent-team.fullname" . }}-orchestration
+  minReplicas: {{ .Values.orchestration.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.orchestration.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.orchestration.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.orchestration.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.orchestration.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.orchestration.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.orchestration.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.orchestration.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.direct.enabled .Values.direct.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-direct
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "direct") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stats-agent-team.fullname" . }}-direct
+  minReplicas: {{ .Values.direct.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.direct.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.direct.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.direct.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.direct.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.direct.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.direct.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.direct.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}

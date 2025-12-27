@@ -1,0 +1,21 @@
+apiVersion: v2
+name: stats-agent-team
+description: A Helm chart for deploying the Statistics Agent Team multi-agent system
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - statistics
+  - agents
+  - llm
+  - multi-agent
+  - ai
+
+home: https://github.com/agentplexus/stats-agent-team
+sources:
+  - https://github.com/agentplexus/stats-agent-team
+
+maintainers:
+  - name: grokify
+    url: https://github.com/grokify

@@ -1,0 +1,24 @@
+{{- if .Values.research.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "stats-agent-team.fullname" . }}-research
+  namespace: {{ include "stats-agent-team.namespace" . }}
+  labels:
+    {{- include "stats-agent-team.agentLabels" (dict "context" . "agent" "research") | nindent 4 }}
+spec:
+  type: {{ .Values.research.service.type }}
+  ports:
+    - port: {{ .Values.research.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    {{- if .Values.research.service.a2aPort }}
+    - port: {{ .Values.research.service.a2aPort }}
+      targetPort: a2a
+      protocol: TCP
+      name: a2a
+    {{- end }}
+  selector:
+    {{- include "stats-agent-team.agentSelectorLabels" (dict "context" . "agent" "research") | nindent 4 }}
+{{- end }}
