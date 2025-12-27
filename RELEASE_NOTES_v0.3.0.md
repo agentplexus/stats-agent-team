@@ -1,0 +1,109 @@
+# Release Notes v0.3.0
+
+**Release Date:** December 21, 2025
+
+This release introduces major features for agent interoperability, observability, and security, along with performance improvements and comprehensive documentation updates.
+
+## Highlights
+
+- **A2A Protocol Support** - Full inter-agent protocol implementation for agent interoperability
+- **LLM Observability** - MetaObserve integration for tracing and monitoring LLM operations
+- **Security Documentation** - Comprehensive security guide for production deployments
+- **Project Roadmap** - Published feature roadmap for Q1-Q3 2026
+
+## New Features
+
+### A2A Inter-Agent Protocol Support
+Added support for Google's Agent-to-Agent (A2A) protocol across all agents, enabling standardized inter-agent communication and interoperability:
+
+- `agents/orchestration/a2a.go` - A2A server for ADK orchestration agent
+- `agents/orchestration-eino/a2a.go` - A2A server for Eino orchestration agent
+- `agents/research/a2a.go` - A2A server for research agent
+- `agents/synthesis/a2a.go` - A2A server for synthesis agent
+- `agents/verification/a2a.go` - A2A server for verification agent
+
+Uses the `a2aproject/a2a-go` library with Google ADK's `adka2a` integration.
+
+### LLM Observability via MetaObserve
+Added integrated observability for LLM operations with support for multiple backends:
+
+- **Opik** - Comet ML's LLM observability platform
+- **Langfuse** - Open-source LLM observability
+- **Phoenix** - Arize AI's open-source observability
+
+Configuration via environment variables:
+- `OBSERVABILITY_ENABLED=true`
+- `OBSERVABILITY_PROVIDER=opik|langfuse|phoenix`
+- `OBSERVABILITY_PROJECT=your-project-name`
+
+### LLM Adapter Refactoring
+Replaced the gollm adapter with the new MetaLLM adapter (`pkg/llm/adapters/metallm_adapter.go`) for improved multi-LLM provider support with built-in observability hooks.
+
+## Documentation
+
+### Security Guide (`README_SECURITY.md`)
+Comprehensive security documentation covering:
+- Threat modeling for multi-agent systems
+- Credential management best practices
+- Cloud deployment security (AWS/Azure)
+- SPIFFE/SPIRE workload identity
+- Network and API security
+- Container security hardening
+- Incident response procedures
+- Compliance considerations
+
+### Project Roadmap (`ROADMAP.md`)
+Published feature roadmap including:
+- Q1 2026: Perplexity API, range statistics, response streaming
+- Q2 2026: Multi-language support, caching layer, GraphQL API
+- Q3 2026: Browser extension, Notion/Confluence integrations, citation formats
+
+### Presentation Materials
+Added `presentation.md` with comprehensive project overview for conferences and demos.
+
+## Enhancements
+
+- **Performance improvement** - Enhanced team stats finding via `make run-all-eino`
+- **Updated README** - Revised architecture diagram and feature documentation
+- **Interactive documentation** - Added `docs/index.html` for browsable documentation
+
+## Dependencies
+
+- Updated `github.com/cloudwego/eino` from 0.7.8 to 0.7.10
+- Added `github.com/a2aproject/a2a-go` for A2A protocol support
+- Added `github.com/grokify/metallm` for unified LLM interface
+- Added `github.com/grokify/metaobserve` for observability integration
+- Various go.mod dependency updates
+
+## Bug Fixes
+
+- Fixed various linting issues identified by golangci-lint
+
+## Breaking Changes
+
+None.
+
+## Migration Guide
+
+### Enabling Observability (Optional)
+
+To enable LLM observability, set the following environment variables:
+
+```bash
+export OBSERVABILITY_ENABLED=true
+export OBSERVABILITY_PROVIDER=opik  # or langfuse, phoenix
+export OBSERVABILITY_PROJECT=stats-agent
+export OBSERVABILITY_API_KEY=your-api-key  # if required by provider
+```
+
+### A2A Protocol
+
+A2A servers run alongside existing HTTP servers. No configuration changes required - A2A support is automatically available when agents start.
+
+## Contributors
+
+- John Wang (@grokify)
+
+---
+
+**Full Changelog:** https://github.com/grokify/stats-agent-team/compare/v0.2.0...v0.3.0
