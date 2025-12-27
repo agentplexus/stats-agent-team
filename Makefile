@@ -1,6 +1,7 @@
 .PHONY: help build build-mcp docker-build docker-up docker-down docker-logs run-research run-synthesis run-verification run-direct run-orchestration run-orchestration-eino run-all run-all-eino run-direct-verify run-mcp clean install test
 .PHONY: k8s-build-images k8s-minikube-setup k8s-minikube-build k8s-minikube-deploy k8s-minikube-delete k8s-eks-deploy k8s-eks-delete helm-lint helm-template
 .PHONY: helm-test helm-unittest helm-kubeconform helm-polaris helm-test-all
+.PHONY: docs docs-serve docs-clean
 
 # Image registry (override for EKS: make k8s-eks-deploy REGISTRY=123456789.dkr.ecr.us-west-2.amazonaws.com)
 REGISTRY ?=
@@ -48,6 +49,11 @@ help:
 	@echo "  make run-all                 Run all agents with trpc-agent orchestrator"
 	@echo "  make run-all-eino            Run all agents with Eino orchestrator"
 	@echo "  make run-mcp                 Run MCP server (requires agents running)"
+	@echo ""
+	@echo "Documentation Commands:"
+	@echo "  make docs                    Build MkDocs documentation"
+	@echo "  make docs-serve              Serve documentation locally"
+	@echo "  make docs-clean              Clean generated docs"
 	@echo ""
 	@echo "Other Commands:"
 	@echo "  make test                    Run tests"
@@ -309,3 +315,35 @@ helm-test-all: helm-lint helm-unittest helm-kubeconform
 helm-test: helm-lint helm-unittest
 	@echo ""
 	@echo "Helm chart tests passed!"
+
+# ============================================
+# Documentation Commands
+# ============================================
+
+# Build MkDocs documentation (requires: pip install mkdocs mkdocs-material)
+docs:
+	@echo "Building documentation..."
+	@if command -v mkdocs >/dev/null 2>&1; then \
+		mkdocs build; \
+	else \
+		echo "MkDocs not found. Install: pip install mkdocs mkdocs-material pymdown-extensions"; \
+		exit 1; \
+	fi
+	@echo "Documentation built in docs/"
+
+# Serve documentation locally for development
+docs-serve:
+	@echo "Starting documentation server..."
+	@if command -v mkdocs >/dev/null 2>&1; then \
+		mkdocs serve; \
+	else \
+		echo "MkDocs not found. Install: pip install mkdocs mkdocs-material pymdown-extensions"; \
+		exit 1; \
+	fi
+
+# Clean generated documentation
+docs-clean:
+	@echo "Cleaning generated documentation..."
+	rm -rf docs/*
+	touch docs/.gitkeep
+	@echo "Documentation cleaned!"
