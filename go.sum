@@ -12,8 +12,8 @@ github.com/agentplexus/omnillm v0.9.0 h1:frL5nEcATlcUOJYqBYSqZB1Ba/pRWIzda7ID1mR
 github.com/agentplexus/omnillm v0.9.0/go.mod h1:2ZmGwLt2SdmYtwT9+kPt0vlLHyQFy7NtMjXMZQbkLhI=
 github.com/agentplexus/omniobserve v0.4.0 h1:bJcWOx0uRHyP/QONO+4uVrvqSauKDsa66y4fq90BWpc=
 github.com/agentplexus/omniobserve v0.4.0/go.mod h1:Wcf9Agw+OsvXMgC7YzUPfgw3R3mdzwlDFHoohdawSEI=
-github.com/agentplexus/omniserp v0.6.0 h1:e2CViWNOSVd8vnLoW1hUVkm3V7n+/v6dqmVHspedaZI=
-github.com/agentplexus/omniserp v0.6.0/go.mod h1:zmNjAaiHC4Y1CBqoamVGVBv6ZqOz30qdrQJ2eIg+OIw=
+github.com/agentplexus/omniserp v0.7.0 h1:23TiYDQfb+IlmAopLavpptJ/pR8aiGzvXIdPYk6kmeE=
+github.com/agentplexus/omniserp v0.7.0/go.mod h1:zBnvqf+2ni0jG+u3hwpefi3o1BwAb5wYEyykqee/zCY=
 github.com/airbrake/gobrake v3.6.1+incompatible/go.mod h1:wM4gu3Cn0W0K7GUuVWnlXZU11AGBXMILnrdOU8Kn00o=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
