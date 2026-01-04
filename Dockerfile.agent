@@ -28,14 +28,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the specified agent
-RUN if [ "$AGENT" = "orchestration-eino" ]; then \
-        go build -ldflags="-s -w" -o /build/bin/agent agents/orchestration-eino/main.go; \
-    elif [ "$AGENT" = "orchestration" ]; then \
-        go build -ldflags="-s -w" -o /build/bin/agent agents/orchestration/main.go; \
-    else \
-        go build -ldflags="-s -w" -o /build/bin/agent agents/${AGENT}/main.go; \
-    fi
+# Build the specified agent (use directory to include all .go files)
+RUN go build -ldflags="-s -w" -o /build/bin/agent ./agents/${AGENT}/
 
 # Stage 2: Create minimal runtime image
 FROM alpine:3.19
