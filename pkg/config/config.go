@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 )
 
 // Config holds the application configuration
@@ -37,11 +38,15 @@ type Config struct {
 	A2AAuthToken string
 
 	// Observability Configuration
-	ObservabilityEnabled  bool   // Enable LLM observability
-	ObservabilityProvider string // "opik", "langfuse", "phoenix"
-	ObservabilityAPIKey   string
-	ObservabilityEndpoint string // Custom endpoint (optional)
-	ObservabilityProject  string // Project name for grouping traces
+	ObservabilityEnabled   bool   // Enable LLM observability
+	ObservabilityProvider  string // "opik", "langfuse", "phoenix"
+	ObservabilityAPIKey    string
+	ObservabilityEndpoint  string // Custom endpoint (optional)
+	ObservabilityProject   string // Project name for grouping traces
+	ObservabilityWorkspace string // Workspace name (for Comet Opik)
+
+	// HTTP Server Configuration
+	HTTPTimeoutSeconds int // HTTP read/write timeout in seconds (default: 300)
 }
 
 // LoadConfig loads configuration from environment variables
@@ -80,11 +85,15 @@ func LoadConfig() *Config {
 		A2AAuthToken: getEnv("A2A_AUTH_TOKEN", ""),
 
 		// Observability
-		ObservabilityEnabled:  getEnv("OBSERVABILITY_ENABLED", "false") == "true",
-		ObservabilityProvider: getEnv("OBSERVABILITY_PROVIDER", "opik"),
-		ObservabilityAPIKey:   getEnv("OBSERVABILITY_API_KEY", getEnv("OPIK_API_KEY", "")),
-		ObservabilityEndpoint: getEnv("OBSERVABILITY_ENDPOINT", ""),
-		ObservabilityProject:  getEnv("OBSERVABILITY_PROJECT", "stats-agent-team"),
+		ObservabilityEnabled:   getEnv("OBSERVABILITY_ENABLED", "false") == "true",
+		ObservabilityProvider:  getEnv("OBSERVABILITY_PROVIDER", "opik"),
+		ObservabilityAPIKey:    getEnv("OBSERVABILITY_API_KEY", getEnv("OPIK_API_KEY", getEnv("PHOENIX_API_KEY", ""))),
+		ObservabilityEndpoint:  getEnv("OBSERVABILITY_ENDPOINT", ""),
+		ObservabilityProject:   getEnv("OBSERVABILITY_PROJECT", "stats-agent-team"),
+		ObservabilityWorkspace: getEnv("OBSERVABILITY_WORKSPACE", getEnv("OPIK_WORKSPACE", getEnv("PHOENIX_SPACE_ID", ""))),
+
+		// HTTP Server
+		HTTPTimeoutSeconds: getEnvInt("HTTP_TIMEOUT_SECONDS", 300),
 	}
 
 	// Set LLMAPIKey based on provider if not explicitly set
@@ -104,6 +113,28 @@ func LoadConfig() *Config {
 	// Set LLMBaseURL for Ollama if not explicitly set
 	if cfg.LLMBaseURL == "" && provider == "ollama" {
 		cfg.LLMBaseURL = cfg.OllamaURL
+	}
+
+	// Set observability settings based on provider if not explicitly set
+	if cfg.ObservabilityEnabled {
+		switch cfg.ObservabilityProvider {
+		case "phoenix":
+			// For Phoenix, prefer PHOENIX_API_KEY over generic fallbacks
+			if phoenixKey := getEnv("PHOENIX_API_KEY", ""); phoenixKey != "" {
+				cfg.ObservabilityAPIKey = phoenixKey
+			}
+			// For Phoenix, prefer PHOENIX_SPACE_ID over OPIK_WORKSPACE
+			if spaceID := getEnv("PHOENIX_SPACE_ID", ""); spaceID != "" {
+				cfg.ObservabilityWorkspace = spaceID
+			}
+		case "opik":
+			if cfg.ObservabilityAPIKey == "" {
+				cfg.ObservabilityAPIKey = getEnv("OPIK_API_KEY", "")
+			}
+			if cfg.ObservabilityWorkspace == "" {
+				cfg.ObservabilityWorkspace = getEnv("OPIK_WORKSPACE", "")
+			}
+		}
 	}
 
 	return cfg
@@ -131,6 +162,16 @@ func getDefaultModel(provider string) string {
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
+	}
+	return defaultValue
+}
+
+// getEnvInt gets an environment variable as int or returns a default value
+func getEnvInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intVal, err := strconv.Atoi(value); err == nil {
+			return intVal
+		}
 	}
 	return defaultValue
 }
