@@ -4,13 +4,15 @@ go 1.25.3
 
 require (
 	github.com/a2aproject/a2a-go v0.3.3
+	github.com/agentplexus/go-opik v0.5.0
 	github.com/agentplexus/omnillm v0.9.0
-	github.com/agentplexus/omniobserve v0.4.0
+	github.com/agentplexus/omniobserve v0.5.0
 	github.com/agentplexus/omniserp v0.7.0
 	github.com/cloudwego/eino v0.7.17
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-playground/validator/v10 v10.30.1
+	github.com/grokify/mogo v0.72.5
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	google.golang.org/adk v0.3.0
@@ -22,7 +24,6 @@ require (
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/auth v0.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
-	github.com/agentplexus/go-comet-ml-opik v0.3.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -53,7 +54,6 @@ require (
 	github.com/googleapis/gax-go/v2 v2.16.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/grokify/mogo v0.72.5 // indirect
 	github.com/grokify/sogo v0.13.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect

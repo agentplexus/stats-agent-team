@@ -6,12 +6,12 @@ cloud.google.com/go/compute/metadata v0.9.0 h1:pDUj4QMoPejqq20dK0Pg2N4yG9zIkYGdB
 cloud.google.com/go/compute/metadata v0.9.0/go.mod h1:E0bWwX5wTnLPedCKqk3pJmVgCBSM6qQI1yTBdEb3C10=
 github.com/a2aproject/a2a-go v0.3.3 h1:NqGDw2c8hCSW3/9MakeeRpw5yCZUUmW2Y/yINV15GwQ=
 github.com/a2aproject/a2a-go v0.3.3/go.mod h1:8C0O6lsfR7zWFEqVZz/+zWCoxe8gSWpknEpqm/Vgj3E=
-github.com/agentplexus/go-comet-ml-opik v0.3.0 h1:7ikwtsvtfw40J95E7mNu4LZQr7a5abEEWmqljI9tZ08=
-github.com/agentplexus/go-comet-ml-opik v0.3.0/go.mod h1:BjePiG921PstZJ8yDlCLekVxjssRGl7uEaxFvzV4Y00=
+github.com/agentplexus/go-opik v0.5.0 h1:74EtbDCsSOY4YXyVoEsSSiwDZMmFKepixUotTpQ9Ik4=
+github.com/agentplexus/go-opik v0.5.0/go.mod h1:bhAALiRxyy270gF/AguOaPQik39pAqXHwvOXEsd44UA=
 github.com/agentplexus/omnillm v0.9.0 h1:frL5nEcATlcUOJYqBYSqZB1Ba/pRWIzda7ID1mRkthM=
 github.com/agentplexus/omnillm v0.9.0/go.mod h1:2ZmGwLt2SdmYtwT9+kPt0vlLHyQFy7NtMjXMZQbkLhI=
-github.com/agentplexus/omniobserve v0.4.0 h1:bJcWOx0uRHyP/QONO+4uVrvqSauKDsa66y4fq90BWpc=
-github.com/agentplexus/omniobserve v0.4.0/go.mod h1:Wcf9Agw+OsvXMgC7YzUPfgw3R3mdzwlDFHoohdawSEI=
+github.com/agentplexus/omniobserve v0.5.0 h1:Tkt4CurVWQF6mHOq4pEHR7xBQdCqiloretSqmpoPrNk=
+github.com/agentplexus/omniobserve v0.5.0/go.mod h1:Hm3cfaxXcBxMGPjIE0aM7dxz2MoVAxL7F/lpx69mbXw=
 github.com/agentplexus/omniserp v0.7.0 h1:23TiYDQfb+IlmAopLavpptJ/pR8aiGzvXIdPYk6kmeE=
 github.com/agentplexus/omniserp v0.7.0/go.mod h1:zBnvqf+2ni0jG+u3hwpefi3o1BwAb5wYEyykqee/zCY=
 github.com/airbrake/gobrake v3.6.1+incompatible/go.mod h1:wM4gu3Cn0W0K7GUuVWnlXZU11AGBXMILnrdOU8Kn00o=
