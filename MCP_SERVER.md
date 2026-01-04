@@ -10,23 +10,32 @@ The MCP server exposes the Statistics Agent Team's functionality through the Mod
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  MCP Client                              │
-│              (e.g., Claude Code)                         │
+│                  MCP Client                             │
+│              (e.g., Claude Code)                        │
 └──────────────────────┬──────────────────────────────────┘
                        │ MCP Protocol (stdio)
                        │
 ┌──────────────────────▼──────────────────────────────────┐
-│              MCP Server                                  │
-│          (stats-agent-team)                             │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-           ┌───────────┴────────────┐
-           │                        │
-┌──────────▼────────┐    ┌─────────▼──────────────┐
-│ Research Agent     │    │ Verification Agent     │
-│ (Gemini + Web)     │───▶│ (Validates sources)    │
-└────────────────────┘    └─────────────────────────┘
+│              MCP Server (stats-agent-team)              │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  Embedded Eino Orchestration Agent                 │ │
+│  │  (Deterministic Graph Workflow)                    │ │
+│  └──────────────────────┬─────────────────────────────┘ │
+└─────────────────────────┼───────────────────────────────┘
+                          │ HTTP
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+        ▼                 ▼                 ▼
+┌────────────┐     ┌────────────┐     ┌────────────────┐
+│ Research   │────▶│ Synthesis  │────▶│ Verification   │
+│ Agent      │     │ Agent      │     │ Agent          │
+│ (Web URLs) │     │ (Extract   │     │ (Validate      │
+│ :8001      │     │  Stats)    │     │  Sources)      │
+└────────────┘     │ :8004      │     │ :8002          │
+                   └────────────┘     └────────────────┘
 ```
+
+> **Note:** The MCP server **embeds** the Eino orchestration logic directly in-process. You only need to run the three worker agents (Research, Synthesis, Verification) when using the MCP server. The standalone orchestration agent (`orchestration-eino` on port 8000) is only needed for direct HTTP API access, not for MCP usage.
 
 ## Features
 
@@ -53,13 +62,20 @@ Search for verified statistics on a given topic using a multi-agent system.
 2. **API Keys** configured:
    - `GOOGLE_API_KEY` for Gemini (default LLM)
    - Or other LLM provider keys as configured
-3. **Research and Verification agents** running:
+3. **All three agents** running:
    ```bash
-   # Terminal 1: Research Agent
+   # Terminal 1: Research Agent (port 8001)
    ./bin/research
 
-   # Terminal 2: Verification Agent
+   # Terminal 2: Synthesis Agent (port 8004)
+   ./bin/synthesis
+
+   # Terminal 3: Verification Agent (port 8002)
    ./bin/verification
+   ```
+   Or use the convenience target:
+   ```bash
+   make run-all-eino
    ```
 
 ## Building
@@ -80,11 +96,12 @@ The MCP server uses the same configuration as other agents:
 
 ```bash
 # LLM Configuration
-export LLM_PROVIDER=gemini  # or claude, openai, ollama
+export LLM_PROVIDER=gemini  # or claude, openai, ollama, xai
 export GOOGLE_API_KEY=your-api-key
 
 # Agent URLs (defaults shown)
 export RESEARCH_AGENT_URL=http://localhost:8001
+export SYNTHESIS_AGENT_URL=http://localhost:8004
 export VERIFICATION_AGENT_URL=http://localhost:8002
 ```
 
@@ -106,6 +123,7 @@ Add the MCP server to your Claude Code MCP settings file:
       "env": {
         "GOOGLE_API_KEY": "your-google-api-key",
         "RESEARCH_AGENT_URL": "http://localhost:8001",
+        "SYNTHESIS_AGENT_URL": "http://localhost:8004",
         "VERIFICATION_AGENT_URL": "http://localhost:8002"
       }
     }
@@ -115,18 +133,31 @@ Add the MCP server to your Claude Code MCP settings file:
 
 ### 2. Start Required Agents
 
-Before using the MCP server, start the research and verification agents:
+Before using the MCP server, start all three agents:
 
 ```bash
-# Terminal 1: Research Agent
+# Terminal 1: Research Agent (port 8001)
 cd /path/to/stats-agent-team
 export GOOGLE_API_KEY=your-key
 ./bin/research
 
-# Terminal 2: Verification Agent
+# Terminal 2: Synthesis Agent (port 8004)
+cd /path/to/stats-agent-team
+export GOOGLE_API_KEY=your-key
+./bin/synthesis
+
+# Terminal 3: Verification Agent (port 8002)
 cd /path/to/stats-agent-team
 export GOOGLE_API_KEY=your-key
 ./bin/verification
+```
+
+Or start all agents at once:
+
+```bash
+cd /path/to/stats-agent-team
+export GOOGLE_API_KEY=your-key
+make run-all-eino
 ```
 
 ### 3. Use in Claude Code
@@ -200,20 +231,21 @@ The tool returns formatted markdown output:
 ### MCP Server Not Starting
 
 1. **Check logs:** The MCP server logs to stderr, which Claude Code captures
-2. **Verify agents are running:** Research and verification agents must be running
+2. **Verify agents are running:** All three agents (Research, Synthesis, Verification) must be running
 3. **Check API keys:** Ensure `GOOGLE_API_KEY` or other LLM provider keys are set
 
 ### No Statistics Found
 
 1. **Check research agent:** Ensure it's running on port 8001
-2. **Check verification agent:** Ensure it's running on port 8002
-3. **Review topic:** Try a more specific or different topic
+2. **Check synthesis agent:** Ensure it's running on port 8004
+3. **Check verification agent:** Ensure it's running on port 8002
+4. **Review topic:** Try a more specific or different topic
 
 ### Connection Errors
 
-1. **Check agent URLs:** Verify `RESEARCH_AGENT_URL` and `VERIFICATION_AGENT_URL` are correct
+1. **Check agent URLs:** Verify `RESEARCH_AGENT_URL`, `SYNTHESIS_AGENT_URL`, and `VERIFICATION_AGENT_URL` are correct
 2. **Check network:** Ensure agents can communicate with each other
-3. **Check ports:** Ensure ports 8001 and 8002 are not blocked
+3. **Check ports:** Ensure ports 8001, 8004, and 8002 are not blocked
 
 ## Development
 
@@ -242,10 +274,11 @@ The MCP server logs to stderr:
 ### Communication Flow
 
 1. **Claude Code → MCP Server:** Claude sends `tools/call` request via stdio
-2. **MCP Server → Eino Orchestrator:** Orchestrator coordinates workflow
-3. **Orchestrator → Research Agent:** HTTP POST to /research endpoint
-4. **Orchestrator → Verification Agent:** HTTP POST to /verify endpoint
-5. **MCP Server → Claude Code:** Returns formatted results via stdio
+2. **MCP Server → Eino Orchestrator:** Orchestrator coordinates deterministic graph workflow
+3. **Orchestrator → Research Agent:** HTTP POST to `/research` - finds relevant source URLs
+4. **Orchestrator → Synthesis Agent:** HTTP POST to `/synthesize` - extracts statistics from sources
+5. **Orchestrator → Verification Agent:** HTTP POST to `/verify` - validates statistics against sources
+6. **MCP Server → Claude Code:** Returns formatted results via stdio
 
 ### Error Handling
 
