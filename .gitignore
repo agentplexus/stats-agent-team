@@ -1,9 +1,19 @@
 .DS_Store
 .env
+.env.sh
 _*
 *.tar
+*.bak
+*.pdf
+*.css
 bin/
 coverage.txt
 debug.test
 main
 main.zip
+
+# Temp/binary directories from agent runs
+orchestration-eino
+research
+synthesis
+verification

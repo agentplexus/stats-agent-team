@@ -1,0 +1,226 @@
+{
+  "ir_version": "1.0",
+  "project": "stats-agent-team",
+  "repository": "https://github.com/agentplexus/stats-agent-team",
+  "generated_at": "2026-01-04T00:00:00Z",
+  "unreleased": {},
+  "releases": [
+    {
+      "version": "0.5.0",
+      "date": "2026-01-04",
+      "added": [
+        {
+          "description": "Phoenix observability provider support for LLM tracing"
+        },
+        {
+          "description": "`HTTP_TIMEOUT_SECONDS` environment variable for configurable HTTP client/server timeout"
+        },
+        {
+          "description": "`pkg/logging` package for centralized structured logging with slog"
+        },
+        {
+          "description": "Provider-specific observability configuration (PHOENIX_API_KEY, PHOENIX_SPACE_ID)"
+        }
+      ],
+      "changed": [
+        {
+          "description": "All agents refactored to use structured logging package"
+        },
+        {
+          "description": "HTTP servers now use configurable timeouts from config"
+        },
+        {
+          "description": "OmniLLM adapter updated to pass timeout configuration"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "`github.com/agentplexus/omnillm` v0.9.0 → v0.10.0"
+        },
+        {
+          "description": "`github.com/agentplexus/go-phoenix` v0.1.0 (new)"
+        },
+        {
+          "description": "`github.com/agentplexus/go-opik` v0.4.0 → v0.5.0"
+        },
+        {
+          "description": "`github.com/agentplexus/omniobserve` v0.4.0 → v0.5.0"
+        },
+        {
+          "description": "`github.com/cloudwego/eino` v0.7.14 → v0.7.17"
+        },
+        {
+          "description": "`github.com/agentplexus/omniserp` v0.6.0 → v0.7.0"
+        }
+      ]
+    },
+    {
+      "version": "0.4.0",
+      "date": "2025-12-27",
+      "added": [
+        {
+          "description": "Helm chart for Kubernetes deployment with Minikube and EKS support"
+        },
+        {
+          "description": "Parameterized Dockerfile (`Dockerfile.agent`) for building all agent images"
+        },
+        {
+          "description": "CI/CD pipeline with Gitleaks, Trivy, Kubeconform, and Polaris"
+        },
+        {
+          "description": "Go struct validation for Helm values (`pkg/helm/`)"
+        },
+        {
+          "description": "Helm chart unit tests with helm-unittest"
+        },
+        {
+          "description": "MkDocs documentation site with Material theme"
+        }
+      ],
+      "changed": [
+        {
+          "description": "Module moved from `github.com/grokify/stats-agent-team` to `github.com/agentplexus/stats-agent-team`",
+          "breaking": true
+        },
+        {
+          "description": "Dependencies renamed: metallm → omnillm, metaobserve → omniobserve, metaserp → omniserp",
+          "breaking": true
+        }
+      ],
+      "fixed": [
+        {
+          "description": "Unchecked error return value in Helm validation registration"
+        }
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "date": "2025-12-21",
+      "added": [
+        {
+          "description": "A2A Inter-Agent Protocol support for all agents"
+        },
+        {
+          "description": "LLM Observability via MetaObserve (Opik, Langfuse, Phoenix backends)"
+        },
+        {
+          "description": "MetaLLM adapter replacing gollm adapter"
+        },
+        {
+          "description": "Security documentation (`README_SECURITY.md`)"
+        },
+        {
+          "description": "Project roadmap (`ROADMAP.md`)"
+        },
+        {
+          "description": "Presentation materials (`presentation.md`)"
+        }
+      ],
+      "changed": [
+        {
+          "description": "Enhanced team stats finding performance via `make run-all-eino`"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "`github.com/cloudwego/eino` 0.7.8 → 0.7.10"
+        },
+        {
+          "description": "`github.com/a2aproject/a2a-go` (new)"
+        },
+        {
+          "description": "`github.com/grokify/metallm` (new)"
+        },
+        {
+          "description": "`github.com/grokify/metaobserve` (new)"
+        }
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "date": "2025-12-14",
+      "added": [
+        {
+          "description": "Synthesis Agent for LLM-powered statistic extraction from web content"
+        },
+        {
+          "description": "Complete 4-agent architecture (Research, Synthesis, Verification, Orchestration)"
+        },
+        {
+          "description": "Docker support with Dockerfile, docker-compose.yml, and entrypoint script"
+        },
+        {
+          "description": "Serper/SerpAPI integration for real web search"
+        },
+        {
+          "description": "Multi-LLM provider support (Gemini, Claude, OpenAI, xAI Grok, Ollama)"
+        },
+        {
+          "description": "Direct LLM search mode with `--direct` CLI flag"
+        },
+        {
+          "description": "Base agent package (`pkg/agent/base.go`)"
+        }
+      ],
+      "changed": [
+        {
+          "description": "Removed pre-built binaries from `bin/` directory",
+          "breaking": true
+        },
+        {
+          "description": "Research agent API changes for 4-agent architecture compatibility",
+          "breaking": true
+        }
+      ],
+      "fixed": [
+        {
+          "description": "Search functionality issues"
+        },
+        {
+          "description": "LLM support for synthesis and verification agents"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "`github.com/grokify/gollm` (new)"
+        },
+        {
+          "description": "`github.com/grokify/metasearch` (new)"
+        }
+      ]
+    },
+    {
+      "version": "0.1.0",
+      "date": "2025-12-13",
+      "added": [
+        {
+          "description": "Initial release with 3-agent architecture (Research, Verification, Orchestration)"
+        },
+        {
+          "description": "Research Agent with Google ADK and Gemini 2.0 Flash"
+        },
+        {
+          "description": "Verification Agent for source validation"
+        },
+        {
+          "description": "ADK Orchestration Agent with LLM-based coordination"
+        },
+        {
+          "description": "Eino Orchestration Agent with deterministic graph-based workflow"
+        },
+        {
+          "description": "MCP Server integration for Claude Code"
+        },
+        {
+          "description": "Multi-LLM provider support (Gemini, Claude, OpenAI, Ollama)"
+        },
+        {
+          "description": "Structured JSON output for verified statistics"
+        },
+        {
+          "description": "GitHub Actions CI/CD with golangci-lint"
+        }
+      ]
+    }
+  ]
+}
