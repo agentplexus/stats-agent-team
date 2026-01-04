@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"time"
 
 	"github.com/agentplexus/omnillm"
 	"github.com/agentplexus/omnillm/provider"
@@ -16,6 +17,7 @@ type OmniLLMAdapterConfig struct {
 	ProviderName      string
 	APIKey            string
 	ModelName         string
+	Timeout           time.Duration // HTTP timeout for API calls (0 = provider default)
 	ObservabilityHook omnillm.ObservabilityHook
 }
 
@@ -41,10 +43,10 @@ func NewOmniLLMAdapterWithConfig(cfg OmniLLMAdapterConfig) (*OmniLLMAdapter, err
 		return nil, fmt.Errorf("%s API key is required", cfg.ProviderName)
 	}
 
-	// Create OmniLLM config
 	config := omnillm.ClientConfig{
 		Provider:          omnillm.ProviderName(cfg.ProviderName),
 		APIKey:            cfg.APIKey,
+		Timeout:           cfg.Timeout,
 		ObservabilityHook: cfg.ObservabilityHook,
 	}
 
@@ -96,7 +98,10 @@ func (m *OmniLLMAdapter) GenerateContent(ctx context.Context, req *model.LLMRequ
 		}
 
 		// Call OmniLLM API
+		// Note: The observability hook is called automatically by the ChatClient
+		// (passed via ClientConfig.ObservabilityHook)
 		resp, err := m.client.CreateChatCompletion(ctx, omniReq)
+
 		if err != nil {
 			yield(nil, fmt.Errorf("OmniLLM API error: %w", err))
 			return

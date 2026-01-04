@@ -30,7 +30,7 @@ func NewBaseAgent(ctx context.Context, cfg *config.Config, timeoutSec int) (*Bas
 	logger := logging.FromContext(ctx)
 
 	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
+	modelFactory := llm.NewModelFactory(ctx, cfg)
 	llmModel, err := modelFactory.CreateModel(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model: %w", err)
@@ -47,8 +47,11 @@ func NewBaseAgent(ctx context.Context, cfg *config.Config, timeoutSec int) (*Bas
 
 // NewBaseAgentWithLogger creates a new base agent with an explicit logger
 func NewBaseAgentWithLogger(ctx context.Context, cfg *config.Config, timeoutSec int, logger *slog.Logger) (*BaseAgent, error) {
+	// Ensure context has the logger for model factory
+	ctx = logging.WithLogger(ctx, logger)
+
 	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
+	modelFactory := llm.NewModelFactory(ctx, cfg)
 	llmModel, err := modelFactory.CreateModel(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model: %w", err)

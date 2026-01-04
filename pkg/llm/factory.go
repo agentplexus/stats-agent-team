@@ -3,10 +3,13 @@ package llm
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"time"
 
 	"github.com/agentplexus/omnillm"
 	omnillmhook "github.com/agentplexus/omniobserve/integrations/omnillm"
 	"github.com/agentplexus/omniobserve/llmops"
+	"github.com/grokify/mogo/log/slogutil"
 	"google.golang.org/adk/model"
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/genai"
@@ -15,21 +18,28 @@ import (
 	"github.com/agentplexus/stats-agent-team/pkg/llm/adapters"
 
 	// Import observability providers (driver registration via init())
+	// TODO: move to build tags for smaller binaries
+	_ "github.com/agentplexus/go-opik/llmops"
+	_ "github.com/agentplexus/go-phoenix/llmops"
 	_ "github.com/agentplexus/omniobserve/llmops/langfuse"
-	_ "github.com/agentplexus/omniobserve/llmops/opik"
-	_ "github.com/agentplexus/omniobserve/llmops/phoenix"
 )
 
 // ModelFactory creates LLM models based on configuration
 type ModelFactory struct {
 	cfg      *config.Config
+	logger   *slog.Logger
 	obsHook  omnillm.ObservabilityHook
 	obsClose func() error
 }
 
-// NewModelFactory creates a new model factory
-func NewModelFactory(cfg *config.Config) *ModelFactory {
-	mf := &ModelFactory{cfg: cfg}
+// NewModelFactory creates a new model factory.
+// The logger is retrieved from ctx using slogutil.LoggerFromContext.
+func NewModelFactory(ctx context.Context, cfg *config.Config) *ModelFactory {
+	logger := slogutil.LoggerFromContext(ctx, slog.Default())
+	mf := &ModelFactory{
+		cfg:    cfg,
+		logger: logger.With("component", "model-factory"),
+	}
 
 	// Initialize observability if enabled
 	if cfg.ObservabilityEnabled && cfg.ObservabilityProvider != "" {
@@ -55,14 +65,38 @@ func (mf *ModelFactory) initObservability() (omnillm.ObservabilityHook, func() e
 		opts = append(opts, llmops.WithEndpoint(mf.cfg.ObservabilityEndpoint))
 	}
 
+	if mf.cfg.ObservabilityWorkspace != "" {
+		opts = append(opts, llmops.WithWorkspace(mf.cfg.ObservabilityWorkspace))
+	}
+
 	provider, err := llmops.Open(mf.cfg.ObservabilityProvider, opts...)
 	if err != nil {
-		// Log error but don't fail - observability is optional
-		fmt.Printf("Warning: failed to initialize observability provider %s: %v\n", mf.cfg.ObservabilityProvider, err)
+		// Log warning but don't fail - observability is optional
+		mf.logger.Warn("failed to initialize observability provider",
+			"provider", mf.cfg.ObservabilityProvider,
+			"error", err)
 		return nil, nil
 	}
 
-	return omnillmhook.NewHook(provider), provider.Close
+	// Ensure project exists (some providers require this)
+	ctx := context.Background()
+	if _, err = provider.CreateProject(ctx, mf.cfg.ObservabilityProject); err != nil {
+		// Ignore error - project may already exist
+		mf.logger.Debug("CreateProject returned error (may already exist)", "error", err)
+	}
+
+	// Set the project as active
+	if err := provider.SetProject(ctx, mf.cfg.ObservabilityProject); err != nil {
+		mf.logger.Warn("failed to set observability project", "project", mf.cfg.ObservabilityProject, "error", err)
+	}
+
+	hook := omnillmhook.NewHook(provider)
+
+	closeFn := func() error {
+		return provider.Close()
+	}
+
+	return hook, closeFn
 }
 
 // Close cleans up resources (call when factory is no longer needed)
@@ -132,6 +166,7 @@ func (mf *ModelFactory) createClaudeModel() (model.LLM, error) {
 		ProviderName:      "anthropic",
 		APIKey:            apiKey,
 		ModelName:         modelName,
+		Timeout:           mf.getTimeout(),
 		ObservabilityHook: mf.obsHook,
 	})
 }
@@ -156,6 +191,7 @@ func (mf *ModelFactory) createOpenAIModel() (model.LLM, error) {
 		ProviderName:      "openai",
 		APIKey:            apiKey,
 		ModelName:         modelName,
+		Timeout:           mf.getTimeout(),
 		ObservabilityHook: mf.obsHook,
 	})
 }
@@ -180,6 +216,7 @@ func (mf *ModelFactory) createXAIModel() (model.LLM, error) {
 		ProviderName:      "xai",
 		APIKey:            apiKey,
 		ModelName:         modelName,
+		Timeout:           mf.getTimeout(),
 		ObservabilityHook: mf.obsHook,
 	})
 }
@@ -197,8 +234,17 @@ func (mf *ModelFactory) createOllamaModel() (model.LLM, error) {
 		ProviderName:      "ollama",
 		APIKey:            "",
 		ModelName:         modelName,
+		Timeout:           mf.getTimeout(),
 		ObservabilityHook: mf.obsHook,
 	})
+}
+
+// getTimeout returns the configured HTTP timeout for LLM API calls
+func (mf *ModelFactory) getTimeout() time.Duration {
+	if mf.cfg.HTTPTimeoutSeconds > 0 {
+		return time.Duration(mf.cfg.HTTPTimeoutSeconds) * time.Second
+	}
+	return 0 // Let provider use its default
 }
 
 // GetProviderInfo returns information about the current provider

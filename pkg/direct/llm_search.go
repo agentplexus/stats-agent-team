@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -15,29 +15,33 @@ import (
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
 	"github.com/agentplexus/stats-agent-team/pkg/llm"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
 // LLMSearchService provides direct LLM-based statistics search (like ChatGPT)
 type LLMSearchService struct {
-	cfg   *config.Config
-	model model.LLM
+	cfg    *config.Config
+	model  model.LLM
+	logger *slog.Logger
 }
 
 // NewLLMSearchService creates a new direct LLM search service
 func NewLLMSearchService(cfg *config.Config) (*LLMSearchService, error) {
-	ctx := context.Background()
+	logger := logging.NewAgentLogger("llm-search")
+	ctx := logging.WithLogger(context.Background(), logger)
 
 	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
+	modelFactory := llm.NewModelFactory(ctx, cfg)
 	llmModel, err := modelFactory.CreateModel(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model: %w", err)
 	}
 
 	return &LLMSearchService{
-		cfg:   cfg,
-		model: llmModel,
+		cfg:    cfg,
+		model:  llmModel,
+		logger: logger,
 	}, nil
 }
 
@@ -221,8 +225,10 @@ func (s *LLMSearchService) verifyWithVerificationAgent(ctx context.Context, topi
 		}
 	}
 
-	log.Printf("[Direct+Verify] LLM provided %d claims, verification confirmed %d/%d",
-		len(candidates), len(verifiedStats), minStats)
+	s.logger.Info("verification completed",
+		"candidates", len(candidates),
+		"verified", len(verifiedStats),
+		"target", minStats)
 
 	return &models.OrchestrationResponse{
 		Topic:           topic,
