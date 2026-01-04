@@ -6,6 +6,15 @@
   "unreleased": {},
   "releases": [
     {
+      "version": "0.5.1",
+      "date": "2026-01-04",
+      "fixed": [
+        {
+          "description": "Docker build failing due to multi-file agents (build directory instead of single main.go)"
+        }
+      ]
+    },
+    {
       "version": "0.5.0",
       "date": "2026-01-04",
       "added": [
