@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 	"github.com/agentplexus/stats-agent-team/pkg/orchestration"
 )
@@ -29,7 +30,10 @@ type SearchStatisticsParams struct {
 	ReputableOnly    bool   `json:"reputable_only,omitempty"`
 }
 
-var einoAgent *orchestration.EinoOrchestrationAgent
+var (
+	einoAgent *orchestration.EinoOrchestrationAgent
+	logger    *slog.Logger
+)
 
 func SearchStatistics(ctx context.Context, req *mcp.CallToolRequest, args SearchStatisticsParams) (*mcp.CallToolResult, any, error) {
 	// Validate input
@@ -61,13 +65,13 @@ func SearchStatistics(ctx context.Context, req *mcp.CallToolRequest, args Search
 		ReputableOnly:    args.ReputableOnly,
 	}
 
-	log.Printf("[MCP] Searching for statistics on topic: %s", args.Topic)
+	logger.Info("searching for statistics", "topic", args.Topic)
 
 	// Execute orchestration
 	result, err := einoAgent.Orchestrate(ctx, orchReq)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error searching for statistics: %v", err)
-		log.Printf("[MCP] %s", errMsg)
+		logger.Error("search failed", "error", err)
 		return &mcp.CallToolResult{
 			IsError: true,
 			Content: []mcp.Content{
@@ -78,8 +82,9 @@ func SearchStatistics(ctx context.Context, req *mcp.CallToolRequest, args Search
 
 	// Format response
 	response := formatResponse(result)
-	log.Printf("[MCP] Found %d verified statistics (from %d candidates)",
-		result.VerifiedCount, result.TotalCandidates)
+	logger.Info("search completed",
+		"verified", result.VerifiedCount,
+		"candidates", result.TotalCandidates)
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -150,16 +155,22 @@ func (c *ioConn) SessionID() string {
 }
 
 func main() {
+	// Initialize logger
+	logger = logging.NewAgentLogger("mcp-server")
+
 	// Load configuration
 	cfg := config.LoadConfig()
 
 	// Create Eino orchestration agent
-	einoAgent = orchestration.NewEinoOrchestrationAgent(cfg)
+	einoAgent = orchestration.NewEinoOrchestrationAgent(cfg, logger)
 
-	log.Printf("Starting MCP server: %s v%s", serverName, serverVersion)
-	log.Printf("Using LLM Provider: %s, Model: %s", cfg.LLMProvider, cfg.LLMModel)
-	log.Printf("Research Agent: %s", cfg.ResearchAgentURL)
-	log.Printf("Verification Agent: %s", cfg.VerificationAgentURL)
+	logger.Info("starting MCP server",
+		"name", serverName,
+		"version", serverVersion,
+		"llm_provider", cfg.LLMProvider,
+		"llm_model", cfg.LLMModel,
+		"research_agent", cfg.ResearchAgentURL,
+		"verification_agent", cfg.VerificationAgentURL)
 
 	// Create MCP server
 	server := mcp.NewServer(
@@ -208,11 +219,12 @@ func main() {
 	// Create stdio transport
 	transport := NewIOTransport(os.Stdin, os.Stdout)
 
-	log.Println("[MCP] Server running on stdio transport")
+	logger.Info("server running on stdio transport")
 
 	// Run server
 	if err := server.Run(context.Background(), transport); err != nil {
-		log.Fatalf("Server error: %v", err)
+		logger.Error("server error", "error", err)
+		os.Exit(1)
 	}
 }
 

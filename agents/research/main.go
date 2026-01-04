@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 	"github.com/agentplexus/stats-agent-team/pkg/search"
 )
@@ -21,6 +23,7 @@ type ResearchAgent struct {
 	cfg       *config.Config
 	client    *http.Client
 	searchSvc *search.Service
+	logger    *slog.Logger
 }
 
 // ResearchInput defines the input for the research tool
@@ -37,19 +40,23 @@ type ResearchOutput struct {
 
 // NewResearchAgent creates a new search-focused research agent
 func NewResearchAgent(cfg *config.Config) (*ResearchAgent, error) {
+	logger := logging.NewAgentLogger("research")
+
 	// Create search service
 	searchSvc, err := search.NewService(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("search service required: %w", err)
 	}
 
-	log.Printf("Research Agent: Using %s search provider", cfg.SearchProvider)
-	log.Printf("Research Agent: Focuses on finding relevant sources (no LLM analysis)")
+	logger.Info("agent initialized",
+		"search_provider", cfg.SearchProvider,
+		"mode", "search-only")
 
 	ra := &ResearchAgent{
 		cfg:       cfg,
 		client:    &http.Client{Timeout: 30 * time.Second},
 		searchSvc: searchSvc,
+		logger:    logger,
 	}
 
 	return ra, nil
@@ -57,7 +64,7 @@ func NewResearchAgent(cfg *config.Config) (*ResearchAgent, error) {
 
 // findSources performs web search and returns relevant URLs
 func (ra *ResearchAgent) findSources(ctx context.Context, topic string, numResults int, reputableOnly bool) ([]models.SearchResult, error) {
-	log.Printf("Research Agent: Searching for sources on topic: %s", topic)
+	ra.logger.Info("searching for sources", "topic", topic)
 
 	if numResults <= 0 {
 		numResults = 10
@@ -69,14 +76,14 @@ func (ra *ResearchAgent) findSources(ctx context.Context, topic string, numResul
 		return nil, fmt.Errorf("search failed: %w", err)
 	}
 
-	log.Printf("Research Agent: Found %d search results", searchResp.Total)
+	ra.logger.Info("search completed", "results", searchResp.Total)
 
 	// Convert search results to our model format
 	results := make([]models.SearchResult, 0, len(searchResp.Results))
 	for i, result := range searchResp.Results {
 		// Filter for reputable sources if requested
 		if reputableOnly && !isReputableSource(result.DisplayLink) {
-			log.Printf("Filtering out non-reputable source: %s", result.DisplayLink)
+			ra.logger.Debug("filtering non-reputable source", "domain", result.DisplayLink)
 			continue
 		}
 
@@ -89,7 +96,7 @@ func (ra *ResearchAgent) findSources(ctx context.Context, topic string, numResul
 		})
 	}
 
-	log.Printf("Research Agent: Returning %d sources", len(results))
+	ra.logger.Info("sources found", "count", len(results))
 	return results, nil
 }
 
@@ -113,7 +120,7 @@ func isReputableSource(domain string) bool {
 
 // Research finds sources for a given topic (returns URLs, not statistics)
 func (ra *ResearchAgent) Research(ctx context.Context, req *models.ResearchRequest) (*models.ResearchResponse, error) {
-	log.Printf("Research Agent: Finding sources for topic: %s", req.Topic)
+	ra.logger.Info("finding sources", "topic", req.Topic)
 
 	// Determine number of results to fetch
 	numResults := req.MaxStatistics
@@ -151,7 +158,7 @@ func (ra *ResearchAgent) Research(ctx context.Context, req *models.ResearchReque
 		Timestamp:  time.Now(),
 	}
 
-	log.Printf("Research Agent: Found %d sources", len(searchResults))
+	ra.logger.Info("research completed", "sources", len(searchResults))
 	return response, nil
 }
 
@@ -184,31 +191,33 @@ func (ra *ResearchAgent) HandleResearchRequest(w http.ResponseWriter, r *http.Re
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		ra.logger.Error("failed to encode response", "error", err)
 	}
 }
 
 func main() {
+	logger := logging.NewAgentLogger("research")
 	cfg := config.LoadConfig()
 
 	researchAgent, err := NewResearchAgent(cfg)
 	if err != nil {
-		log.Fatalf("Failed to create research agent: %v", err)
+		logger.Error("failed to create research agent", "error", err)
+		os.Exit(1)
 	}
 
 	// Start A2A server if enabled (standard protocol for agent interoperability)
 	// Note: Research Agent is Tool-based, but wrapped in ADK for A2A compatibility
 	if cfg.A2AEnabled {
-		a2aServer, err := NewA2AServer(researchAgent, "9001")
+		a2aServer, err := NewA2AServer(researchAgent, "9001", logger)
 		if err != nil {
-			log.Printf("Failed to create A2A server: %v", err)
+			logger.Error("failed to create A2A server", "error", err)
 		} else {
 			go func() {
 				if err := a2aServer.Start(context.Background()); err != nil {
-					log.Printf("A2A server error: %v", err)
+					logger.Error("A2A server error", "error", err)
 				}
 			}()
-			log.Println("Research Agent A2A server started on :9001")
+			logger.Info("A2A server started", "port", 9001)
 		}
 	}
 
@@ -224,14 +233,16 @@ func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("OK")); err != nil {
-			log.Printf("Failed to write health response: %v", err)
+			logger.Error("failed to write health response", "error", err)
 		}
 	})
 
-	log.Println("Research Agent HTTP server starting on :8001")
-	log.Println("Role: Find relevant sources via web search (Tool-based, no LLM reasoning)")
-	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
+	logger.Info("HTTP server starting",
+		"port", 8001,
+		"role", "search-based source discovery",
+		"mode", "dual (HTTP + A2A)")
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP server failed: %v", err)
+		logger.Error("HTTP server failed", "error", err)
+		os.Exit(1)
 	}
 }

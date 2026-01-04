@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -20,10 +20,11 @@ type A2AServer struct {
 	agent    *SynthesisAgent
 	listener net.Listener
 	baseURL  *url.URL
+	logger   *slog.Logger
 }
 
 // NewA2AServer creates a new A2A server for the synthesis agent
-func NewA2AServer(agent *SynthesisAgent, port string) (*A2AServer, error) {
+func NewA2AServer(agent *SynthesisAgent, port string, logger *slog.Logger) (*A2AServer, error) {
 	addr := "0.0.0.0:" + port
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -36,6 +37,7 @@ func NewA2AServer(agent *SynthesisAgent, port string) (*A2AServer, error) {
 		agent:    agent,
 		listener: listener,
 		baseURL:  baseURL,
+		logger:   logger,
 	}, nil
 }
 
@@ -77,9 +79,10 @@ func (s *A2AServer) Start(context.Context) error {
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	log.Printf("Synthesis Agent A2A server starting on %s", s.baseURL.String())
-	log.Printf("  Agent Card: %s%s", s.baseURL.String(), a2asrv.WellKnownAgentCardPath)
-	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
+	s.logger.Info("A2A server starting",
+		"url", s.baseURL.String(),
+		"agent_card", s.baseURL.String()+a2asrv.WellKnownAgentCardPath,
+		"invoke", s.baseURL.String()+agentPath)
 
 	server := &http.Server{
 		Handler:           mux,

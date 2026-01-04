@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
 	"github.com/agentplexus/stats-agent-team/pkg/direct"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
@@ -20,10 +22,11 @@ import (
 type DirectAgent struct {
 	cfg       *config.Config
 	directSvc *direct.LLMSearchService
+	logger    *slog.Logger
 }
 
 // NewDirectAgent creates a new direct search agent
-func NewDirectAgent(cfg *config.Config) (*DirectAgent, error) {
+func NewDirectAgent(cfg *config.Config, logger *slog.Logger) (*DirectAgent, error) {
 	directSvc, err := direct.NewLLMSearchService(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create direct search service: %w", err)
@@ -32,6 +35,7 @@ func NewDirectAgent(cfg *config.Config) (*DirectAgent, error) {
 	return &DirectAgent{
 		cfg:       cfg,
 		directSvc: directSvc,
+		logger:    logger,
 	}, nil
 }
 
@@ -58,11 +62,13 @@ type ErrorOutput struct {
 }
 
 func main() {
+	logger := logging.NewAgentLogger("direct")
 	cfg := config.LoadConfig()
 
-	directAgent, err := NewDirectAgent(cfg)
+	directAgent, err := NewDirectAgent(cfg, logger)
 	if err != nil {
-		log.Fatalf("Failed to create direct agent: %v", err)
+		logger.Error("failed to create direct agent", "error", err)
+		os.Exit(1)
 	}
 
 	// Create Chi router
@@ -106,8 +112,10 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 			minStats = 10
 		}
 
-		log.Printf("[Direct Agent] Processing request for topic '%s' (min_stats: %d, verify: %v)",
-			input.Body.Topic, minStats, input.Body.VerifyWithWeb)
+		directAgent.logger.Info("processing request",
+			"topic", input.Body.Topic,
+			"min_stats", minStats,
+			"verify", input.Body.VerifyWithWeb)
 
 		// Call direct search service
 		resp, err := directAgent.directSvc.SearchStatisticsWithVerification(
@@ -117,12 +125,13 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 			input.Body.VerifyWithWeb,
 		)
 		if err != nil {
-			log.Printf("[Direct Agent] Search failed: %v", err)
+			directAgent.logger.Error("search failed", "error", err)
 			return nil, huma.Error500InternalServerError(fmt.Sprintf("Search failed: %v", err))
 		}
 
-		log.Printf("[Direct Agent] Search completed: %d verified statistics (partial: %v)",
-			resp.VerifiedCount, resp.Partial)
+		directAgent.logger.Info("search completed",
+			"verified", resp.VerifiedCount,
+			"partial", resp.Partial)
 
 		return &DirectSearchOutput{Body: resp}, nil
 	})
@@ -153,21 +162,11 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 		}, nil
 	})
 
-	log.Println("===========================================")
-	log.Println("Direct Agent HTTP server starting on :8005")
-	log.Println("===========================================")
-	log.Printf("LLM Provider: %s", cfg.LLMProvider)
-	log.Printf("LLM Model: %s", cfg.LLMModel)
-	log.Println()
-	log.Println("Endpoints:")
-	log.Println("  POST /search         - Direct LLM search (optionally with verification)")
-	log.Println("  GET  /health         - Health check")
-	log.Println("  GET  /docs           - OpenAPI documentation (Swagger UI)")
-	log.Println("  GET  /openapi.json   - OpenAPI 3.1 specification")
-	log.Println("  GET  /openapi.yaml   - OpenAPI 3.1 specification (YAML)")
-	log.Println()
-	log.Println("Documentation available at: http://localhost:8005/docs")
-	log.Println("===========================================")
+	logger.Info("HTTP server starting",
+		"port", 8005,
+		"llm_provider", cfg.LLMProvider,
+		"llm_model", cfg.LLMModel,
+		"docs_url", "http://localhost:8005/docs")
 
 	// Create HTTP server with timeouts
 	server := &http.Server{
@@ -179,6 +178,7 @@ The service uses server-side LLM configuration, so clients don't need API keys.`
 	}
 
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP server failed: %v", err)
+		logger.Error("HTTP server failed", "error", err)
+		os.Exit(1)
 	}
 }

@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"google.golang.org/adk/agent"
@@ -16,6 +17,7 @@ import (
 	"github.com/agentplexus/stats-agent-team/pkg/config"
 	"github.com/agentplexus/stats-agent-team/pkg/httpclient"
 	"github.com/agentplexus/stats-agent-team/pkg/llm"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
@@ -24,6 +26,7 @@ type OrchestrationAgent struct {
 	cfg      *config.Config
 	client   *http.Client
 	adkAgent agent.Agent
+	logger   *slog.Logger
 }
 
 // OrchestrationInput defines input for orchestration tool
@@ -40,21 +43,22 @@ type OrchestrationToolOutput struct {
 }
 
 // NewOrchestrationAgent creates a new ADK-based orchestration agent
-func NewOrchestrationAgent(cfg *config.Config) (*OrchestrationAgent, error) {
-	ctx := context.Background()
+func NewOrchestrationAgent(cfg *config.Config, logger *slog.Logger) (*OrchestrationAgent, error) {
+	ctx := logging.WithLogger(context.Background(), logger)
 
 	// Create model using factory
-	modelFactory := llm.NewModelFactory(cfg)
+	modelFactory := llm.NewModelFactory(ctx, cfg)
 	model, err := modelFactory.CreateModel(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model: %w", err)
 	}
 
-	log.Printf("Orchestration Agent: Using %s", modelFactory.GetProviderInfo())
+	logger.Info("agent initialized", "provider", modelFactory.GetProviderInfo())
 
 	oa := &OrchestrationAgent{
 		cfg:    cfg,
 		client: &http.Client{Timeout: 60 * time.Second},
+		logger: logger,
 	}
 
 	// Create orchestration tool
@@ -96,8 +100,10 @@ Workflow:
 
 // orchestrationToolHandler implements the orchestration logic
 func (oa *OrchestrationAgent) orchestrationToolHandler(ctx tool.Context, input OrchestrationInput) (OrchestrationToolOutput, error) {
-	log.Printf("Orchestration Agent: Starting orchestration for topic: %s", input.Topic)
-	log.Printf("Target: %d verified statistics, max %d candidates", input.MinVerifiedStats, input.MaxCandidates)
+	oa.logger.Info("starting orchestration",
+		"topic", input.Topic,
+		"target", input.MinVerifiedStats,
+		"max_candidates", input.MaxCandidates)
 
 	req := &models.OrchestrationRequest{
 		Topic:            input.Topic,
@@ -137,7 +143,7 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 		// Don't exceed max candidates
 		candidatesLeft := req.MaxCandidates - len(allCandidates)
 		if candidatesLeft <= 0 {
-			log.Printf("Reached maximum candidates limit (%d)", req.MaxCandidates)
+			oa.logger.Info("reached maximum candidates limit", "max", req.MaxCandidates)
 			break
 		}
 		if candidatesNeeded > candidatesLeft {
@@ -152,12 +158,14 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 			ReputableOnly: req.ReputableOnly,
 		}
 
-		log.Printf("Orchestration: Requesting %d sources from research agent (attempt %d/%d)",
-			candidatesNeeded, retry+1, maxRetries)
+		oa.logger.Info("requesting sources from research agent",
+			"needed", candidatesNeeded,
+			"attempt", retry+1,
+			"max_retries", maxRetries)
 
 		researchResp, err := oa.callResearchAgent(ctx, researchReq)
 		if err != nil {
-			log.Printf("Research agent failed: %v", err)
+			oa.logger.Warn("research agent failed", "error", err)
 			retry++
 			continue
 		}
@@ -173,7 +181,7 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 			})
 		}
 
-		log.Printf("Orchestration: Received %d sources from research agent", len(searchResults))
+		oa.logger.Info("received sources from research agent", "count", len(searchResults))
 
 		// Step 2: Send sources to synthesis agent to extract statistics
 		synthesisReq := &models.SynthesisRequest{
@@ -183,16 +191,16 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 			MaxStatistics: candidatesNeeded + 5,
 		}
 
-		log.Printf("Orchestration: Sending %d sources to synthesis agent", len(searchResults))
+		oa.logger.Info("sending sources to synthesis agent", "count", len(searchResults))
 
 		synthesisResp, err := oa.callSynthesisAgent(ctx, synthesisReq)
 		if err != nil {
-			log.Printf("Synthesis agent failed: %v", err)
+			oa.logger.Warn("synthesis agent failed", "error", err)
 			retry++
 			continue
 		}
 
-		log.Printf("Orchestration: Synthesis extracted %d candidates", len(synthesisResp.Candidates))
+		oa.logger.Info("synthesis extracted candidates", "count", len(synthesisResp.Candidates))
 		allCandidates = append(allCandidates, synthesisResp.Candidates...)
 
 		// Step 3: Send candidates to verification agent
@@ -200,17 +208,18 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 			Candidates: synthesisResp.Candidates,
 		}
 
-		log.Printf("Orchestration: Sending %d candidates to verification agent", len(verifyReq.Candidates))
+		oa.logger.Info("sending candidates to verification agent", "count", len(verifyReq.Candidates))
 
 		verifyResp, err := oa.callVerificationAgent(ctx, verifyReq)
 		if err != nil {
-			log.Printf("Verification agent failed: %v", err)
+			oa.logger.Warn("verification agent failed", "error", err)
 			retry++
 			continue
 		}
 
-		log.Printf("Orchestration: Verification complete - %d verified, %d failed",
-			verifyResp.Verified, verifyResp.Failed)
+		oa.logger.Info("verification complete",
+			"verified", verifyResp.Verified,
+			"failed", verifyResp.Failed)
 
 		// Step 3: Collect verified statistics
 		for _, result := range verifyResp.Results {
@@ -219,17 +228,20 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 				totalVerified++
 			} else {
 				totalFailed++
-				log.Printf("Statistic failed verification: %s - %s", result.Statistic.Name, result.Reason)
+				oa.logger.Debug("statistic failed verification",
+					"name", result.Statistic.Name,
+					"reason", result.Reason)
 			}
 		}
 
-		log.Printf("Orchestration: Current progress - %d/%d verified statistics (keeping all verified)",
-			totalVerified, req.MinVerifiedStats)
+		oa.logger.Info("progress update",
+			"verified", totalVerified,
+			"target", req.MinVerifiedStats)
 
 		// Check if we have enough verified statistics to stop gathering more
 		if totalVerified >= req.MinVerifiedStats {
-			log.Printf("Orchestration: Minimum target reached with %d verified statistics (will return all %d)",
-				totalVerified, totalVerified)
+			oa.logger.Info("minimum target reached",
+				"verified", totalVerified)
 			break
 		}
 
@@ -247,13 +259,13 @@ func (oa *OrchestrationAgent) orchestrate(ctx context.Context, req *models.Orche
 	}
 
 	if totalVerified < req.MinVerifiedStats {
-		log.Printf("Warning: Only found %d verified statistics (target: %d)",
-			totalVerified, req.MinVerifiedStats)
-	} else if totalVerified > req.MinVerifiedStats {
-		log.Printf("Orchestration: Successfully completed with %d verified statistics (exceeded target of %d)",
-			totalVerified, req.MinVerifiedStats)
+		oa.logger.Warn("below target",
+			"verified", totalVerified,
+			"target", req.MinVerifiedStats)
 	} else {
-		log.Printf("Orchestration: Successfully completed with exactly %d verified statistics", totalVerified)
+		oa.logger.Info("orchestration completed",
+			"verified", totalVerified,
+			"target", req.MinVerifiedStats)
 	}
 
 	return response, nil
@@ -323,30 +335,32 @@ func (oa *OrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWriter, 
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		oa.logger.Error("failed to encode response", "error", err)
 	}
 }
 
 func main() {
+	logger := logging.NewAgentLogger("orchestration")
 	cfg := config.LoadConfig()
 
-	orchestrationAgent, err := NewOrchestrationAgent(cfg)
+	orchestrationAgent, err := NewOrchestrationAgent(cfg, logger)
 	if err != nil {
-		log.Fatalf("Failed to create orchestration agent: %v", err)
+		logger.Error("failed to create orchestration agent", "error", err)
+		os.Exit(1)
 	}
 
 	// Start A2A server if enabled (standard protocol for agent interoperability)
 	if cfg.A2AEnabled {
-		a2aServer, err := NewA2AServer(orchestrationAgent, "9000")
+		a2aServer, err := NewA2AServer(orchestrationAgent, "9000", logger)
 		if err != nil {
-			log.Printf("Failed to create A2A server: %v", err)
+			logger.Error("failed to create A2A server", "error", err)
 		} else {
 			go func() {
 				if err := a2aServer.Start(context.Background()); err != nil {
-					log.Printf("A2A server error: %v", err)
+					logger.Error("A2A server error", "error", err)
 				}
 			}()
-			log.Println("ADK Orchestration Agent A2A server started on :9000")
+			logger.Info("A2A server started", "port", 9000)
 		}
 	}
 
@@ -362,14 +376,15 @@ func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("OK")); err != nil {
-			log.Printf("Failed to write health response: %v", err)
+			logger.Error("failed to write health response", "error", err)
 		}
 	})
 
-	log.Println("ADK Orchestration Agent HTTP server starting on :8000")
-	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
-	log.Println("Note: Sub-agent calls currently use HTTP; see a2a.go for A2A client notes")
+	logger.Info("HTTP server starting",
+		"port", 8000,
+		"mode", "dual (HTTP + A2A)")
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP server failed: %v", err)
+		logger.Error("HTTP server failed", "error", err)
+		os.Exit(1)
 	}
 }

@@ -101,27 +101,27 @@ docker-logs:
 
 run-research:
 	@echo "Starting Research Agent on :8001 (HTTP) and :9001 (A2A)..."
-	go run agents/research/main.go
+	go run ./agents/research/
 
 run-synthesis:
 	@echo "Starting Synthesis Agent on :8004..."
-	go run agents/synthesis/main.go
+	go run ./agents/synthesis/
 
 run-verification:
 	@echo "Starting Verification Agent on :8002 (HTTP) and :9002 (A2A)..."
-	go run agents/verification/main.go
+	go run ./agents/verification/
 
 run-direct:
 	@echo "Starting Direct Agent on :8005 (HTTP)..."
-	go run agents/direct/main.go
+	go run ./agents/direct/
 
 run-orchestration:
 	@echo "Starting Orchestration Agent (trpc-agent) on :8000 (HTTP) and :9000 (A2A)..."
-	go run agents/orchestration/main.go
+	go run ./agents/orchestration/
 
 run-orchestration-eino:
 	@echo "Starting Orchestration Agent (Eino) on :8000 (HTTP)..."
-	go run agents/orchestration-eino/main.go
+	go run ./agents/orchestration-eino/
 
 run-all:
 	@echo "Starting all agents with trpc-agent orchestrator..."
@@ -129,10 +129,10 @@ run-all:
 	@echo "Synthesis Agent: http://localhost:8004"
 	@echo "Verification Agent: http://localhost:8002 (A2A: 9002)"
 	@echo "Orchestration Agent (trpc-agent): http://localhost:8000 (A2A: 9000)"
-	@go run agents/research/main.go & \
-	go run agents/synthesis/main.go & \
-	go run agents/verification/main.go & \
-	go run agents/orchestration/main.go & \
+	@go run ./agents/research/ & \
+	go run ./agents/synthesis/ & \
+	go run ./agents/verification/ & \
+	go run ./agents/orchestration/ & \
 	wait
 
 run-all-eino:
@@ -141,10 +141,10 @@ run-all-eino:
 	@echo "Synthesis Agent: http://localhost:8004"
 	@echo "Verification Agent: http://localhost:8002 (A2A: 9002)"
 	@echo "Orchestration Agent (Eino): http://localhost:8000"
-	@go run agents/research/main.go & \
-	go run agents/synthesis/main.go & \
-	go run agents/verification/main.go & \
-	go run agents/orchestration-eino/main.go & \
+	@go run ./agents/research/ & \
+	go run ./agents/synthesis/ & \
+	go run ./agents/verification/ & \
+	go run ./agents/orchestration-eino/ & \
 	wait
 
 run-direct-verify:
@@ -153,8 +153,8 @@ run-direct-verify:
 	@echo "Verification Agent: http://localhost:8002"
 	@echo ""
 	@echo "Usage: ./bin/stats-agent search \"topic\" --direct --direct-verify"
-	@go run agents/direct/main.go & \
-	go run agents/verification/main.go & \
+	@go run ./agents/direct/ & \
+	go run ./agents/verification/ & \
 	wait
 
 run-mcp:

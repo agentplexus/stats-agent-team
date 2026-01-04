@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	// A2A and ADK imports
@@ -17,6 +20,7 @@ import (
 
 	agentbase "github.com/agentplexus/stats-agent-team/pkg/agent"
 	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
@@ -37,14 +41,16 @@ type VerificationToolOutput struct {
 }
 
 // NewVerificationAgent creates a new ADK-based verification agent
-func NewVerificationAgent(cfg *config.Config) (*VerificationAgent, error) {
+func NewVerificationAgent(cfg *config.Config, logger *slog.Logger) (*VerificationAgent, error) {
+	ctx := logging.WithLogger(context.Background(), logger)
+
 	// Create base agent with LLM
-	base, err := agentbase.NewBaseAgent(cfg, 30)
+	base, err := agentbase.NewBaseAgent(ctx, cfg, 30)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create base agent: %w", err)
 	}
 
-	log.Printf("Verification Agent: Using %s", base.GetProviderInfo())
+	logger.Info("agent initialized", "provider", base.GetProviderInfo())
 
 	va := &VerificationAgent{
 		BaseAgent: base,
@@ -89,7 +95,7 @@ Verification criteria:
 
 // verifyToolHandler implements the verification logic
 func (va *VerificationAgent) verifyToolHandler(ctx tool.Context, input VerificationInput) (VerificationToolOutput, error) {
-	log.Printf("Verification Agent: Verifying %d candidates", len(input.Candidates))
+	va.Logger.Info("verifying candidates", "count", len(input.Candidates))
 
 	results := make([]models.VerificationResult, 0, len(input.Candidates))
 
@@ -105,12 +111,12 @@ func (va *VerificationAgent) verifyToolHandler(ctx tool.Context, input Verificat
 
 // verifyStatistic verifies a single candidate
 func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate models.CandidateStatistic) models.VerificationResult {
-	log.Printf("Verification Agent: Verifying statistic from %s", candidate.SourceURL)
+	va.Logger.Debug("verifying statistic", "url", candidate.SourceURL)
 
 	// Fetch source content using base agent
 	sourceContent, err := va.FetchURL(ctx, candidate.SourceURL, 1)
 	if err != nil {
-		log.Printf("Failed to fetch source: %v", err)
+		va.Logger.Warn("failed to fetch source", "url", candidate.SourceURL, "error", err)
 		return models.VerificationResult{
 			Statistic: &models.Statistic{
 				Name:      candidate.Name,
@@ -156,7 +162,7 @@ func (va *VerificationAgent) verifyStatistic(ctx context.Context, candidate mode
 //
 //nolint:unparam // error return kept for API consistency
 func (va *VerificationAgent) Verify(ctx context.Context, req *models.VerificationRequest) (*models.VerificationResponse, error) {
-	log.Printf("Verification Agent: Verifying %d candidates", len(req.Candidates))
+	va.Logger.Info("verifying candidates", "count", len(req.Candidates))
 
 	results := make([]models.VerificationResult, 0, len(req.Candidates))
 	verifiedCount := 0
@@ -180,7 +186,7 @@ func (va *VerificationAgent) Verify(ctx context.Context, req *models.Verificatio
 		Timestamp: time.Now(),
 	}
 
-	log.Printf("Verification Agent: %d verified, %d failed", verifiedCount, failedCount)
+	va.Logger.Info("verification completed", "verified", verifiedCount, "failed", failedCount)
 	return response, nil
 }
 
@@ -205,52 +211,78 @@ func (va *VerificationAgent) HandleVerificationRequest(w http.ResponseWriter, r 
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		va.Logger.Error("failed to encode response", "error", err)
 	}
 }
 
 func main() {
+	logger := logging.NewAgentLogger("verification")
 	cfg := config.LoadConfig()
 
-	verificationAgent, err := NewVerificationAgent(cfg)
+	verificationAgent, err := NewVerificationAgent(cfg, logger)
 	if err != nil {
-		log.Fatalf("Failed to create verification agent: %v", err)
+		logger.Error("failed to create verification agent", "error", err)
+		os.Exit(1)
 	}
 
 	// Start A2A server if enabled (standard protocol for agent interoperability)
 	if cfg.A2AEnabled {
-		a2aServer, err := NewA2AServer(verificationAgent, "9002")
+		a2aServer, err := NewA2AServer(verificationAgent, "9002", logger)
 		if err != nil {
-			log.Printf("Failed to create A2A server: %v", err)
+			logger.Error("failed to create A2A server", "error", err)
 		} else {
 			go func() {
 				if err := a2aServer.Start(context.Background()); err != nil {
-					log.Printf("A2A server error: %v", err)
+					logger.Error("A2A server error", "error", err)
 				}
 			}()
-			log.Println("Verification Agent A2A server started on :9002")
+			logger.Info("A2A server started", "port", 9002)
 		}
 	}
 
 	// Start HTTP server with timeout (for custom security: SPIFFE, KYA, XAA, and observability)
+	timeout := time.Duration(cfg.HTTPTimeoutSeconds) * time.Second
 	server := &http.Server{
 		Addr:         ":8002",
-		ReadTimeout:  45 * time.Second,
-		WriteTimeout: 45 * time.Second,
-		IdleTimeout:  90 * time.Second,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+		IdleTimeout:  timeout * 2,
 	}
 
 	http.HandleFunc("/verify", verificationAgent.HandleVerificationRequest)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("OK")); err != nil {
-			log.Printf("Failed to write health response: %v", err)
+			logger.Error("failed to write health response", "error", err)
 		}
 	})
 
-	log.Println("Verification Agent HTTP server starting on :8002")
-	log.Println("(Dual mode: HTTP for security/observability, A2A for interoperability)")
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP server failed: %v", err)
+	// Setup graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		logger.Info("HTTP server starting",
+			"port", 8002,
+			"mode", "dual (HTTP + A2A)")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("HTTP server failed", "error", err)
+		}
+	}()
+
+	<-stop
+	logger.Info("shutting down gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Error("server shutdown error", "error", err)
 	}
+
+	// Close agent to flush observability data
+	if err := verificationAgent.Close(); err != nil {
+		logger.Error("failed to close agent", "error", err)
+	}
+	logger.Info("shutdown complete")
 }

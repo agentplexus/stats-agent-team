@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -33,6 +33,7 @@ type A2AServer struct {
 	adkAgent  agent.Agent
 	listener  net.Listener
 	baseURL   *url.URL
+	logger    *slog.Logger
 }
 
 // OrchestrationInput defines input for the orchestration tool
@@ -44,7 +45,7 @@ type OrchestrationInput struct {
 }
 
 // NewA2AServer creates a new A2A server for the Eino orchestration agent
-func NewA2AServer(einoAgent *orchestration.EinoOrchestrationAgent, port string) (*A2AServer, error) {
+func NewA2AServer(einoAgent *orchestration.EinoOrchestrationAgent, port string, logger *slog.Logger) (*A2AServer, error) {
 	addr := "0.0.0.0:" + port
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -103,6 +104,7 @@ The workflow is deterministic (graph-based, not LLM-driven).`,
 		adkAgent:  adkAgent,
 		listener:  listener,
 		baseURL:   baseURL,
+		logger:    logger,
 	}, nil
 }
 
@@ -144,10 +146,11 @@ func (s *A2AServer) Start(context.Context) error {
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	log.Printf("Eino Orchestration Agent A2A server starting on %s", s.baseURL.String())
-	log.Printf("  Agent Card: %s%s", s.baseURL.String(), a2asrv.WellKnownAgentCardPath)
-	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
-	log.Printf("  Note: Uses Eino graph-based orchestration (deterministic, not LLM-driven)")
+	s.logger.Info("A2A server starting",
+		"url", s.baseURL.String(),
+		"agent_card", s.baseURL.String()+a2asrv.WellKnownAgentCardPath,
+		"invoke", s.baseURL.String()+agentPath,
+		"mode", "Eino graph-based deterministic")
 
 	server := &http.Server{
 		Handler:           mux,

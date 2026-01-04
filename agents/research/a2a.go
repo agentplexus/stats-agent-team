@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -31,10 +31,11 @@ type A2AServer struct {
 	adkAgent agent.Agent
 	listener net.Listener
 	baseURL  *url.URL
+	logger   *slog.Logger
 }
 
 // NewA2AServer creates a new A2A server for the research agent
-func NewA2AServer(ra *ResearchAgent, port string) (*A2AServer, error) {
+func NewA2AServer(ra *ResearchAgent, port string, logger *slog.Logger) (*A2AServer, error) {
 	addr := "0.0.0.0:" + port
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -91,6 +92,7 @@ Do not analyze or summarize - just return the raw search results.`,
 		adkAgent: adkAgent,
 		listener: listener,
 		baseURL:  baseURL,
+		logger:   logger,
 	}, nil
 }
 
@@ -132,10 +134,11 @@ func (s *A2AServer) Start(context.Context) error {
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	log.Printf("Research Agent A2A server starting on %s", s.baseURL.String())
-	log.Printf("  Agent Card: %s%s", s.baseURL.String(), a2asrv.WellKnownAgentCardPath)
-	log.Printf("  Invoke: %s%s", s.baseURL.String(), agentPath)
-	log.Printf("  Note: Tool-based agent (search API), LLM only for A2A protocol compatibility")
+	s.logger.Info("A2A server starting",
+		"url", s.baseURL.String(),
+		"agent_card", s.baseURL.String()+a2asrv.WellKnownAgentCardPath,
+		"invoke", s.baseURL.String()+agentPath,
+		"mode", "tool-based")
 
 	server := &http.Server{
 		Handler:           mux,

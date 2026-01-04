@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"google.golang.org/adk/agent"
@@ -18,6 +21,7 @@ import (
 
 	agentbase "github.com/agentplexus/stats-agent-team/pkg/agent"
 	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
@@ -41,14 +45,16 @@ type SynthesisToolOutput struct {
 }
 
 // NewSynthesisAgent creates a new ADK-based synthesis agent
-func NewSynthesisAgent(cfg *config.Config) (*SynthesisAgent, error) {
+func NewSynthesisAgent(cfg *config.Config, logger *slog.Logger) (*SynthesisAgent, error) {
+	ctx := logging.WithLogger(context.Background(), logger)
+
 	// Create base agent with LLM
-	base, err := agentbase.NewBaseAgent(cfg, 45)
+	base, err := agentbase.NewBaseAgent(ctx, cfg, 45)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create base agent: %w", err)
 	}
 
-	log.Printf("Synthesis Agent: Using %s", base.GetProviderInfo())
+	logger.Info("agent initialized", "provider", base.GetProviderInfo())
 
 	sa := &SynthesisAgent{
 		BaseAgent: base,
@@ -101,7 +107,7 @@ Reputable sources include:
 
 // synthesisToolHandler implements the synthesis logic
 func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input SynthesisInput) (SynthesisToolOutput, error) {
-	log.Printf("Synthesis Agent: Analyzing %d URLs for topic: %s", len(input.SearchResults), input.Topic)
+	sa.Logger.Info("analyzing URLs", "count", len(input.SearchResults), "topic", input.Topic)
 
 	candidates := make([]models.CandidateStatistic, 0)
 
@@ -111,25 +117,28 @@ func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input Synthesis
 			break
 		}
 
-		log.Printf("Synthesis Agent: Fetching content from %s", result.URL)
+		sa.Logger.Debug("fetching content", "url", result.URL)
 
 		// Fetch webpage content using base agent method
 		content, err := sa.FetchURL(context.Background(), result.URL, 1)
 		if err != nil {
-			log.Printf("Failed to fetch %s: %v", result.URL, err)
+			sa.Logger.Warn("failed to fetch URL", "url", result.URL, "error", err)
 			continue
 		}
 
 		// Extract statistics from content using LLM
 		stats, err := sa.extractStatisticsWithLLM(context.Background(), input.Topic, result, content)
 		if err != nil {
-			log.Printf("Failed to extract statistics from %s: %v", result.URL, err)
+			sa.Logger.Warn("failed to extract statistics", "url", result.URL, "error", err)
 			continue
 		}
 		candidates = append(candidates, stats...)
 
-		log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d/%d)",
-			len(stats), result.Domain, len(candidates), input.MinStatistics)
+		sa.Logger.Info("extracted statistics",
+			"extracted", len(stats),
+			"domain", result.Domain,
+			"total", len(candidates),
+			"target", input.MinStatistics)
 
 		// Stop if we have enough
 		if len(candidates) >= input.MinStatistics && i > 2 {
@@ -137,7 +146,7 @@ func (sa *SynthesisAgent) synthesisToolHandler(ctx tool.Context, input Synthesis
 		}
 	}
 
-	log.Printf("Synthesis Agent: Total candidates extracted: %d", len(candidates))
+	sa.Logger.Info("synthesis completed", "candidates", len(candidates))
 
 	return SynthesisToolOutput{
 		Candidates: candidates,
@@ -277,7 +286,7 @@ func extractJSONFromMarkdown(response string) string {
 
 // Synthesize processes a synthesis request directly
 func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisRequest) (*models.SynthesisResponse, error) { // nolint:unparam // error return kept for future usage
-	log.Printf("Synthesis Agent: Processing %d search results for topic: %s", len(req.SearchResults), req.Topic)
+	sa.Logger.Info("processing search results", "count", len(req.SearchResults), "topic", req.Topic)
 
 	var candidates []models.CandidateStatistic
 	pagesProcessed := 0
@@ -287,21 +296,21 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 	for _, result := range req.SearchResults {
 		// Stop only if we have enough candidates AND processed minimum pages
 		if len(candidates) >= req.MaxStatistics && req.MaxStatistics > 0 && pagesProcessed >= minPagesToProcess {
-			log.Printf("Synthesis Agent: Reached max statistics (%d) after processing %d pages", req.MaxStatistics, pagesProcessed)
+			sa.Logger.Info("reached max statistics", "max", req.MaxStatistics, "pages", pagesProcessed)
 			break
 		}
 
 		// Fetch webpage content using base agent
 		content, err := sa.FetchURL(ctx, result.URL, 1)
 		if err != nil {
-			log.Printf("Failed to fetch %s: %v", result.URL, err)
+			sa.Logger.Warn("failed to fetch URL", "url", result.URL, "error", err)
 			continue
 		}
 
 		// Extract statistics using LLM
 		stats, err := sa.extractStatisticsWithLLM(ctx, req.Topic, result, content)
 		if err != nil {
-			log.Printf("Failed to extract statistics from %s: %v", result.URL, err)
+			sa.Logger.Warn("failed to extract statistics", "url", result.URL, "error", err)
 			continue
 		}
 
@@ -309,17 +318,24 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 
 		if len(stats) > 0 {
 			candidates = append(candidates, stats...)
-			log.Printf("Synthesis Agent: Extracted %d statistics from %s (total: %d from %d pages)",
-				len(stats), result.Domain, len(candidates), pagesProcessed)
+			sa.Logger.Info("extracted statistics",
+				"extracted", len(stats),
+				"domain", result.Domain,
+				"total", len(candidates),
+				"pages", pagesProcessed)
 		} else {
-			log.Printf("Synthesis Agent: No statistics extracted from %s (total: %d from %d pages)",
-				result.Domain, len(candidates), pagesProcessed)
+			sa.Logger.Debug("no statistics found",
+				"domain", result.Domain,
+				"total", len(candidates),
+				"pages", pagesProcessed)
 		}
 
 		// Only stop early if we have well exceeded the minimum requirement
 		// Use 5x multiplier to account for verification failures (increased from 2x)
 		if len(candidates) >= req.MinStatistics*5 && pagesProcessed >= minPagesToProcess {
-			log.Printf("Synthesis Agent: Have %d candidates (5x minimum), stopping after %d pages", len(candidates), pagesProcessed)
+			sa.Logger.Info("exceeded minimum threshold",
+				"candidates", len(candidates),
+				"pages", pagesProcessed)
 			break
 		}
 	}
@@ -331,8 +347,9 @@ func (sa *SynthesisAgent) Synthesize(ctx context.Context, req *models.SynthesisR
 		Timestamp:       time.Now(),
 	}
 
-	log.Printf("Synthesis Agent: Completed with %d candidates from %d sources",
-		len(candidates), response.SourcesAnalyzed)
+	sa.Logger.Info("synthesis completed",
+		"candidates", len(candidates),
+		"sources", response.SourcesAnalyzed)
 
 	return response, nil
 }
@@ -366,54 +383,80 @@ func (sa *SynthesisAgent) HandleSynthesisRequest(w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		sa.Logger.Error("failed to encode response", "error", err)
 	}
 }
 
 func main() {
+	logger := logging.NewAgentLogger("synthesis")
 	cfg := config.LoadConfig()
 
-	synthesisAgent, err := NewSynthesisAgent(cfg)
+	synthesisAgent, err := NewSynthesisAgent(cfg, logger)
 	if err != nil {
-		log.Fatalf("Failed to create synthesis agent: %v", err)
+		logger.Error("failed to create synthesis agent", "error", err)
+		os.Exit(1)
 	}
 
 	// Start A2A server if enabled
 	if cfg.A2AEnabled {
-		a2aServer, err := NewA2AServer(synthesisAgent, "9004")
+		a2aServer, err := NewA2AServer(synthesisAgent, "9004", logger)
 		if err != nil {
-			log.Printf("Failed to create A2A server: %v", err)
+			logger.Error("failed to create A2A server", "error", err)
 		} else {
 			go func() {
 				if err := a2aServer.Start(context.Background()); err != nil {
-					log.Printf("A2A server error: %v", err)
+					logger.Error("A2A server error", "error", err)
 				}
 			}()
-			log.Println("Synthesis Agent A2A server started on :9004")
+			logger.Info("A2A server started", "port", 9004)
 		}
 	}
 
 	// Start HTTP server with timeout (backward compatible)
+	timeout := time.Duration(cfg.HTTPTimeoutSeconds) * time.Second
 	server := &http.Server{
 		Addr:         ":8004",
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 60 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+		IdleTimeout:  timeout * 2,
 	}
 
 	http.HandleFunc("/synthesize", synthesisAgent.HandleSynthesisRequest)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("OK")); err != nil {
-			log.Printf("Failed to write health response: %v", err)
+			logger.Error("failed to write health response", "error", err)
 		}
 	})
 
-	log.Println("Synthesis Agent HTTP server starting on :8004")
-	log.Println("(ADK agent initialized for LLM-based statistics extraction)")
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("HTTP server failed: %v", err)
+	// Setup graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		logger.Info("HTTP server starting",
+			"port", 8004,
+			"mode", "ADK-based LLM extraction")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("HTTP server failed", "error", err)
+		}
+	}()
+
+	<-stop
+	logger.Info("shutting down gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Error("server shutdown error", "error", err)
 	}
+
+	// Close agent to flush observability data
+	if err := synthesisAgent.Close(); err != nil {
+		logger.Error("failed to close agent", "error", err)
+	}
+	logger.Info("shutdown complete")
 }
 
 // Helper functions

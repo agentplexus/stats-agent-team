@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -12,6 +12,7 @@ import (
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
 	"github.com/agentplexus/stats-agent-team/pkg/httpclient"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
 
@@ -20,13 +21,19 @@ type EinoOrchestrationAgent struct {
 	cfg    *config.Config
 	client *http.Client
 	graph  *compose.Graph[*models.OrchestrationRequest, *models.OrchestrationResponse]
+	logger *slog.Logger
 }
 
 // NewEinoOrchestrationAgent creates a new Eino-based orchestration agent
-func NewEinoOrchestrationAgent(cfg *config.Config) *EinoOrchestrationAgent {
+func NewEinoOrchestrationAgent(cfg *config.Config, logger *slog.Logger) *EinoOrchestrationAgent {
+	if logger == nil {
+		logger = logging.NewAgentLogger("eino-orchestrator")
+	}
+
 	oa := &EinoOrchestrationAgent{
 		cfg:    cfg,
-		client: &http.Client{Timeout: 60 * time.Second},
+		client: &http.Client{Timeout: time.Duration(cfg.HTTPTimeoutSeconds) * time.Second},
+		logger: logger,
 	}
 
 	// Build the deterministic workflow graph
@@ -55,7 +62,8 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 
 	// 1. Validate Input Node
 	validateInputLambda := compose.InvokableLambda(func(ctx context.Context, req *models.OrchestrationRequest) (*models.OrchestrationRequest, error) {
-		log.Printf("[Eino] Validating input for topic: %s", req.Topic)
+		logger := logging.FromContext(ctx)
+		logger.Info("validating input", "topic", req.Topic)
 
 		// Set defaults
 		if req.MinVerifiedStats == 0 {
@@ -68,12 +76,13 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		return req, nil
 	})
 	if err := g.AddLambdaNode(nodeValidateInput, validateInputLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add validate input node: %v", err)
+		oa.logger.Warn("failed to add validate input node", "error", err)
 	}
 
 	// 2. Research Node - calls research agent to find sources (URLs)
 	researchLambda := compose.InvokableLambda(func(ctx context.Context, req *models.OrchestrationRequest) (*ResearchState, error) {
-		log.Printf("[Eino] Executing research for topic: %s", req.Topic)
+		logger := logging.FromContext(ctx)
+		logger.Info("executing research", "topic", req.Topic)
 
 		researchReq := &models.ResearchRequest{
 			Topic:         req.Topic,
@@ -98,7 +107,7 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			})
 		}
 
-		log.Printf("[Eino] Research found %d sources", len(searchResults))
+		logger.Info("research completed", "sources", len(searchResults))
 
 		return &ResearchState{
 			Request:       req,
@@ -106,12 +115,13 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		}, nil
 	})
 	if err := g.AddLambdaNode(nodeResearch, researchLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add research node: %v", err)
+		oa.logger.Warn("failed to add research node", "error", err)
 	}
 
 	// 3. Synthesis Node - calls synthesis agent to extract statistics
 	synthesisLambda := compose.InvokableLambda(func(ctx context.Context, state *ResearchState) (*SynthesisState, error) {
-		log.Printf("[Eino] Synthesizing statistics from %d sources", len(state.SearchResults))
+		logger := logging.FromContext(ctx)
+		logger.Info("synthesizing statistics", "sources", len(state.SearchResults))
 
 		synthesisReq := &models.SynthesisRequest{
 			Topic:         state.Request.Topic,
@@ -125,7 +135,7 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			return nil, fmt.Errorf("synthesis failed: %w", err)
 		}
 
-		log.Printf("[Eino] Synthesis extracted %d candidate statistics", len(resp.Candidates))
+		logger.Info("synthesis completed", "candidates", len(resp.Candidates))
 
 		return &SynthesisState{
 			Request:       state.Request,
@@ -134,12 +144,13 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		}, nil
 	})
 	if err := g.AddLambdaNode(nodeSynthesis, synthesisLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add synthesis node: %v", err)
+		oa.logger.Warn("failed to add synthesis node", "error", err)
 	}
 
 	// 4. Verification Node - calls verification agent
 	verificationLambda := compose.InvokableLambda(func(ctx context.Context, state *SynthesisState) (*VerificationState, error) {
-		log.Printf("[Eino] Verifying %d candidates", len(state.Candidates))
+		logger := logging.FromContext(ctx)
+		logger.Info("verifying candidates", "count", len(state.Candidates))
 
 		verifyReq := &models.VerificationRequest{
 			Candidates: state.Candidates,
@@ -166,15 +177,16 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		}, nil
 	})
 	if err := g.AddLambdaNode(nodeVerification, verificationLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add verification node: %v", err)
+		oa.logger.Warn("failed to add verification node", "error", err)
 	}
 
 	// 5. Quality Check Node - deterministic decision
 	qualityCheckLambda := compose.InvokableLambda(func(ctx context.Context, state *VerificationState) (*QualityDecision, error) {
+		logger := logging.FromContext(ctx)
 		verified := len(state.Verified)
 		target := state.Request.MinVerifiedStats
 
-		log.Printf("[Eino] Quality check: %d verified (target: %d)", verified, target)
+		logger.Info("quality check", "verified", verified, "target", target)
 
 		decision := &QualityDecision{
 			State:     state,
@@ -183,15 +195,15 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		}
 
 		if decision.NeedMore {
-			log.Printf("[Eino] Need %d more verified statistics", decision.Shortfall)
+			logger.Info("need more verified statistics", "shortfall", decision.Shortfall)
 		} else {
-			log.Printf("[Eino] Quality target met")
+			logger.Info("quality target met")
 		}
 
 		return decision, nil
 	})
 	if err := g.AddLambdaNode(nodeCheckQuality, qualityCheckLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add quality check node: %v", err)
+		oa.logger.Warn("failed to add quality check node", "error", err)
 	}
 
 	// 6. Retry Research Node (if needed) - NOT IMPLEMENTED YET in 4-agent architecture
@@ -202,27 +214,28 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 			return decision.State, nil
 		}
 
-		log.Printf("[Eino] Retry logic not yet implemented for 4-agent architecture")
-		log.Printf("[Eino] Would retry for %d more candidates", decision.Shortfall)
+		logger := logging.FromContext(ctx)
+		logger.Warn("retry logic not yet implemented for 4-agent architecture", "shortfall", decision.Shortfall)
 
 		// For now, just return the existing state
 		// TODO: Implement: Research → Synthesis → Verification loop
 		return decision.State, nil
 	})
 	if err := g.AddLambdaNode(nodeRetryResearch, retryResearchLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add retry research node: %v", err)
+		oa.logger.Warn("failed to add retry research node", "error", err)
 	}
 
 	// 7. Format Response Node
 	formatResponseLambda := compose.InvokableLambda(func(ctx context.Context, state *VerificationState) (*models.OrchestrationResponse, error) {
+		logger := logging.FromContext(ctx)
 		verifiedCount := len(state.Verified)
 		targetCount := state.Request.MinVerifiedStats
 		isPartial := verifiedCount < targetCount
 
 		if isPartial {
-			log.Printf("[Eino] Formatting PARTIAL response with %d/%d verified statistics", verifiedCount, targetCount)
+			logger.Info("formatting partial response", "verified", verifiedCount, "target", targetCount)
 		} else {
-			log.Printf("[Eino] Formatting COMPLETE response with %d verified statistics", verifiedCount)
+			logger.Info("formatting complete response", "verified", verifiedCount)
 		}
 
 		return &models.OrchestrationResponse{
@@ -237,7 +250,7 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 		}, nil
 	})
 	if err := g.AddLambdaNode(nodeFormatResponse, formatResponseLambda); err != nil {
-		log.Printf("[Eino] Warning: failed to add format response node: %v", err)
+		oa.logger.Warn("failed to add format response node", "error", err)
 	}
 
 	// Add edges to define the workflow
@@ -252,14 +265,17 @@ func (oa *EinoOrchestrationAgent) buildWorkflowGraph() *compose.Graph[*models.Or
 	_ = g.AddEdge(nodeRetryResearch, nodeFormatResponse)
 	_ = g.AddEdge(nodeFormatResponse, compose.END)
 
-	log.Printf("[Eino] Workflow graph built: ValidateInput → Research → Synthesis → Verification → QualityCheck → Format")
+	oa.logger.Info("workflow graph built", "flow", "ValidateInput → Research → Synthesis → Verification → QualityCheck → Format")
 
 	return g
 }
 
 // Orchestrate executes the deterministic Eino workflow
 func (oa *EinoOrchestrationAgent) Orchestrate(ctx context.Context, req *models.OrchestrationRequest) (*models.OrchestrationResponse, error) {
-	log.Printf("[Eino Orchestrator] Starting deterministic workflow for topic: %s", req.Topic)
+	// Inject logger into context for lambda nodes
+	ctx = logging.WithLogger(ctx, oa.logger)
+
+	oa.logger.Info("starting deterministic workflow", "topic", req.Topic)
 
 	// Compile the graph
 	compiledGraph, err := oa.graph.Compile(ctx)
@@ -273,7 +289,7 @@ func (oa *EinoOrchestrationAgent) Orchestrate(ctx context.Context, req *models.O
 		return nil, fmt.Errorf("workflow execution failed: %w", err)
 	}
 
-	log.Printf("[Eino Orchestrator] Workflow completed successfully")
+	oa.logger.Info("workflow completed successfully")
 	return result, nil
 }
 
@@ -327,7 +343,7 @@ func (oa *EinoOrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWrit
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		oa.logger.Error("failed to encode response", "error", err)
 	}
 }
 

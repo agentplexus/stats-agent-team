@@ -5,15 +5,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/jessevdk/go-flags"
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 	"github.com/agentplexus/stats-agent-team/pkg/models"
 )
+
+var logger *slog.Logger
 
 // Options defines the CLI options structure
 type Options struct {
@@ -171,6 +174,8 @@ func (cmd *SearchCommand) Execute([]string) error { // param `args []string`
 }
 
 func main() {
+	logger = logging.NewAgentLogger("cli")
+
 	var opts Options
 
 	parser := flags.NewParser(&opts, flags.Default)
@@ -323,7 +328,7 @@ func printResults(resp *models.OrchestrationResponse, outputFormat string) {
 		// JSON only
 		jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
 		if err != nil {
-			log.Printf("Error marshaling JSON: %v", err)
+			logger.Error("failed to marshal JSON", "error", err)
 			return
 		}
 		fmt.Println(string(jsonData))
@@ -348,7 +353,7 @@ func printResults(resp *models.OrchestrationResponse, outputFormat string) {
 		fmt.Println()
 		jsonData, err := json.MarshalIndent(resp.Statistics, "", "  ")
 		if err != nil {
-			log.Printf("Error marshaling JSON: %v", err)
+			logger.Error("failed to marshal JSON", "error", err)
 			return
 		}
 		fmt.Println(string(jsonData))
