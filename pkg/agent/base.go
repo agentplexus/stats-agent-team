@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -13,6 +13,7 @@ import (
 
 	"github.com/agentplexus/stats-agent-team/pkg/config"
 	"github.com/agentplexus/stats-agent-team/pkg/llm"
+	"github.com/agentplexus/stats-agent-team/pkg/logging"
 )
 
 // BaseAgent provides common functionality for all agents
@@ -21,11 +22,12 @@ type BaseAgent struct {
 	Client       *http.Client
 	Model        model.LLM
 	ModelFactory *llm.ModelFactory
+	Logger       *slog.Logger
 }
 
 // NewBaseAgent creates a new base agent with LLM initialization
-func NewBaseAgent(cfg *config.Config, timeoutSec int) (*BaseAgent, error) {
-	ctx := context.Background()
+func NewBaseAgent(ctx context.Context, cfg *config.Config, timeoutSec int) (*BaseAgent, error) {
+	logger := logging.FromContext(ctx)
 
 	// Create model using factory
 	modelFactory := llm.NewModelFactory(cfg)
@@ -39,12 +41,39 @@ func NewBaseAgent(cfg *config.Config, timeoutSec int) (*BaseAgent, error) {
 		Client:       &http.Client{Timeout: time.Duration(timeoutSec) * time.Second},
 		Model:        llmModel,
 		ModelFactory: modelFactory,
+		Logger:       logger,
+	}, nil
+}
+
+// NewBaseAgentWithLogger creates a new base agent with an explicit logger
+func NewBaseAgentWithLogger(ctx context.Context, cfg *config.Config, timeoutSec int, logger *slog.Logger) (*BaseAgent, error) {
+	// Create model using factory
+	modelFactory := llm.NewModelFactory(cfg)
+	llmModel, err := modelFactory.CreateModel(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create model: %w", err)
+	}
+
+	return &BaseAgent{
+		Cfg:          cfg,
+		Client:       &http.Client{Timeout: time.Duration(timeoutSec) * time.Second},
+		Model:        llmModel,
+		ModelFactory: modelFactory,
+		Logger:       logger,
 	}, nil
 }
 
 // GetProviderInfo returns information about the LLM provider
 func (ba *BaseAgent) GetProviderInfo() string {
 	return ba.ModelFactory.GetProviderInfo()
+}
+
+// Close cleans up resources including flushing observability data
+func (ba *BaseAgent) Close() error {
+	if ba.ModelFactory != nil {
+		return ba.ModelFactory.Close()
+	}
+	return nil
 }
 
 // FetchURL fetches content from a URL with proper error handling
@@ -77,16 +106,24 @@ func (ba *BaseAgent) FetchURL(ctx context.Context, url string, maxSizeMB int) (s
 	return string(body), nil
 }
 
-// LogInfo logs an informational message with agent context
-func (ba *BaseAgent) LogInfo(agentName, format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-	log.Printf("[%s] %s", agentName, msg)
+// Info logs an informational message
+func (ba *BaseAgent) Info(msg string, args ...any) {
+	ba.Logger.Info(msg, args...)
 }
 
-// LogError logs an error message with agent context
-func (ba *BaseAgent) LogError(agentName, format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-	log.Printf("[%s] ERROR: %s", agentName, msg)
+// Error logs an error message
+func (ba *BaseAgent) Error(msg string, args ...any) {
+	ba.Logger.Error(msg, args...)
+}
+
+// Debug logs a debug message
+func (ba *BaseAgent) Debug(msg string, args ...any) {
+	ba.Logger.Debug(msg, args...)
+}
+
+// Warn logs a warning message
+func (ba *BaseAgent) Warn(msg string, args ...any) {
+	ba.Logger.Warn(msg, args...)
 }
 
 // AgentWrapper wraps common agent initialization patterns
