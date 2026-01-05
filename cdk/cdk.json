@@ -1,0 +1,6 @@
+{
+  "app": "go run main.go",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}

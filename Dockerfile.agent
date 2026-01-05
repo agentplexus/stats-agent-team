@@ -8,8 +8,11 @@
 #   - orchestration
 #   - orchestration-eino
 #   - direct
+#
+# CONFIG_FILE: Which config to use (default: config.json, use config.aws.json for AWS)
 
 ARG AGENT=research
+ARG CONFIG_FILE=config.json
 
 # Stage 1: Build the specified agent
 FROM golang:1.25-alpine AS builder
@@ -35,6 +38,7 @@ RUN go build -ldflags="-s -w" -o /build/bin/agent ./agents/${AGENT}/
 FROM alpine:3.19
 
 ARG AGENT
+ARG CONFIG_FILE
 ENV AGENT_NAME=${AGENT}
 
 # Install runtime dependencies
@@ -47,6 +51,9 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /build/bin/agent /app/agent
+
+# Copy config file (for config.json-based configuration)
+COPY ${CONFIG_FILE} /app/config.json
 
 # Set ownership
 RUN chown -R appuser:appgroup /app

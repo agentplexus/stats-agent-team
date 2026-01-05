@@ -94,6 +94,60 @@ skills:
 
 **Don't add A2A client to Eino** unless there's a concrete need. HTTP is simpler for internal communication.
 
+## AWS AgentCore Deployment
+
+Deployment to AWS using [agentkit-aws-cdk](https://github.com/agentplexus/agentkit-aws-cdk).
+
+### What's Ready
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| agentkit-aws-cdk | ✅ Ready | Runtime, Endpoint, Gateway creation |
+| Agent code | ✅ Ready | A2A protocol via Google ADK |
+| Dockerfile | ✅ Ready | Multi-stage alpine build (`Dockerfile.agent`) |
+| A2A implementation | ✅ Ready | All agents have `a2a.go` |
+| Container images | ✅ Ready | GHCR via Release workflow |
+
+### Container Images (GHCR)
+
+| Image | Path | Port | A2A Port |
+|-------|------|------|----------|
+| Research | `ghcr.io/agentplexus/stats-agent-research:latest` | 8001 | 9001 |
+| Synthesis | `ghcr.io/agentplexus/stats-agent-synthesis:latest` | 8004 | - |
+| Verification | `ghcr.io/agentplexus/stats-agent-verification:latest` | 8002 | 9002 |
+| Orchestration | `ghcr.io/agentplexus/stats-agent-orchestration-eino:latest` | 8000 | 9000 |
+| Direct | `ghcr.io/agentplexus/stats-agent-direct:latest` | 8005 | - |
+
+### Remaining Tasks
+
+| Task | Priority | Status | Notes |
+|------|----------|--------|-------|
+| Create CDK config for stats-agent-team | P0 | ✅ Done | `cdk/config.json` |
+| Setup AWS Secrets Manager | P0 | ⬚ TODO | `SERPER_API_KEY`, `GOOGLE_API_KEY` (or other LLM provider) |
+| AWS account bootstrap | P0 | ⬚ TODO | `cdk bootstrap aws://ACCOUNT/REGION` |
+| Test deployment | P0 | ⬚ TODO | `cdk deploy` |
+| Document deployment process | P1 | ✅ Done | `docsrc/guides/aws-agentcore.md` |
+
+### AWS Secrets Required
+
+| Secret Path | Keys | Notes |
+|-------------|------|-------|
+| `stats-agent/llm` | `GOOGLE_API_KEY` or `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | Based on LLM_PROVIDER |
+| `stats-agent/search` | `SERPER_API_KEY` or `SERPAPI_API_KEY` | Based on SEARCH_PROVIDER |
+| `stats-agent/observability` | `OPIK_API_KEY` | Optional - for Opik observability |
+
+### Decision Points
+
+Before deployment, decide:
+
+- [ ] **LLM Provider**: `gemini` (default), `openai`, or `claude`
+- [ ] **Search Provider**: `serper` (default) or `serpapi`
+- [ ] **AWS Region**: Target deployment region
+- [ ] **Observability**: Enable Opik/Langfuse/Phoenix?
+- [ ] **Include Direct agent**: Optional (less accurate, LLM-memory based)
+
+---
+
 ## Q1 2026
 
 - ✨ **Perplexity API integration** - Built-in search without separate provider

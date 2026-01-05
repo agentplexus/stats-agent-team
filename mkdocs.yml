@@ -68,6 +68,7 @@ nav:
   - Guides:
       - Docker Deployment: guides/docker.md
       - Kubernetes Deployment: guides/kubernetes.md
+      - AWS AgentCore Deployment: guides/aws-agentcore.md
       - MCP Server Integration: guides/mcp-server.md
       - LLM Configuration: guides/llm-configuration.md
       - Multi-LLM Support: guides/multi-llm-support.md

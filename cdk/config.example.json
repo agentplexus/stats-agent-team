@@ -1,0 +1,84 @@
+{
+  "stackName": "stats-agent-team",
+  "description": "Statistics research and verification multi-agent system",
+  "agents": [
+    {
+      "name": "research",
+      "description": "Internal agent - web search via Serper/SerpAPI (not externally exposed)",
+      "containerImage": "ghcr.io/agentplexus/stats-agent-research:latest",
+      "memoryMB": 512,
+      "timeoutSeconds": 30,
+      "protocol": "HTTP",
+      "environment": {
+        "LOG_LEVEL": "info",
+        "SEARCH_PROVIDER": "serper"
+      },
+      "secretsARNs": []
+    },
+    {
+      "name": "synthesis",
+      "description": "Internal agent - extract statistics from URLs using LLM (not externally exposed)",
+      "containerImage": "ghcr.io/agentplexus/stats-agent-synthesis:latest",
+      "memoryMB": 1024,
+      "timeoutSeconds": 120,
+      "protocol": "HTTP",
+      "environment": {
+        "LOG_LEVEL": "info",
+        "LLM_PROVIDER": "gemini"
+      },
+      "secretsARNs": []
+    },
+    {
+      "name": "verification",
+      "description": "Internal agent - validate statistics exist in sources (not externally exposed)",
+      "containerImage": "ghcr.io/agentplexus/stats-agent-verification:latest",
+      "memoryMB": 512,
+      "timeoutSeconds": 60,
+      "protocol": "HTTP",
+      "environment": {
+        "LOG_LEVEL": "info",
+        "LLM_PROVIDER": "gemini"
+      },
+      "secretsARNs": []
+    },
+    {
+      "name": "orchestration",
+      "description": "Entry point - Eino orchestrator coordinates the research workflow",
+      "containerImage": "ghcr.io/agentplexus/stats-agent-orchestration-eino:latest",
+      "memoryMB": 512,
+      "timeoutSeconds": 300,
+      "protocol": "HTTP",
+      "isDefault": true,
+      "environment": {
+        "LOG_LEVEL": "info",
+        "RESEARCH_AGENT_URL": "http://research:8001",
+        "SYNTHESIS_AGENT_URL": "http://synthesis:8004",
+        "VERIFICATION_AGENT_URL": "http://verification:8002"
+      }
+    }
+  ],
+  "gateway": {
+    "enabled": true,
+    "name": "stats-agent-gateway",
+    "description": "External entry point for stats-agent-team"
+  },
+  "vpc": {
+    "createVPC": true,
+    "vpcCidr": "10.0.0.0/16",
+    "maxAZs": 2,
+    "enableVPCEndpoints": true
+  },
+  "observability": {
+    "enableCloudWatchLogs": true,
+    "logRetentionDays": 30
+  },
+  "iam": {
+    "enableBedrockAccess": true
+  },
+  "tags": {
+    "Project": "stats-agent-team",
+    "Environment": "production",
+    "Team": "ai-platform"
+  },
+  "removalPolicy": "destroy"
+}

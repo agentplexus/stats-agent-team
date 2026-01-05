@@ -1,0 +1,46 @@
+{
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-2.0-flash-exp"
+  },
+  "search": {
+    "provider": "serper"
+  },
+  "observability": {
+    "enabled": true,
+    "provider": "opik",
+    "project": "stats-agent-team"
+  },
+  "agents": {
+    "research": {
+      "url": "http://research:8001",
+      "description": "Web search for statistics sources"
+    },
+    "synthesis": {
+      "url": "http://synthesis:8004",
+      "description": "Extract statistics from URLs using LLM"
+    },
+    "verification": {
+      "url": "http://verification:8002",
+      "description": "Validate statistics exist in sources"
+    },
+    "orchestrator": {
+      "url": "http://orchestration:8000",
+      "description": "Coordinate research workflow"
+    }
+  },
+  "a2a": {
+    "enabled": true,
+    "authType": "apikey"
+  },
+  "security": {
+    "enabled": false,
+    "minScore": 50,
+    "requireEncryption": false
+  },
+  "secrets": {
+    "provider": "aws-sm",
+    "prefix": "stats-agent-team/",
+    "region": "us-west-2"
+  }
+}
