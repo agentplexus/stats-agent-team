@@ -7,7 +7,7 @@ require (
 	github.com/agentplexus/agentkit v0.3.0
 	github.com/agentplexus/go-opik v0.5.0
 	github.com/agentplexus/go-phoenix v0.1.0
-	github.com/agentplexus/omnillm v0.10.0
+	github.com/agentplexus/omnillm v0.11.0
 	github.com/agentplexus/omniobserve v0.5.0
 	github.com/agentplexus/omniserp v0.7.0
 	github.com/cloudwego/eino v0.7.18
@@ -60,7 +60,7 @@ require (
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/safehtml v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.7 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.9 // indirect
 	github.com/googleapis/gax-go/v2 v2.16.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
