@@ -44,9 +44,13 @@ func NewOmniLLMAdapterWithConfig(cfg OmniLLMAdapterConfig) (*OmniLLMAdapter, err
 	}
 
 	config := omnillm.ClientConfig{
-		Provider:          omnillm.ProviderName(cfg.ProviderName),
-		APIKey:            cfg.APIKey,
-		Timeout:           cfg.Timeout,
+		Providers: []omnillm.ProviderConfig{
+			{
+				Provider: omnillm.ProviderName(cfg.ProviderName),
+				APIKey:   cfg.APIKey,
+				Timeout:  cfg.Timeout,
+			},
+		},
 		ObservabilityHook: cfg.ObservabilityHook,
 	}
 
