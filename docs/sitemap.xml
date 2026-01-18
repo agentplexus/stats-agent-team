@@ -2,94 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/architecture/4-agent-architecture/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/architecture/eino-orchestration/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/architecture/overview/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/development/lint-fixes/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/getting-started/configuration/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/getting-started/installation/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/getting-started/quickstart/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
+    </url>
+    <url>
+         <loc>https://agentplexus.github.io/stats-agent-team/guides/aws-agentcore/</loc>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/docker/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/kubernetes/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/llm-configuration/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/llm-integration/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/mcp-server/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/multi-llm-support/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/guides/search-integration/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/operations/chart-testing/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/operations/scaling/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/operations/security/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/reference/roadmap/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.1.0/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.2.0/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.3.0/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
     </url>
     <url>
          <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.4.0/</loc>
-         <lastmod>2025-12-27</lastmod>
+         <lastmod>2026-01-18</lastmod>
+    </url>
+    <url>
+         <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.5.0/</loc>
+         <lastmod>2026-01-18</lastmod>
+    </url>
+    <url>
+         <loc>https://agentplexus.github.io/stats-agent-team/releases/v0.6.0/</loc>
+         <lastmod>2026-01-18</lastmod>
     </url>
 </urlset>
