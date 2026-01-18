@@ -6,7 +6,7 @@
   "commit_convention": "conventional",
   "releases": [
     {
-      "version": "0.6.0",
+      "version": "v0.6.0",
       "date": "2026-01-18",
       "highlights": [
         { "description": "Unified configuration loading with agentkit integration and OmniVault secret management" }
@@ -40,14 +40,14 @@
       ]
     },
     {
-      "version": "0.5.1",
+      "version": "v0.5.1",
       "date": "2026-01-04",
       "fixed": [
         { "description": "Docker build failing due to multi-file agents (build directory instead of single main.go)", "commit": "3eea642" }
       ]
     },
     {
-      "version": "0.5.0",
+      "version": "v0.5.0",
       "date": "2026-01-04",
       "highlights": [
         { "description": "LLM observability with Phoenix support, configurable HTTP timeouts, and structured logging" }
@@ -73,7 +73,7 @@
       ]
     },
     {
-      "version": "0.4.0",
+      "version": "v0.4.0",
       "date": "2025-12-27",
       "highlights": [
         { "description": "Helm chart for Kubernetes deployment and MkDocs documentation site" }
@@ -95,7 +95,7 @@
       ]
     },
     {
-      "version": "0.3.0",
+      "version": "v0.3.0",
       "date": "2025-12-21",
       "highlights": [
         { "description": "A2A Inter-Agent Protocol and LLM Observability via MetaObserve" }
@@ -119,7 +119,7 @@
       ]
     },
     {
-      "version": "0.2.0",
+      "version": "v0.2.0",
       "date": "2025-12-14",
       "highlights": [
         { "description": "Complete 4-agent architecture with Synthesis Agent and multi-LLM provider support" }
@@ -147,7 +147,7 @@
       ]
     },
     {
-      "version": "0.1.0",
+      "version": "v0.1.0",
       "date": "2025-12-13",
       "highlights": [
         { "description": "Initial release with 3-agent architecture using Google ADK and Eino orchestration" }
