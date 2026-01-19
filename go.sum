@@ -14,8 +14,8 @@ github.com/agentplexus/go-phoenix v0.1.1 h1:8/iNlak1TN2h0AqNvbwEs8ot4Kfu3w8zSV7e
 github.com/agentplexus/go-phoenix v0.1.1/go.mod h1:Ilsm4RsF1ei7v3ca5A8cdIUWW0MD6wuFLG31TbmxoSI=
 github.com/agentplexus/omnillm v0.11.0 h1:kjmdmmu0wDVLqrfcECMTLw+hkTvVSvN+FIpQea126PE=
 github.com/agentplexus/omnillm v0.11.0/go.mod h1:vJ2I0U/p8n9wtX4vT2pni/seRqhnbdKknrZwEdAb5ZU=
-github.com/agentplexus/omniobserve v0.5.0 h1:Tkt4CurVWQF6mHOq4pEHR7xBQdCqiloretSqmpoPrNk=
-github.com/agentplexus/omniobserve v0.5.0/go.mod h1:Hm3cfaxXcBxMGPjIE0aM7dxz2MoVAxL7F/lpx69mbXw=
+github.com/agentplexus/omniobserve v0.5.1 h1:dDoZlDyJnsE/Dloe2KiL9qvyLcFsScKzj1LYyklcLP0=
+github.com/agentplexus/omniobserve v0.5.1/go.mod h1:qnUhvMCViaUIITILKmOlzmi19Es/eYH/gmcdyDywZdY=
 github.com/agentplexus/omniserp v0.7.0 h1:23TiYDQfb+IlmAopLavpptJ/pR8aiGzvXIdPYk6kmeE=
 github.com/agentplexus/omniserp v0.7.0/go.mod h1:zBnvqf+2ni0jG+u3hwpefi3o1BwAb5wYEyykqee/zCY=
 github.com/agentplexus/omnivault v0.2.0 h1:2Irg07HT4vg2TekocJoUfjyekUdtKcQm/alNEnUngRk=
