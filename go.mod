@@ -8,7 +8,7 @@ require (
 	github.com/agentplexus/go-opik v0.5.1
 	github.com/agentplexus/go-phoenix v0.1.1
 	github.com/agentplexus/omnillm v0.11.0
-	github.com/agentplexus/omniobserve v0.5.0
+	github.com/agentplexus/omniobserve v0.5.1
 	github.com/agentplexus/omniserp v0.7.0
 	github.com/cloudwego/eino v0.7.21
 	github.com/danielgtaylor/huma/v2 v2.35.0
