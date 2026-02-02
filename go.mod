@@ -3,7 +3,7 @@ module github.com/agentplexus/stats-agent-team
 go 1.25.3
 
 require (
-	github.com/a2aproject/a2a-go v0.3.4
+	github.com/a2aproject/a2a-go v0.3.6
 	github.com/agentplexus/agentkit v0.3.0
 	github.com/agentplexus/go-opik v0.5.1
 	github.com/agentplexus/go-phoenix v0.1.1
