@@ -16,7 +16,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/grokify/mogo v0.72.7
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/modelcontextprotocol/go-sdk v1.2.0
+	github.com/modelcontextprotocol/go-sdk v1.3.0
 	google.golang.org/adk v0.4.0
 	google.golang.org/genai v1.44.0
 	gopkg.in/yaml.v3 v3.0.1
