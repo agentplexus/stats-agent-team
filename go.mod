@@ -18,7 +18,7 @@ require (
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	google.golang.org/adk v0.4.0
-	google.golang.org/genai v1.44.0
+	google.golang.org/genai v1.46.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
