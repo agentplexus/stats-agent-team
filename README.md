@@ -165,8 +165,8 @@ The system returns verified statistics in JSON format:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/agentplexus/stats-agent.git
-cd stats-agent
+git clone https://github.com/plexusone/agent-team-stats.git
+cd agent-team-stats
 ```
 
 2. Install dependencies:
@@ -548,16 +548,16 @@ make clean
   - [Google ADK (Agent Development Kit)](https://github.com/google/adk-go) - LLM-based agents + A2A protocol ⭐
   - [Eino](https://github.com/cloudwego/eino) - Deterministic graph orchestration ⭐
 - **LLM Integration**:
-  - [OmniLLM](https://github.com/agentplexus/omnillm) - Multi-provider LLM abstraction
+  - [OmniLLM](https://github.com/plexusone/omnillm) - Multi-provider LLM abstraction
   - Supports: Gemini, Claude, OpenAI, xAI Grok, Ollama
 - **Observability**:
-  - [OmniObserve](https://github.com/agentplexus/omniobserve) - Unified LLM observability
+  - [OmniObserve](https://github.com/plexusone/omniobserve) - Unified LLM observability
   - Supports: Comet Opik, Langfuse, Arize Phoenix
 - **Protocols**:
   - HTTP - Custom security, flexibility (ports 800x)
   - A2A - Agent-to-Agent interoperability (ports 900x)
 - **Search**:
-  - [OmniSerp](https://github.com/agentplexus/omniserp) - Unified serp API abstraction
+  - [OmniSerp](https://github.com/plexusone/omniserp) - Unified serp API abstraction
   - Supports: Serper.dev, SerpAPI 
 
 ## How It Works
@@ -606,24 +606,24 @@ Contributions welcome! Please:
 
 - Built with [Google ADK (Agent Development Kit)](https://github.com/google/adk-go)
 - Uses [Eino](https://github.com/cloudwego/eino) for deterministic orchestration
-- Multi-LLM support via [OmniLLM](https://github.com/agentplexus/omnillm)
-- LLM observability via [OmniObserve](https://github.com/agentplexus/omniobserve)
+- Multi-LLM support via [OmniLLM](https://github.com/plexusone/omnillm)
+- LLM observability via [OmniObserve](https://github.com/plexusone/omniobserve)
 - A2A protocol for agent interoperability
 - Inspired by multi-agent collaboration frameworks
 
- [used-by-svg]: https://sourcegraph.com/github.com/agentplexus/stats-agent-team/-/badge.svg
- [used-by-url]: https://sourcegraph.com/github.com/agentplexus/stats-agent-team?badge
- [build-status-svg]: https://github.com/agentplexus/stats-agent-team/actions/workflows/ci.yaml/badge.svg?branch=main
- [build-status-url]: https://github.com/agentplexus/stats-agent-team/actions/workflows/ci.yaml
- [lint-status-svg]: https://github.com/agentplexus/stats-agent-team/actions/workflows/lint.yaml/badge.svg?branch=main
- [lint-status-url]: https://github.com/agentplexus/stats-agent-team/actions/workflows/lint.yaml
- [goreport-svg]: https://goreportcard.com/badge/github.com/agentplexus/stats-agent-team
- [goreport-url]: https://goreportcard.com/report/github.com/agentplexus/stats-agent-team
- [codeclimate-status-svg]: https://codeclimate.com/github/agentplexus/stats-agent-team/badges/gpa.svg
- [codeclimate-status-url]: https://codeclimate.com/github/agentplexus/stats-agent-team
- [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/agentplexus/stats-agent-team
- [docs-godoc-url]: https://pkg.go.dev/github.com/agentplexus/stats-agent-team
- [loc-svg]: https://tokei.rs/b1/github/agentplexus/stats-agent-team
- [repo-url]: https://github.com/agentplexus/stats-agent-team
+ [used-by-svg]: https://sourcegraph.com/github.com/plexusone/agent-team-stats/-/badge.svg
+ [used-by-url]: https://sourcegraph.com/github.com/plexusone/agent-team-stats?badge
+ [build-status-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/ci.yaml/badge.svg?branch=main
+ [build-status-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/ci.yaml
+ [lint-status-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/lint.yaml/badge.svg?branch=main
+ [lint-status-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/lint.yaml
+ [goreport-svg]: https://goreportcard.com/badge/github.com/plexusone/agent-team-stats
+ [goreport-url]: https://goreportcard.com/report/github.com/plexusone/agent-team-stats
+ [codeclimate-status-svg]: https://codeclimate.com/github/plexusone/agent-team-stats/badges/gpa.svg
+ [codeclimate-status-url]: https://codeclimate.com/github/plexusone/agent-team-stats
+ [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/plexusone/agent-team-stats
+ [docs-godoc-url]: https://pkg.go.dev/github.com/plexusone/agent-team-stats
+ [loc-svg]: https://tokei.rs/b1/github/plexusone/agent-team-stats
+ [repo-url]: https://github.com/plexusone/agent-team-stats
  [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
- [license-url]: https://github.com/agentplexus/stats-agent-team/blob/master/LICENSE
+ [license-url]: https://github.com/plexusone/agent-team-stats/blob/master/LICENSE
