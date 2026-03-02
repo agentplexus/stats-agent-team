@@ -1,5 +1,29 @@
-module github.com/agentplexus/stats-agent-team/cdk
+module github.com/plexusone/agent-team-stats/cdk
 
-go 1.23
+go 1.25.5
 
-require github.com/agentplexus/agentkit-aws-cdk v0.1.0
+require github.com/plexusone/agentkit-aws-cdk v0.2.0
+
+require (
+	github.com/Masterminds/semver/v3 v3.4.0 // indirect
+	github.com/aws/aws-cdk-go/awscdk/v2 v2.240.0 // indirect
+	github.com/aws/constructs-go/constructs/v10 v10.5.1 // indirect
+	github.com/aws/jsii-runtime-go v1.127.0 // indirect
+	github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.267 // indirect
+	github.com/cdklabs/awscdk-asset-node-proxy-agent-go/nodeproxyagentv6/v2 v2.1.1 // indirect
+	github.com/cdklabs/cloud-assembly-schema-go/awscdkcloudassemblyschema/v50 v50.4.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/plexusone/agentkit v0.5.0 // indirect
+	github.com/yuin/goldmark v1.7.16 // indirect
+	golang.org/x/lint v0.0.0-20241112194109-818c5a804067 // indirect
+	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/telemetry v0.0.0-20260213145524-e0ab670178e1 // indirect
+	golang.org/x/tools v0.42.0 // indirect
+	golang.org/x/tools/cmd/godoc v0.1.0-deprecated // indirect
+	golang.org/x/tools/godoc v0.1.0-deprecated // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
