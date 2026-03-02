@@ -1,11 +1,10 @@
 site_name: Stats Agent Team
 site_description: A multi-agent system for finding and verifying statistics from reputable web sources
-site_url: https://agentplexus.github.io/stats-agent-team
-repo_url: https://github.com/agentplexus/stats-agent-team
-repo_name: agentplexus/stats-agent-team
+site_url: https://plexusone.github.io/agent-team-stats
+repo_url: https://github.com/plexusone/agent-team-stats
+repo_name: plexusone/agent-team-stats
 
-docs_dir: docsrc
-site_dir: docs
+docs_dir: docs
 
 theme:
   name: material
@@ -93,6 +92,6 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/agentplexus/stats-agent-team
+      link: https://github.com/plexusone/agent-team-stats
 
-copyright: Copyright &copy; 2025 AgentPlexus
+copyright: Copyright &copy; 2025-2026 PlexusOne
