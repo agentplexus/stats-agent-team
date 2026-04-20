@@ -12,7 +12,7 @@ require (
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/modelcontextprotocol/go-sdk v1.5.0
 	github.com/plexusone/agentkit v0.5.0
-	github.com/plexusone/omnillm v0.15.1
+	github.com/plexusone/omnillm v0.15.2
 	github.com/plexusone/omniobserve v0.8.0
 	github.com/plexusone/omniserp v0.8.0
 	github.com/plexusone/opik-go v0.6.0
@@ -94,11 +94,11 @@ require (
 	github.com/openai/openai-go v1.12.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/plexusone/omni-openai v0.2.0 // indirect
 	github.com/plexusone/omnillm-anthropic v0.1.0 // indirect
 	github.com/plexusone/omnillm-bedrock v0.5.0 // indirect
 	github.com/plexusone/omnillm-core v0.15.0 // indirect
 	github.com/plexusone/omnillm-gemini v0.1.0 // indirect
-	github.com/plexusone/omnillm-openai v0.1.0 // indirect
 	github.com/plexusone/omnivault v0.3.0 // indirect
 	github.com/plexusone/posture v0.3.0 // indirect
 	github.com/plexusone/vaultguard v0.3.0 // indirect
