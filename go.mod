@@ -10,7 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/grokify/mogo v0.74.2
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/modelcontextprotocol/go-sdk v1.5.0
+	github.com/modelcontextprotocol/go-sdk v1.6.0
 	github.com/plexusone/agentkit v0.6.0
 	github.com/plexusone/omnillm v0.15.2
 	github.com/plexusone/omniobserve v0.8.0
@@ -69,7 +69,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/jsonschema-go v0.4.2 // indirect
+	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/safehtml v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
