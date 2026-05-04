@@ -5,8 +5,28 @@
 [![Go SAST][go-sast-svg]][go-sast-url]
 [![Go Report Card][goreport-svg]][goreport-url]
 [![Docs][docs-godoc-svg]][docs-godoc-url]
+[![Docs][docs-mkdoc-svg]][docs-mkdoc-url]
 [![Visualization][viz-svg]][viz-url]
 [![License][license-svg]][license-url]
+
+ [go-ci-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-ci.yaml/badge.svg?branch=main
+ [go-ci-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-ci.yaml
+ [go-lint-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-lint.yaml/badge.svg?branch=main
+ [go-lint-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-lint.yaml
+ [go-sast-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-sast-codeql.yaml/badge.svg?branch=main
+ [go-sast-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-sast-codeql.yaml
+ [goreport-svg]: https://goreportcard.com/badge/github.com/plexusone/agent-team-stats
+ [goreport-url]: https://goreportcard.com/report/github.com/plexusone/agent-team-stats
+ [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/plexusone/agent-team-stats
+ [docs-godoc-url]: https://pkg.go.dev/github.com/plexusone/agent-team-stats
+ [docs-mkdoc-svg]: https://img.shields.io/badge/Go-dev%20guide-blue.svg
+ [docs-mkdoc-url]: https://plexusone.dev/agent-team-stats
+ [viz-svg]: https://img.shields.io/badge/Go-visualizaton-blue.svg
+ [viz-url]: https://mango-dune-07a8b7110.1.azurestaticapps.net/?repo=plexusone%2Fagent-team-stats
+ [loc-svg]: https://tokei.rs/b1/github/plexusone/agent-team-stats
+ [repo-url]: https://github.com/plexusone/agent-team-stats
+ [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
+ [license-url]: https://github.com/plexusone/agent-team-stats/blob/main/LICENSE
 
 A multi-agent system for finding and verifying statistics from reputable web sources using Go, built with [Google ADK (Agent Development Kit)](https://github.com/google/adk-go) and [Eino](https://github.com/cloudwego/eino).
 
@@ -612,20 +632,3 @@ Contributions welcome! Please:
 - LLM observability via [OmniObserve](https://github.com/plexusone/omniobserve)
 - A2A protocol for agent interoperability
 - Inspired by multi-agent collaboration frameworks
-
- [go-ci-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-ci.yaml/badge.svg?branch=main
- [go-ci-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-ci.yaml
- [go-lint-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-lint.yaml/badge.svg?branch=main
- [go-lint-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-lint.yaml
- [go-sast-svg]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-sast-codeql.yaml/badge.svg?branch=main
- [go-sast-url]: https://github.com/plexusone/agent-team-stats/actions/workflows/go-sast-codeql.yaml
- [goreport-svg]: https://goreportcard.com/badge/github.com/plexusone/agent-team-stats
- [goreport-url]: https://goreportcard.com/report/github.com/plexusone/agent-team-stats
- [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/plexusone/agent-team-stats
- [docs-godoc-url]: https://pkg.go.dev/github.com/plexusone/agent-team-stats
- [viz-svg]: https://img.shields.io/badge/visualizaton-Go-blue.svg
- [viz-url]: https://mango-dune-07a8b7110.1.azurestaticapps.net/?repo=plexusone%2Fagent-team-stats
- [loc-svg]: https://tokei.rs/b1/github/plexusone/agent-team-stats
- [repo-url]: https://github.com/plexusone/agent-team-stats
- [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
- [license-url]: https://github.com/plexusone/agent-team-stats/blob/master/LICENSE
