@@ -130,6 +130,10 @@ The system implements a **4-agent architecture** with clear separation of concer
 - ✅ **Hybrid mode** - LLM discovery + web verification (⚠️ low verification rate)
 - ✅ **OpenAPI documentation** - Interactive Swagger UI for Direct agent (port 8005)
 
+### Output Formats
+- ✅ **ClaimsReport format** - Export as [structured-evaluation](https://github.com/plexusone/structured-evaluation) ClaimsReport via `?format=claims`
+- ✅ **Source classification** - Authoritative sources (WHO, CDC, NASA, etc.) classified as high reliability
+
 ### Technical Stack
 - ✅ **Multi-LLM providers** - Gemini, Claude, OpenAI, Ollama, xAI Grok via unified interface
 - ✅ **Google ADK integration** - For LLM-based agents
@@ -427,7 +431,14 @@ curl -X POST http://localhost:8000/orchestrate \
     "max_candidates": 30,
     "reputable_only": true
   }'
+
+# Get ClaimsReport format (structured-evaluation compatible)
+curl -X POST "http://localhost:8000/orchestrate?format=claims" \
+  -H "Content-Type: application/json" \
+  -d '{"topic": "climate change", "min_verified_stats": 5}'
 ```
+
+See [ClaimsReport Integration](docs/guides/claims-report.md) for detailed usage.
 
 ## Configuration
 

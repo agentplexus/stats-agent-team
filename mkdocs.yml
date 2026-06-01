@@ -73,6 +73,7 @@ nav:
       - Kubernetes Deployment: guides/kubernetes.md
       - AWS AgentCore Deployment: guides/aws-agentcore.md
       - MCP Server Integration: guides/mcp-server.md
+      - ClaimsReport Integration: guides/claims-report.md
       - LLM Configuration: guides/llm-configuration.md
       - Multi-LLM Support: guides/multi-llm-support.md
       - LLM Integration: guides/llm-integration.md
