@@ -6,6 +6,50 @@
   "commitConvention": "conventional",
   "releases": [
     {
+      "version": "v0.8.0",
+      "date": "2026-06-01",
+      "highlights": [
+        { "description": "Structured-evaluation ClaimsReport integration for standardized statistics output" },
+        { "description": "PlexusOne unified navigation and theming for documentation" }
+      ],
+      "added": [
+        { "description": "ClaimsReport conversion methods for OrchestrationResponse and VerificationResponse", "commit": "ed5901e" },
+        { "description": "HTTP `?format=claims` query parameter for ClaimsReport JSON output", "commit": "2fdfe84" },
+        { "description": "Source classification mapping authoritative sources to ReliabilityHigh", "commit": "ed5901e" },
+        { "description": "PlexusOne unified navigation and theme for MkDocs site", "commit": "4411fc8" }
+      ],
+      "fixed": [
+        { "description": "gosec false positive with nolint directive", "commit": "8130c1d" }
+      ],
+      "changed": [
+        { "description": "MkDocs navigation switched to vertical style", "commit": "013a2de" }
+      ],
+      "documentation": [
+        { "description": "README shields updated", "commit": "84fe3fc" },
+        { "description": "MkDocs index page shields removed", "commit": "fb145f7" }
+      ],
+      "dependencies": [
+        { "description": "`github.com/plexusone/structured-evaluation` v0.6.0 (new)", "commit": "81ff6df" },
+        { "description": "`github.com/cloudwego/eino` v0.7.36 → v0.9.2", "commit": "627738f" },
+        { "description": "`github.com/grokify/mogo` v0.73.3 → v0.74.5", "commit": "5371b97" },
+        { "description": "`github.com/modelcontextprotocol/go-sdk` v1.4.0 → v1.6.0", "commit": "0a16f3d" },
+        { "description": "`github.com/danielgtaylor/huma/v2` v2.35.0 → v2.38.0", "commit": "f97ff1a" },
+        { "description": "`github.com/plexusone/agentkit` v0.5.0 → v0.6.0", "commit": "d77484a" },
+        { "description": "`github.com/plexusone/omnillm` v0.13.0 → v0.15.3", "commit": "fcbcefa" },
+        { "description": "`github.com/plexusone/omniobserve` v0.7.0 → v0.8.0", "commit": "ff521b6" },
+        { "description": "`github.com/a2aproject/a2a-go` v0.3.7 → v0.3.15", "commit": "937b7f1" },
+        { "description": "`google.golang.org/genai` v1.48.0 → v1.58.0", "commit": "4566f42" },
+        { "description": "`google.golang.org/adk` v0.5.0 → v1.4.0", "commit": "3aee30a" }
+      ],
+      "infrastructure": [
+        { "description": "GitHub Actions: `docker/login-action` v3 → v4", "commit": "ef9a52a" },
+        { "description": "GitHub Actions: `docker/build-push-action` v6 → v7", "commit": "44c3a28" },
+        { "description": "GitHub Actions: `docker/metadata-action` v5 → v6", "commit": "35e4cc1" },
+        { "description": "GitHub Actions: `docker/setup-buildx-action` v3 → v4", "commit": "69f31f9" },
+        { "description": "GitHub Actions: `azure/setup-helm` v4 → v5", "commit": "26a1d59" }
+      ]
+    },
+    {
       "version": "v0.7.0",
       "date": "2026-03-01",
       "highlights": [
