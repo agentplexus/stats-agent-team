@@ -190,7 +190,8 @@ func (va *VerificationAgent) Verify(ctx context.Context, req *models.Verificatio
 	return response, nil
 }
 
-// HandleVerificationRequest is the HTTP handler
+// HandleVerificationRequest is the HTTP handler.
+// Supports ?format=claims query parameter for structured-evaluation ClaimsReport output.
 func (va *VerificationAgent) HandleVerificationRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -206,6 +207,21 @@ func (va *VerificationAgent) HandleVerificationRequest(w http.ResponseWriter, r 
 	resp, err := va.Verify(r.Context(), &req)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Verification failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Check for claims format request via query parameter
+	format := r.URL.Query().Get("format")
+	topic := r.URL.Query().Get("topic")
+	if topic == "" {
+		topic = "statistics-verification"
+	}
+	if format == "claims" {
+		claimsReport := resp.ToClaimsReport(topic)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(claimsReport); err != nil {
+			va.Logger.Error("failed to encode claims response", "error", err)
+		}
 		return
 	}
 

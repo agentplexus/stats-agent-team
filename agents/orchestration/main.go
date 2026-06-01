@@ -306,7 +306,8 @@ func (oa *OrchestrationAgent) Orchestrate(ctx context.Context, req *models.Orche
 	return oa.orchestrate(ctx, req)
 }
 
-// HandleOrchestrationRequest is the HTTP handler for orchestration requests
+// HandleOrchestrationRequest is the HTTP handler for orchestration requests.
+// Supports ?format=claims query parameter for structured-evaluation ClaimsReport output.
 func (oa *OrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -333,6 +334,18 @@ func (oa *OrchestrationAgent) HandleOrchestrationRequest(w http.ResponseWriter, 
 		return
 	}
 
+	// Check for claims format request via query parameter
+	format := r.URL.Query().Get("format")
+	if format == "claims" {
+		claimsReport := resp.ToClaimsReport()
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(claimsReport); err != nil {
+			oa.logger.Error("failed to encode claims response", "error", err)
+		}
+		return
+	}
+
+	// Default: return original format
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		oa.logger.Error("failed to encode response", "error", err)
